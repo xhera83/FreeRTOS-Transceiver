@@ -1,3 +1,4 @@
+Deadline: 19.06.2022
 # FreeRtos-Transceiver
 
 A modular C++ library to simplify the use of FreeRtos inter-task communication. 
@@ -5,7 +6,7 @@ A modular C++ library to simplify the use of FreeRtos inter-task communication.
 # Features
 
 - Passing data over the queue  
-  - Sending data to each and every task
+  - Sending data to every possible task
   - Simultaneous transmission of x different datatypes (over the same queue)
   - Simultaneous transmission of x different datatypes to y different queues
   
