@@ -25,7 +25,10 @@ class FRTTransceiver
       funcPointer_dataAllocateCallback _dataAllocator = NULL;
       funcPointer_dataFreeCallback _dataDestroyer = NULL;
 
+
+      bool _checkValidQueueLength(uint8_t u8QueueLength);
       int _checkWaitTime(int timeMS);
+      void _rearrangeTempContainerArray(uint8_t u8CommStructPos);
       int _getCommStruct(FRTTransceiver_TaskHandle partner);
       bool _checkForMessages(FRTTransceiver_QueueHandle queue);
       int _getAmountOfMessages(FRTTransceiver_QueueHandle queue);
@@ -36,8 +39,8 @@ class FRTTransceiver
       FRTTransceiver(uint8_t u8MaxPartners = 2);
       ~FRTTransceiver();
       bool addCommPartner(FRTTransceiver_TaskHandle partnersAddress = NULL,FRTTransceiver_SemaphoreHandle semaphore = NULL,FRTTransceiver_QueueHandle queueRX = NULL, \
-                          FRTTransceiver_QueueHandle queueTX = NULL,const string partnersName = string());
-      bool addCommQueue(FRTTransceiver_TaskHandle partner, FRTTransceiver_QueueHandle queueRxOrTx,bool TX);
+                          uint8_t u8QueueLengthRx = -1,FRTTransceiver_QueueHandle queueTX = NULL,uint8_t u8QueueLengthTx = -1,const string partnersName = string());
+      bool addCommQueue(FRTTransceiver_TaskHandle partner, FRTTransceiver_QueueHandle queueRxOrTx,uint8_t u8QueueLength = -1,bool TX = false);
 
       #if defined(FRTTRANSCEIVER_32BITADDITIONALDATA)
          bool writeToQueue(FRTTransceiver_TaskHandle destination,uint8_t u8Datatype,void * data,int blockTimeWrite = FRTTRANSCEIVER_WAITMAX,int blockTimeTakeSemaphore = 100,uint32_t u32AdditionalInfo = 0);
@@ -47,11 +50,12 @@ class FRTTransceiver
       
       bool readFromQueue(FRTTransceiver_TaskHandle source,int blockTime = FRTTRANSCEIVER_WAITMAX,int blockTimeTakeSemaphore = 100);
       void manualDeleteAllocatedData(FRTTransceiver_TaskHandle partner);
-      void manualDeleteAllAllocatedData();
+      void manualDeleteAllAllocatedDataForLine(FRTTransceiver_TaskHandle partner);
       int messagesOnQueue(FRTTransceiver_TaskHandle partner);
       bool hasDataFrom(FRTTransceiver_TaskHandle partner);
-      int waitingData();
+      int dataInBuffer();
       const TempDataContainer * getNewestDataFrom(FRTTransceiver_TaskHandle partner);
+      const TempDataContainer * getOldestDataFrom(FRTTransceiver_TaskHandle partner);
       void addDataAllocateCallback(void(*fp)(const DataContainerOnQueue &,TempDataContainer &));
       void addDataFreeCallback(void (*fp)(TempDataContainer &));
       string getPartnersName(FRTTransceiver_TaskHandle partner);

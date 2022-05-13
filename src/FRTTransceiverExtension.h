@@ -49,14 +49,20 @@ struct CommunicationPartner
 
    FRTTransceiver_SemaphoreHandle semaphore = NULL;        
 
-   struct DataContainerOnQueue txLineContainer;    
+   uint8_t u8TxQueueLength = 0;
+   uint8_t u8RxQueueLength = 0;
+
+   struct DataContainerOnQueue txLineContainer[FRTTRANSCEIVER_MAXELEMENTSIZEONQUEUE];    
    struct DataContainerOnQueue rxLineContainer; 
 
    FRTTransceiver_QueueHandle rxQueue = NULL;              
    FRTTransceiver_QueueHandle txQueue = NULL;              
 
-   TempDataContainer tempContainer;        
-   bool hasData = false;                          
+   TempDataContainer tempContainer[FRTTRANSCEIVER_MAXELEMENTSIZEONQUEUE];
+
+   bool hasBufferedData = false;
+   bool rxQueueFull = false;                
+   int8_t i8CurrTempcontainerPos = -1;
 };
 
 
