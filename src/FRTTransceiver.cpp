@@ -459,6 +459,17 @@ bool FRTTransceiver::hasDataFrom(FRTTransceiver_TaskHandle partner)
    return this->_structCommPartners[pos].hasBufferedData;
 }
 
+int FRTTransceiver::amountOfBufferedDataFrom(FRTTransceiver_TaskHandle partner)
+{
+   int pos;
+
+   if((pos = this->_getCommStruct(partner)) == -1)
+   {
+      return -1;
+   }
+
+   return (this->_structCommPartners[pos].hasBufferedData ? this->_structCommPartners[pos].i8CurrTempcontainerPos + 1:-1);
+}
 
 int FRTTransceiver::amountOfDataInAllBuffers()
 {

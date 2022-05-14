@@ -62,6 +62,7 @@ class FRTTransceiver
       
       int messagesOnQueue(FRTTransceiver_TaskHandle partner);
       bool hasDataFrom(FRTTransceiver_TaskHandle partner);
+      int amountOfBufferedDataFrom(FRTTransceiver_TaskHandle partner);
       int amountOfDataInAllBuffers();
 
       const TempDataContainer * getNewestBufferedDataFrom(FRTTransceiver_TaskHandle partner);
