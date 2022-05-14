@@ -21,6 +21,7 @@ class FRTTransceiver
       struct CommunicationPartner * _structCommPartners; 
       uint8_t _u8CurrCommPartners = 0;
       uint8_t _u8MaxPartners;
+      uint8_t _u8MultiSenderQueues = 0;
 
       funcPointer_dataAllocateCallback _dataAllocator = NULL;
       funcPointer_dataFreeCallback _dataDestroyer = NULL;
@@ -40,6 +41,9 @@ class FRTTransceiver
       ~FRTTransceiver();
       bool addCommPartner(FRTTransceiver_TaskHandle partnersAddress = NULL,FRTTransceiver_SemaphoreHandle semaphoreRx = NULL,FRTTransceiver_SemaphoreHandle semaphoreTx = NULL,
          FRTTransceiver_QueueHandle queueRX = NULL,uint8_t u8QueueLengthRx = -1,FRTTransceiver_QueueHandle queueTX = NULL,uint8_t u8QueueLengthTx = -1,const string partnersName = string());
+      /* Aquivalent to addCommPartner but only for multisenderqueues (multiple partners, readonly)*/
+      bool addMultiSenderQueue(FRTTransceiver_SemaphoreHandle semaphoreRx,FRTTransceiver_QueueHandle queueRX,uint8_t u8QueueLengthRx);
+      
       bool addCommQueue(FRTTransceiver_TaskHandle partner, FRTTransceiver_QueueHandle queueRxOrTx,uint8_t u8QueueLength = -1,bool TX = false);
 
       #if defined(FRTTRANSCEIVER_32BITADDITIONALDATA)

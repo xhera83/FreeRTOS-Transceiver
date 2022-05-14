@@ -16,10 +16,8 @@ using namespace std;
 
 #define FRTTRANSCEIVER_WAITMAX (-1)
 
-
 #define FRTTRANSCEIVER_PDTRUE (pdTRUE)
 #define FRTTRANSCEIVER_PDFALSE (pdFALSE)
-
 
 
 typedef UBaseType_t FRTTransceiver_BaseType;
@@ -31,6 +29,7 @@ typedef SemaphoreHandle_t FRTTransceiver_SemaphoreHandle;
 
 struct DataContainerOnQueue
 {
+   FRTTransceiver_TaskHandle senderAddress;
    void * data;
    uint8_t u8DataType;
    #if defined(FRTTRANSCEIVER_32BITADDITIONALDATA)
@@ -45,7 +44,8 @@ typedef DataContainerOnQueue TempDataContainer;
 struct CommunicationPartner
 {
    FRTTransceiver_TaskHandle commPartner = NULL;           
-   string partnersName;   
+   string partnersName;
+   bool bReadOnlyQueue = false;
 
    FRTTransceiver_SemaphoreHandle semaphoreRxQueue = NULL;
    FRTTransceiver_SemaphoreHandle semaphoreTxQueue = NULL;        
@@ -63,7 +63,7 @@ struct CommunicationPartner
 
    bool hasBufferedData = false;
    bool rxBufferFull = false;            
-   int8_t i8CurrTempcontainerPos = -1;
+   int8_t i8CurrTempcontainerPos = -1; 
 };
 
 

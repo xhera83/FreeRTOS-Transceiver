@@ -162,7 +162,31 @@ bool FRTTransceiver::addCommPartner(FRTTransceiver_TaskHandle partnersAddress,FR
    return true;
 }
 
+bool FRTTransceiver::addMultiSenderQueue(FRTTransceiver_SemaphoreHandle semaphoreRx,FRTTransceiver_QueueHandle queueRX,uint8_t u8QueueLengthRx)
+{
+   if(this->_u8CurrCommPartners + 1 > this->_u8MaxPartners)
+   {
+      return false;
+   }
 
+   if(queueRX != NULL)
+   {
+      this->_structCommPartners[_u8CurrCommPartners].rxQueue = queueRX;
+      this->_structCommPartners[_u8CurrCommPartners].u8RxQueueLength = u8QueueLengthRx;
+
+      if(semaphoreRx == NULL)
+      {
+         return false;
+      }
+      this->_structCommPartners[_u8CurrCommPartners].semaphoreRxQueue = semaphoreRx;
+   }
+
+   this->_structCommPartners[_u8CurrCommPartners].partnersName = FRTTRANSCEIVER_MULTISENDERDEFAULTPARTNERNAME;
+   this->_structCommPartners[_u8CurrCommPartners].bReadOnlyQueue = true; /* means multisender queue, where we dont send ourselves*/
+   this->_u8MultiSenderQueues++;
+   this->_u8CurrCommPartners++;
+   return true;
+}
 
 #if defined(FRTTRANSCEIVER_32BITADDITIONALDATA)
 bool FRTTransceiver::writeToQueue(FRTTransceiver_TaskHandle destination,uint8_t u8DataType,void * data,int blockTimeWrite,int blockTimeTakeSemaphore,uint32_t u32AdditionalData)
