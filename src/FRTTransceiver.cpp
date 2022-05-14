@@ -83,7 +83,7 @@ bool FRTTransceiver::_hasDataInterpreters()
    return (this->_dataAllocator && this->_dataDestroyer) ? true:false;
 }
 
-bool FRTTransceiver::_hasSemaphore(FRTTransceiver_TaskHandle partner)
+bool FRTTransceiver::_hasSemaphore(FRTTransceiver_TaskHandle partner,bool txLine)
 {
    int pos;
    if((pos  = this->_getCommStruct(partner)) == -1)
@@ -91,13 +91,13 @@ bool FRTTransceiver::_hasSemaphore(FRTTransceiver_TaskHandle partner)
       return false;
    }
 
-   if(this->_structCommPartners[pos].semaphore)
+   if(txLine)
    {
-      return true;
+      return this->_structCommPartners[pos].semaphoreTxQueue == NULL ? false:true;
    }
    else
    {
-      return false;
+      return this->_structCommPartners[pos].semaphoreRxQueue == NULL ? false:true;
    }
 }
 
@@ -114,7 +114,8 @@ FRTTransceiver::~FRTTransceiver()
 }
 
 
-bool FRTTransceiver::addCommPartner(FRTTransceiver_TaskHandle partnersAddress,FRTTransceiver_SemaphoreHandle semaphore,FRTTransceiver_QueueHandle queueRX,uint8_t u8QueueLengthRx,FRTTransceiver_QueueHandle queueTX,uint8_t u8QueueLengthTx,const string partnersName)
+bool FRTTransceiver::addCommPartner(FRTTransceiver_TaskHandle partnersAddress,FRTTransceiver_SemaphoreHandle semaphoreRx,FRTTransceiver_SemaphoreHandle semaphoreTx,FRTTransceiver_QueueHandle queueRX,uint8_t u8QueueLengthRx,
+                                                                                                FRTTransceiver_QueueHandle queueTX,uint8_t u8QueueLengthTx,const string partnersName)
 {
 
    if(this->_u8CurrCommPartners + 1 > this->_u8MaxPartners)
@@ -131,25 +132,28 @@ bool FRTTransceiver::addCommPartner(FRTTransceiver_TaskHandle partnersAddress,FR
       return false;
    }
 
-   if(semaphore != NULL)
-   {
-      this->_structCommPartners[_u8CurrCommPartners].semaphore = semaphore;
-   }
-   else
-   {
-      return false;
-   }
-
    if(queueRX != NULL)
    {
       this->_structCommPartners[_u8CurrCommPartners].rxQueue = queueRX;
       this->_structCommPartners[_u8CurrCommPartners].u8RxQueueLength = u8QueueLengthRx;
+
+      if(semaphoreRx == NULL)
+      {
+         return false;
+      }
+      this->_structCommPartners[_u8CurrCommPartners].semaphoreRxQueue = semaphoreRx;
    }
 
    if(queueTX != NULL)
    {
       this->_structCommPartners[_u8CurrCommPartners].txQueue = queueTX;
       this->_structCommPartners[_u8CurrCommPartners].u8TxQueueLength = u8QueueLengthTx;
+
+      if(semaphoreTx == NULL)
+      {
+         return false;
+      }
+      this->_structCommPartners[_u8CurrCommPartners].semaphoreTxQueue = semaphoreTx;
    }
 
    this->_structCommPartners[_u8CurrCommPartners].partnersName = partnersName;
@@ -168,7 +172,7 @@ bool FRTTransceiver::writeToQueue(FRTTransceiver_TaskHandle destination,uint8_t 
 {
    int pos;
 
-   if(!this->_hasDataInterpreters() || !this->_hasSemaphore(destination) || (pos  = this->_getCommStruct(destination)) == -1)
+   if(!this->_hasDataInterpreters() || !this->_hasSemaphore(destination,true) || (pos  = this->_getCommStruct(destination)) == -1)
    {
       #ifdef LOG_WARNING
       log_e("You are not allowed to write to a queue \nOne of the following things happened:\n"
@@ -200,7 +204,7 @@ bool FRTTransceiver::writeToQueue(FRTTransceiver_TaskHandle destination,uint8_t 
 
    timeToWait = (timeToWait == FRTTRANSCEIVER_WAITMAX ? portMAX_DELAY : pdMS_TO_TICKS(timeToWait));
 
-   SemaphoreHandle_t s = this->_structCommPartners[pos].semaphore;
+   SemaphoreHandle_t s = this->_structCommPartners[pos].semaphoreTxQueue;
 
    if(xSemaphoreTake(s,timeToWait) == pdFALSE)
    {
@@ -298,7 +302,7 @@ bool FRTTransceiver::addCommQueue(FRTTransceiver_TaskHandle partner, FRTTranscei
 bool FRTTransceiver::readFromQueue(FRTTransceiver_TaskHandle source,int blockTimeRead,int blockTimeTakeSemaphore)
 {
 
-   if(!this->_hasDataInterpreters() || !this->_hasSemaphore(source))
+   if(!this->_hasDataInterpreters() || !this->_hasSemaphore(source,false))
    {
       return false;
    }
@@ -320,7 +324,7 @@ bool FRTTransceiver::readFromQueue(FRTTransceiver_TaskHandle source,int blockTim
 
    timeToWait = (timeToWait == FRTTRANSCEIVER_WAITMAX ? portMAX_DELAY : pdMS_TO_TICKS(timeToWait));
 
-   SemaphoreHandle_t s = this->_structCommPartners[pos].semaphore;
+   SemaphoreHandle_t s = this->_structCommPartners[pos].semaphoreRxQueue;
 
    if(xSemaphoreTake(s,timeToWait) == pdFALSE)
    {

@@ -33,13 +33,13 @@ class FRTTransceiver
       bool _checkForMessages(FRTTransceiver_QueueHandle queue);
       int _getAmountOfMessages(FRTTransceiver_QueueHandle queue);
       bool _hasDataInterpreters();
-      bool _hasSemaphore(FRTTransceiver_TaskHandle partner);
+      bool _hasSemaphore(FRTTransceiver_TaskHandle partner, bool txLine);
 
    public:
       FRTTransceiver(uint8_t u8MaxPartners = 2);
       ~FRTTransceiver();
-      bool addCommPartner(FRTTransceiver_TaskHandle partnersAddress = NULL,FRTTransceiver_SemaphoreHandle semaphore = NULL,FRTTransceiver_QueueHandle queueRX = NULL, \
-                          uint8_t u8QueueLengthRx = -1,FRTTransceiver_QueueHandle queueTX = NULL,uint8_t u8QueueLengthTx = -1,const string partnersName = string());
+      bool addCommPartner(FRTTransceiver_TaskHandle partnersAddress = NULL,FRTTransceiver_SemaphoreHandle semaphoreRx = NULL,FRTTransceiver_SemaphoreHandle semaphoreTx = NULL,
+         FRTTransceiver_QueueHandle queueRX = NULL,uint8_t u8QueueLengthRx = -1,FRTTransceiver_QueueHandle queueTX = NULL,uint8_t u8QueueLengthTx = -1,const string partnersName = string());
       bool addCommQueue(FRTTransceiver_TaskHandle partner, FRTTransceiver_QueueHandle queueRxOrTx,uint8_t u8QueueLength = -1,bool TX = false);
 
       #if defined(FRTTRANSCEIVER_32BITADDITIONALDATA)

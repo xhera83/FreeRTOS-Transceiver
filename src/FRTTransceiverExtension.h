@@ -47,7 +47,8 @@ struct CommunicationPartner
    FRTTransceiver_TaskHandle commPartner = NULL;           
    string partnersName;   
 
-   FRTTransceiver_SemaphoreHandle semaphore = NULL;        
+   FRTTransceiver_SemaphoreHandle semaphoreRxQueue = NULL;
+   FRTTransceiver_SemaphoreHandle semaphoreTxQueue = NULL;        
 
    uint8_t u8TxQueueLength = 0;
    uint8_t u8RxQueueLength = 0;
