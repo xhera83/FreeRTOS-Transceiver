@@ -1,0 +1,16 @@
+{
+      "name": "FreeRtosTransceiver",
+      "keywords": "esp32,freertos,arduino",
+      "description": "A modular C++ library to simplify the use of FreeRtos inter-task communication.",
+      "repository":
+      {
+            "type": "git",
+            "url": "https://github.com/xhera83/FreeRtos-Transceiver"
+      },
+      "authors":
+      {
+            "name": "Xhemail Ramabaja",
+            "email": "x.ramabaja@outlook.de"
+      }
+
+}
