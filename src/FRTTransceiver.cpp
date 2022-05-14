@@ -179,7 +179,7 @@ bool FRTTransceiver::writeToQueue(FRTTransceiver_TaskHandle destination,uint8_t 
       return false;
    }
 
-   if(this->_structCommPartners[pos].txQueue == NULL || _checkValidQueueLength(this->_structCommPartners[pos].u8TxQueueLength) == false || data == NULL)
+   if(this->_structCommPartners[pos].txQueue == NULL || this->_checkValidQueueLength(this->_structCommPartners[pos].u8TxQueueLength) == false || data == NULL)
    {
       #ifdef LOG_WARNING
       log_w("Action now allowed \nOne of the following things happened:\n"
@@ -248,6 +248,25 @@ bool FRTTransceiver::writeToQueue(FRTTransceiver_TaskHandle destination,uint8_t 
    return true;
 }
 
+
+#if defined(FRTTRANSCEIVER_32BITADDITIONALDATA)
+bool FRTTransceiver::databroadcast(uint8_t u8DataType,void * data,int blockTimeWrite,int blockTimeTakeSemaphore,uint32_t u32AdditionalData)
+#elif defined(FRTTRANSCEIVER_64BITADDITIONALDATA)
+bool FRTTransceiver::databroadcast(uint8_t u8DataType,void * data,int blockTimeWrite,int blockTimeTakeSemaphore,uint64_t u64AdditionalData)
+#endif
+{
+   uint8_t u8SuccessCounter = 0;
+   for(uint8_t u8I = 0; u8I < this->_u8CurrCommPartners ; u8I++)
+   {
+      #ifdef FRTTRANSCEIVER_32BITADDITIONALDATA
+      if(this->writeToQueue(this->_structCommPartners[u8I].commPartner,u8DataType,data,blockTimeWrite,blockTimeTakeSemaphore,u32AdditionalData)) u8SuccessCounter++;
+      #elif defined(FRTTRANSCEIVER_64BITADDITIONALDATA)
+      if(this->writeToQueue(this->_structCommPartners[u8I].commPartner,u8DataType,data,blockTimeWrite,blockTimeTakeSemaphore,u64AdditionalData)) u8SuccessCounter++;
+      #endif
+   }
+
+   return (u8SuccessCounter == this->_u8CurrCommPartners);
+}
 
 bool FRTTransceiver::addCommQueue(FRTTransceiver_TaskHandle partner, FRTTransceiver_QueueHandle queueRxOrTx,uint8_t u8QueueLength,bool isTxQueue)
 {

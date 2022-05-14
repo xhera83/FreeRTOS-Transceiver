@@ -47,6 +47,13 @@ class FRTTransceiver
       #elif defined(FRTTRANSCEIVER_64BITADDITIONALDATA)
          bool writeToQueue(FRTTransceiver_TaskHandle destination,uint8_t u8Datatype,void * data,int blockTimeWrite = FRTTRANSCEIVER_WAITMAX,int blockTimeTakeSemaphore = 100,uint64_t u64AdditionalData = 0);
       #endif
+
+      #if defined(FRTTRANSCEIVER_32BITADDITIONALDATA)
+         bool databroadcast(uint8_t u8Datatype,void * data,int blockTimeWrite = FRTTRANSCEIVER_WAITMAX,int blockTimeTakeSemaphore = 100,uint32_t u32AdditionalInfo = 0);
+      #elif defined(FRTTRANSCEIVER_64BITADDITIONALDATA)
+         bool databroadcast(uint8_t u8Datatype,void * data,int blockTimeWrite = FRTTRANSCEIVER_WAITMAX,int blockTimeTakeSemaphore = 100,uint64_t u64AdditionalData = 0);
+      #endif
+      
       
       bool readFromQueue(FRTTransceiver_TaskHandle source,int blockTime = FRTTRANSCEIVER_WAITMAX,int blockTimeTakeSemaphore = 100);
       
