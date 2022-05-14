@@ -28,7 +28,7 @@ class FRTTransceiver
 
       bool _checkValidQueueLength(uint8_t u8QueueLength);
       int _checkWaitTime(int timeMS);
-      void _rearrangeTempContainerArray(uint8_t u8CommStructPos);
+      void _rearrangeTempContainerArray(uint8_t u8CommStructPos,uint8_t u8PosRemoved);
       int _getCommStruct(FRTTransceiver_TaskHandle partner);
       bool _checkForMessages(FRTTransceiver_QueueHandle queue);
       int _getAmountOfMessages(FRTTransceiver_QueueHandle queue);
@@ -50,8 +50,8 @@ class FRTTransceiver
       
       bool readFromQueue(FRTTransceiver_TaskHandle source,int blockTime = FRTTRANSCEIVER_WAITMAX,int blockTimeTakeSemaphore = 100);
       
-      void manualDeleteAllocatedData(FRTTransceiver_TaskHandle partner);
-      void manualDeleteAllAllocatedDataForLine(FRTTransceiver_TaskHandle partner);
+      bool manualDeleteAllocatedDatabufferForLine(FRTTransceiver_TaskHandle partner,uint8_t u8PositionInBuffer);
+      bool manualDeleteAllAllocatedDatabuffersForLine(FRTTransceiver_TaskHandle partner);
       
       int messagesOnQueue(FRTTransceiver_TaskHandle partner);
       bool hasDataFrom(FRTTransceiver_TaskHandle partner);

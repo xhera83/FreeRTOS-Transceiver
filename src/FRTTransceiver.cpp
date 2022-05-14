@@ -328,7 +328,7 @@ bool FRTTransceiver::readFromQueue(FRTTransceiver_TaskHandle source,int blockTim
       /* rearrange array if length at least 2 */
       if(this->_structCommPartners[pos].u8RxQueueLength - 1 > 0)
       {
-         this->_rearrangeTempContainerArray(pos);
+         this->_rearrangeTempContainerArray(pos,0);
       }
       this->_structCommPartners[pos].i8CurrTempcontainerPos--;
    }
@@ -357,32 +357,45 @@ bool FRTTransceiver::readFromQueue(FRTTransceiver_TaskHandle source,int blockTim
 
 
 
-void FRTTransceiver::manualDeleteAllocatedData(FRTTransceiver_TaskHandle partner)
+bool FRTTransceiver::manualDeleteAllocatedDatabufferForLine(FRTTransceiver_TaskHandle partner,uint8_t u8PositionInBuffer)
 {
    int pos;
    if(!this->_hasDataInterpreters() || (pos = this->_getCommStruct(partner)) == -1)
    {
-      return;
+      return false;
    }
 
-   if(this->_structCommPartners[pos].hasBufferedData)
+   if(this->_structCommPartners[pos].hasBufferedData && u8PositionInBuffer >= 0 && u8PositionInBuffer <= this->_structCommPartners[pos].i8CurrTempcontainerPos)
    {
       #ifdef LOG_INFO
       log_i("Manually deleting allocated data");
       #endif
-      this->_dataDestroyer(this->_structCommPartners[pos].tempContainer[0]);
-      this->_structCommPartners[pos].hasBufferedData = false;
-      return;
+       
+      this->_dataDestroyer(this->_structCommPartners[pos].tempContainer[u8PositionInBuffer]);
+      
+      if(this->_structCommPartners[pos].i8CurrTempcontainerPos == 0)
+      {
+         this->_structCommPartners[pos].hasBufferedData = false;
+
+      }
+      else
+      {
+         this->_rearrangeTempContainerArray(pos,u8PositionInBuffer);
+         this->_structCommPartners[pos].i8CurrTempcontainerPos--;
+      }
+      this->_structCommPartners[pos].rxQueueFull = false;
+      return true;
    }
+   return false;
 }
 
 
-void FRTTransceiver::manualDeleteAllAllocatedDataForLine(FRTTransceiver_TaskHandle partner)
+bool FRTTransceiver::manualDeleteAllAllocatedDatabuffersForLine(FRTTransceiver_TaskHandle partner)
 {
    int pos;
    if(!this->_hasDataInterpreters() || (pos = this->_getCommStruct(partner) == -1))
    {
-      return;
+      return false;
    }
 
    if(this->_structCommPartners[pos].hasBufferedData)
@@ -395,6 +408,7 @@ void FRTTransceiver::manualDeleteAllAllocatedDataForLine(FRTTransceiver_TaskHand
       this->_structCommPartners[pos].rxQueueFull = false;
       this->_structCommPartners[pos].i8CurrTempcontainerPos = -1;
    }
+   return true;
 }
 
 
@@ -550,9 +564,9 @@ bool FRTTransceiver::_checkValidQueueLength(uint8_t u8QueueLength)
    return !(u8QueueLength <= 0 || u8QueueLength > FRTTRANSCEIVER_MAXELEMENTSIZEONQUEUE);
 }
 
-void FRTTransceiver::_rearrangeTempContainerArray(uint8_t u8CommStructPos)
+void FRTTransceiver::_rearrangeTempContainerArray(uint8_t u8CommStructPos,uint8_t u8PosRemoved)
 {
-   for(uint8_t u8I = 1; u8I <= this->_structCommPartners[u8CommStructPos].i8CurrTempcontainerPos;u8I++)
+   for(uint8_t u8I = u8PosRemoved + 1; u8I <= this->_structCommPartners[u8CommStructPos].i8CurrTempcontainerPos;u8I++)
    {
       this->_structCommPartners[u8CommStructPos].tempContainer[u8I-1] = this->_structCommPartners[u8CommStructPos].tempContainer[u8I];
    }

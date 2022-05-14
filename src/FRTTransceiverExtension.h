@@ -61,7 +61,7 @@ struct CommunicationPartner
    TempDataContainer tempContainer[FRTTRANSCEIVER_MAXELEMENTSIZEONQUEUE];
 
    bool hasBufferedData = false;
-   bool rxQueueFull = false;                
+   bool rxQueueFull = false;            
    int8_t i8CurrTempcontainerPos = -1;
 };
 
