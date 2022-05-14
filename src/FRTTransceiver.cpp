@@ -208,35 +208,13 @@ bool FRTTransceiver::writeToQueue(FRTTransceiver_TaskHandle destination,uint8_t 
 
    SemaphoreHandle_t s = this->_structCommPartners[pos].semaphoreTxQueue;
 
-   uint8_t u8MessagesOnQueue;
-   bool bQueueClear = true;
 
    /* Queue Full. Manual wait*/
-   if(this->_structCommPartners[pos].u8TxQueueLength == (u8MessagesOnQueue = this->_getAmountOfMessages(this->_structCommPartners[pos].txQueue)))
+   if(this->_structCommPartners[pos].u8TxQueueLength == this->_getAmountOfMessages(this->_structCommPartners[pos].txQueue))
    {
       /* does not end when data arrives, so if timeToWaitWrite == MAXWAIT -----> doesnt go further than below code */
-      vTaskDelay(timeToWaitWrite);
-      bQueueClear = false;
 
-      /* Check if the queue is now free */
-      if(this->_structCommPartners[pos].u8TxQueueLength > (u8MessagesOnQueue = this->_getAmountOfMessages(this->_structCommPartners[pos].txQueue)))
-      {
-         bQueueClear = true;
-      }
-   }
-
-   if(bQueueClear)
-   {
-      if(xSemaphoreTake(s,timeToWaitSemaphore) == pdFALSE)
-      {
-         #ifdef LOG_INFO
-         log_i("Semaphore was not available before block time expired.")
-         #endif
-         return false;
-      }
-
-      /* space left for another element */
-      this->_structCommPartners[pos].txLineContainer[u8MessagesOnQueue] =
+      DataContainerOnQueue tempDataContainerOnQueue = 
       {
          .data = data,
          .u8DataType = u8DataType,
@@ -246,17 +224,66 @@ bool FRTTransceiver::writeToQueue(FRTTransceiver_TaskHandle destination,uint8_t 
          .u64AdditionalData = u64AdditionalData,
          #endif
       };
+      
+      FRTTransceiver_BaseType returnVal = xQueueSendToBack(this->_structCommPartners[pos].txQueue,(const void *)&tempDataContainerOnQueue,timeToWaitWrite);
 
-      /* At this point we should just be able to put data on the queue without waiting. Therefore waitingTime == 0 */
-      xQueueSendToBack(this->_structCommPartners[pos].txQueue,(const void *)&this->_structCommPartners[pos].txLineContainer[u8MessagesOnQueue],0);
+      if(returnVal == pdPASS)
+      {
+         if(xSemaphoreTake(s,timeToWaitSemaphore) == pdFALSE)
+         {
+            #ifdef LOG_INFO
+            log_i("Semaphore was not available before block time expired.")
+            #endif
+            return false;
+         }
+         
+         this->_structCommPartners[pos].txLineContainer[this->_structCommPartners[pos].u8TxQueueLength - 1] =
+         {
+            .data = data,
+            .u8DataType = u8DataType,
+            #if defined(FRTTRANSCEIVER_32BITADDITIONALDATA)
+            .u32AdditionalData = u32AdditionalData,
+            #elif defined(FRTTRANSCEIVER_64BITADDITIONALDATA)
+            .u64AdditionalData = u64AdditionalData,
+            #endif
+         };
 
-      xSemaphoreGive(s);
-      return true;
-   }
-   else
-   {
+         xSemaphoreGive(s);
+         return true;
+      }
+
       return false;
    }
+
+   
+   if(xSemaphoreTake(s,timeToWaitSemaphore) == pdFALSE)
+   {
+      #ifdef LOG_INFO
+      log_i("Semaphore was not available before block time expired.")
+      #endif
+      return false;
+   }
+
+   /* space left for another element */
+   uint8_t u8MessagesOnQueue = this->_getAmountOfMessages(this->_structCommPartners[pos].txQueue);
+
+   this->_structCommPartners[pos].txLineContainer[u8MessagesOnQueue] =
+   {
+      .data = data,
+      .u8DataType = u8DataType,
+      #if defined(FRTTRANSCEIVER_32BITADDITIONALDATA)
+      .u32AdditionalData = u32AdditionalData,
+      #elif defined(FRTTRANSCEIVER_64BITADDITIONALDATA)
+      .u64AdditionalData = u64AdditionalData,
+      #endif
+   };
+
+   /* At this point we should just be able to put data on the queue without waiting. Therefore waitingTime == 0 */
+   xQueueSendToBack(this->_structCommPartners[pos].txQueue,(const void *)&this->_structCommPartners[pos].txLineContainer[u8MessagesOnQueue],0);
+
+   xSemaphoreGive(s);
+   return true;
+   
 }
 
 
@@ -334,19 +361,20 @@ bool FRTTransceiver::readFromQueue(FRTTransceiver_TaskHandle source,int blockTim
    timeToWaitSemaphore = (timeToWaitSemaphore == FRTTRANSCEIVER_WAITMAX ? portMAX_DELAY : pdMS_TO_TICKS(timeToWaitSemaphore));
    
    
-   SemaphoreHandle_t s = this->_structCommPartners[pos].semaphoreRxQueue;
-
-   if(xSemaphoreTake(s,timeToWaitSemaphore) == pdFALSE)
-   {
-      return false;
-   }
 
    FRTTransceiver_BaseType returnVal = xQueueReceive(this->_structCommPartners[pos].rxQueue,(void *)&this->_structCommPartners[pos].rxLineContainer,(TickType_t)timeToWaitRead);
+
 
    /* errQUEUE_EMPTY returned if expression true*/
    if(!(returnVal == pdPASS))
    {
-      xSemaphoreGive(s);
+      return false;
+   }
+
+   SemaphoreHandle_t s = this->_structCommPartners[pos].semaphoreRxQueue;
+
+   if(xSemaphoreTake(s,timeToWaitSemaphore) == pdFALSE)
+   {
       return false;
    }
 
