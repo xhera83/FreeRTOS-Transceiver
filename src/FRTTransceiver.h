@@ -49,13 +49,18 @@ class FRTTransceiver
       #endif
       
       bool readFromQueue(FRTTransceiver_TaskHandle source,int blockTime = FRTTRANSCEIVER_WAITMAX,int blockTimeTakeSemaphore = 100);
+      
       void manualDeleteAllocatedData(FRTTransceiver_TaskHandle partner);
       void manualDeleteAllAllocatedDataForLine(FRTTransceiver_TaskHandle partner);
+      
       int messagesOnQueue(FRTTransceiver_TaskHandle partner);
       bool hasDataFrom(FRTTransceiver_TaskHandle partner);
-      int dataInBuffer();
-      const TempDataContainer * getNewestDataFrom(FRTTransceiver_TaskHandle partner);
-      const TempDataContainer * getOldestDataFrom(FRTTransceiver_TaskHandle partner);
+      int amountOfDataInAllBuffers();
+
+      const TempDataContainer * getNewestBufferedDataFrom(FRTTransceiver_TaskHandle partner);
+      const TempDataContainer * getOldestBufferedDataFrom(FRTTransceiver_TaskHandle partner);
+      const TempDataContainer * getBufferedDataFrom(FRTTransceiver_TaskHandle partner, uint8_t u8PositionInBuffer);
+
       void addDataAllocateCallback(void(*fp)(const DataContainerOnQueue &,TempDataContainer &));
       void addDataFreeCallback(void (*fp)(TempDataContainer &));
       string getPartnersName(FRTTransceiver_TaskHandle partner);

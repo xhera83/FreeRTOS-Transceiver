@@ -423,7 +423,7 @@ bool FRTTransceiver::hasDataFrom(FRTTransceiver_TaskHandle partner)
 }
 
 
-int FRTTransceiver::dataInBuffer()
+int FRTTransceiver::amountOfDataInAllBuffers()
 {
    int amountOfDataAvail = 0;
    for(uint8_t u8I = 0;u8I < this->_u8CurrCommPartners;u8I++)
@@ -456,7 +456,7 @@ int FRTTransceiver::_getCommStruct(FRTTransceiver_TaskHandle partner)
 
 
 /* get the tail of the buffer*/
-const TempDataContainer * FRTTransceiver::getNewestDataFrom(FRTTransceiver_TaskHandle partner)
+const TempDataContainer * FRTTransceiver::getNewestBufferedDataFrom(FRTTransceiver_TaskHandle partner)
 {
    int pos = this->_getCommStruct(partner);
 
@@ -473,7 +473,7 @@ const TempDataContainer * FRTTransceiver::getNewestDataFrom(FRTTransceiver_TaskH
 }
 
 /* get the head of the buffer */
-const TempDataContainer * FRTTransceiver::getOldestDataFrom(FRTTransceiver_TaskHandle partner)
+const TempDataContainer * FRTTransceiver::getOldestBufferedDataFrom(FRTTransceiver_TaskHandle partner)
 {
    int pos = this->_getCommStruct(partner);
 
@@ -486,6 +486,23 @@ const TempDataContainer * FRTTransceiver::getOldestDataFrom(FRTTransceiver_TaskH
    {
       return (const TempDataContainer *)&this->_structCommPartners[pos].tempContainer[0];
    }
+   return NULL;
+}
+
+const TempDataContainer * FRTTransceiver::getBufferedDataFrom(FRTTransceiver_TaskHandle partner, uint8_t u8PositionInBuffer)
+{
+   int pos = this->_getCommStruct(partner);
+   
+   if(pos == -1)
+   {
+      return NULL;
+   }
+
+   if(this->_structCommPartners[pos].hasBufferedData && u8PositionInBuffer >= 0 && u8PositionInBuffer <= this->_structCommPartners[pos].i8CurrTempcontainerPos)
+   {
+      return (const TempDataContainer *)&this->_structCommPartners[pos].tempContainer[u8PositionInBuffer];
+   }
+   
    return NULL;
 }
 
