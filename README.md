@@ -15,15 +15,19 @@ A modular C++ library to simplify the use of FreeRtos inter-task communication.
 
 - Formatted representation regarding information about the connection with other tasks  
   - Amount of communication partners
+  - Name of communication partners
   - Amount of tx-lines connected (outgoing data)
   - Amount of rx-lines connected (incoming data)
+  - Optional:
+    - Data/Bytes received
+    - Current rx and tx buffer informations
+    - ...
 
 - A single queue can be used by multiple tasks
-  - Adressing data by supplying the target-taskhandle
+  - Adressing the source by supplying the target-taskhandle
   - 1...n transmitter of data
-  - 1...n receiver of data
 
-- Queue manipulation  
+- Queue manipulation (only on tx line possible)  
   - Check if datatype x available on queue y
   - Removing an element  
     - Removing the x. element from queue y
