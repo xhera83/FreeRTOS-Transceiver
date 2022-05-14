@@ -195,61 +195,68 @@ bool FRTTransceiver::writeToQueue(FRTTransceiver_TaskHandle destination,uint8_t 
    }
 
 
-   unsigned long timeToWait = _checkWaitTime(blockTimeTakeSemaphore);
+   unsigned long timeToWaitSemaphore = _checkWaitTime(blockTimeTakeSemaphore);
+   unsigned long timeToWaitWrite = _checkWaitTime(blockTimeWrite);
 
-   if(timeToWait == -2)
+   if(timeToWaitSemaphore == -2 || timeToWaitWrite == -2)
    {  
       return false;
    }
 
-   timeToWait = (timeToWait == FRTTRANSCEIVER_WAITMAX ? portMAX_DELAY : pdMS_TO_TICKS(timeToWait));
+   timeToWaitSemaphore = (timeToWaitSemaphore == FRTTRANSCEIVER_WAITMAX ? portMAX_DELAY : pdMS_TO_TICKS(timeToWaitSemaphore));
+   timeToWaitWrite = (timeToWaitWrite == FRTTRANSCEIVER_WAITMAX ? portMAX_DELAY : pdMS_TO_TICKS(timeToWaitWrite));
 
    SemaphoreHandle_t s = this->_structCommPartners[pos].semaphoreTxQueue;
 
-   if(xSemaphoreTake(s,timeToWait) == pdFALSE)
-   {
-      #ifdef LOG_INFO
-      log_i("Semaphore was not available before block time expired.")
-      #endif
-      return false;
-   }
-
-   timeToWait = _checkWaitTime(blockTimeWrite);
-
-   
    uint8_t u8MessagesOnQueue;
-   /* time specified is invalid || queue full */
-   if(timeToWait == -2 || this->_structCommPartners[pos].u8TxQueueLength == (u8MessagesOnQueue = this->_getAmountOfMessages(this->_structCommPartners[pos].txQueue)))
+   bool bQueueClear = true;
+
+   /* Queue Full. Manual wait*/
+   if(this->_structCommPartners[pos].u8TxQueueLength == (u8MessagesOnQueue = this->_getAmountOfMessages(this->_structCommPartners[pos].txQueue)))
    {
+      /* does not end when data arrives, so if timeToWaitWrite == MAXWAIT -----> doesnt go further than below code */
+      vTaskDelay(timeToWaitWrite);
+      bQueueClear = false;
+
+      /* Check if the queue is now free */
+      if(this->_structCommPartners[pos].u8TxQueueLength > (u8MessagesOnQueue = this->_getAmountOfMessages(this->_structCommPartners[pos].txQueue)))
+      {
+         bQueueClear = true;
+      }
+   }
+
+   if(bQueueClear)
+   {
+      if(xSemaphoreTake(s,timeToWaitSemaphore) == pdFALSE)
+      {
+         #ifdef LOG_INFO
+         log_i("Semaphore was not available before block time expired.")
+         #endif
+         return false;
+      }
+
+      /* space left for another element */
+      this->_structCommPartners[pos].txLineContainer[u8MessagesOnQueue] =
+      {
+         .data = data,
+         .u8DataType = u8DataType,
+         #if defined(FRTTRANSCEIVER_32BITADDITIONALDATA)
+         .u32AdditionalData = u32AdditionalData,
+         #elif defined(FRTTRANSCEIVER_64BITADDITIONALDATA)
+         .u64AdditionalData = u64AdditionalData,
+         #endif
+      };
+
+      /* At this point we should just be able to put data on the queue without waiting. Therefore waitingTime == 0 */
+      xQueueSendToBack(this->_structCommPartners[pos].txQueue,(const void *)&this->_structCommPartners[pos].txLineContainer[u8MessagesOnQueue],0);
+
       xSemaphoreGive(s);
-      return false;
+      return true;
    }
-
-   /* space left for another element */
-   this->_structCommPartners[pos].txLineContainer[u8MessagesOnQueue] =
-   {
-      .data = data,
-      .u8DataType = u8DataType,
-      #if defined(FRTTRANSCEIVER_32BITADDITIONALDATA)
-      .u32AdditionalData = u32AdditionalData,
-      #elif defined(FRTTRANSCEIVER_64BITADDITIONALDATA)
-      .u64AdditionalData = u64AdditionalData,
-      #endif
-   };
-
-   timeToWait = (timeToWait == FRTTRANSCEIVER_WAITMAX ? portMAX_DELAY : pdMS_TO_TICKS(timeToWait));
-
-   
-   FRTTransceiver_BaseType returnVal = xQueueSendToBack(this->_structCommPartners[pos].txQueue,(const void *)&this->_structCommPartners[pos].txLineContainer[u8MessagesOnQueue],(TickType_t)timeToWait);
-
-   xSemaphoreGive(s);
-
-   if(!(returnVal == pdTRUE))
+   else
    {
       return false;
    }
-
-   return true;
 }
 
 
@@ -315,37 +322,37 @@ bool FRTTransceiver::readFromQueue(FRTTransceiver_TaskHandle source,int blockTim
 
    }
 
-   unsigned long timeToWait = this->_checkWaitTime(blockTimeTakeSemaphore);
+   unsigned long timeToWaitRead = this->_checkWaitTime(blockTimeRead);
+   unsigned long timeToWaitSemaphore = this->_checkWaitTime(blockTimeTakeSemaphore);
 
-   if(timeToWait == -2)
+   if(timeToWaitRead == -2 || timeToWaitSemaphore == -2)
    {
       return false;
    }
 
-   timeToWait = (timeToWait == FRTTRANSCEIVER_WAITMAX ? portMAX_DELAY : pdMS_TO_TICKS(timeToWait));
-
+   timeToWaitRead = (timeToWaitRead == FRTTRANSCEIVER_WAITMAX ? portMAX_DELAY : pdMS_TO_TICKS(timeToWaitRead));
+   timeToWaitSemaphore = (timeToWaitSemaphore == FRTTRANSCEIVER_WAITMAX ? portMAX_DELAY : pdMS_TO_TICKS(timeToWaitSemaphore));
+   
+   
    SemaphoreHandle_t s = this->_structCommPartners[pos].semaphoreRxQueue;
 
-   if(xSemaphoreTake(s,timeToWait) == pdFALSE)
+   if(xSemaphoreTake(s,timeToWaitSemaphore) == pdFALSE)
    {
       return false;
    }
-   
 
-   timeToWait = this->_checkWaitTime(blockTimeRead);
+   FRTTransceiver_BaseType returnVal = xQueueReceive(this->_structCommPartners[pos].rxQueue,(void *)&this->_structCommPartners[pos].rxLineContainer,(TickType_t)timeToWaitRead);
 
-   if(timeToWait == -2)
+   /* errQUEUE_EMPTY returned if expression true*/
+   if(!(returnVal == pdPASS))
    {
       xSemaphoreGive(s);
       return false;
    }
 
-   timeToWait = (timeToWait == FRTTRANSCEIVER_WAITMAX ? portMAX_DELAY : pdMS_TO_TICKS(timeToWait));
-   
    /* Here it needs to be checked whether we still have space in the tempcontainer array or not*/
-   if(this->_structCommPartners[pos].rxQueueFull)
+   if(this->_structCommPartners[pos].rxBufferFull)
    {
-
       /* remove oldest data */
       this->_dataDestroyer(this->_structCommPartners[pos].tempContainer[0]);
       /* rearrange array if length at least 2 */
@@ -355,23 +362,13 @@ bool FRTTransceiver::readFromQueue(FRTTransceiver_TaskHandle source,int blockTim
       }
       this->_structCommPartners[pos].i8CurrTempcontainerPos--;
    }
-   
-
-   FRTTransceiver_BaseType returnVal = xQueueReceive(this->_structCommPartners[pos].rxQueue,(void *)&this->_structCommPartners[pos].rxLineContainer,(TickType_t)timeToWait);
-
-   /* errQUEUE_EMPTY returned if expression true*/
-   if(!(returnVal == pdPASS))
-   {
-      xSemaphoreGive(s);
-      return false;
-   }
 
    this->_dataAllocator(this->_structCommPartners[pos].rxLineContainer,this->_structCommPartners[pos].tempContainer[++this->_structCommPartners[pos].i8CurrTempcontainerPos]);
    this->_structCommPartners[pos].hasBufferedData = true;
 
    if(this->_structCommPartners[pos].i8CurrTempcontainerPos+1 == this->_structCommPartners[pos].u8RxQueueLength)
    {
-      this->_structCommPartners[pos].rxQueueFull = true;
+      this->_structCommPartners[pos].rxBufferFull = true;
    }
    
    xSemaphoreGive(s);
@@ -406,7 +403,7 @@ bool FRTTransceiver::manualDeleteAllocatedDatabufferForLine(FRTTransceiver_TaskH
          this->_rearrangeTempContainerArray(pos,u8PositionInBuffer);
          this->_structCommPartners[pos].i8CurrTempcontainerPos--;
       }
-      this->_structCommPartners[pos].rxQueueFull = false;
+      this->_structCommPartners[pos].rxBufferFull = false;
       return true;
    }
    return false;
@@ -428,7 +425,7 @@ bool FRTTransceiver::manualDeleteAllAllocatedDatabuffersForLine(FRTTransceiver_T
          this->_dataDestroyer(this->_structCommPartners[pos].tempContainer[u8I]);
       }
       this->_structCommPartners[pos].hasBufferedData = false;
-      this->_structCommPartners[pos].rxQueueFull = false;
+      this->_structCommPartners[pos].rxBufferFull = false;
       this->_structCommPartners[pos].i8CurrTempcontainerPos = -1;
    }
    return true;
