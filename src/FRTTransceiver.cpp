@@ -260,6 +260,7 @@ bool FRTTransceiver::writeToQueue(FRTTransceiver_TaskHandle destination,uint8_t 
 
       DataContainerOnQueue tempDataContainerOnQueue = 
       {
+         .senderAddress = destination,
          .data = data,
          .u8DataType = u8DataType,
          #if defined(FRTTRANSCEIVER_32BITADDITIONALDATA)
@@ -283,6 +284,7 @@ bool FRTTransceiver::writeToQueue(FRTTransceiver_TaskHandle destination,uint8_t 
          
          this->_structCommPartners[pos].txLineContainer[this->_structCommPartners[pos].u8TxQueueLength - 1] =
          {
+            .senderAddress = destination,
             .data = data,
             .u8DataType = u8DataType,
             #if defined(FRTTRANSCEIVER_32BITADDITIONALDATA)
@@ -312,7 +314,8 @@ bool FRTTransceiver::writeToQueue(FRTTransceiver_TaskHandle destination,uint8_t 
    uint8_t u8MessagesOnQueue = this->_getAmountOfMessages(this->_structCommPartners[pos].txQueue);
 
    this->_structCommPartners[pos].txLineContainer[u8MessagesOnQueue] =
-   {
+   {  
+      .senderAddress = destination,
       .data = data,
       .u8DataType = u8DataType,
       #if defined(FRTTRANSCEIVER_32BITADDITIONALDATA)
@@ -525,11 +528,64 @@ bool FRTTransceiver::manualDeleteAllocatedDatabufferForLine(FRTTransceiver_TaskH
    return false;
 }
 
+bool FRTTransceiver::manualDeleteAllocatedDatabufferForLine(eMultiSenderQueue multiSenderQueue,uint8_t u8PositionInBuffer)
+{
+   int pos;
+   if(!this->_hasDataInterpreters() || (pos = this->_getCommStruct(multiSenderQueue)) == -1)
+   {
+      return false;
+   }
+
+   if(this->_structCommPartners[pos].hasBufferedData && u8PositionInBuffer >= 0 && u8PositionInBuffer <= this->_structCommPartners[pos].i8CurrTempcontainerPos)
+   {
+      #ifdef LOG_INFO
+      log_i("Manually deleting allocated data");
+      #endif
+       
+      this->_dataDestroyer(this->_structCommPartners[pos].tempContainer[u8PositionInBuffer]);
+      
+      if(this->_structCommPartners[pos].i8CurrTempcontainerPos == 0)
+      {
+         this->_structCommPartners[pos].hasBufferedData = false;
+
+      }
+      else
+      {
+         this->_rearrangeTempContainerArray(pos,u8PositionInBuffer);
+         this->_structCommPartners[pos].i8CurrTempcontainerPos--;
+      }
+      this->_structCommPartners[pos].rxBufferFull = false;
+      return true;
+   }
+   return false;
+}
+
 
 bool FRTTransceiver::manualDeleteAllAllocatedDatabuffersForLine(FRTTransceiver_TaskHandle partner)
 {
    int pos;
    if(!this->_hasDataInterpreters() || (pos = this->_getCommStruct(partner) == -1))
+   {
+      return false;
+   }
+
+   if(this->_structCommPartners[pos].hasBufferedData)
+   {
+      for(uint8_t u8I = 0;u8I <= this->_structCommPartners[pos].i8CurrTempcontainerPos;u8I++)
+      {
+         this->_dataDestroyer(this->_structCommPartners[pos].tempContainer[u8I]);
+      }
+      this->_structCommPartners[pos].hasBufferedData = false;
+      this->_structCommPartners[pos].rxBufferFull = false;
+      this->_structCommPartners[pos].i8CurrTempcontainerPos = -1;
+   }
+   return true;
+}
+
+bool FRTTransceiver::manualDeleteAllAllocatedDatabuffersForLine(eMultiSenderQueue multiSenderQueue)
+{
+   int pos;
+   if(!this->_hasDataInterpreters() || (pos = this->_getCommStruct(multiSenderQueue) == -1))
    {
       return false;
    }
@@ -559,6 +615,16 @@ int FRTTransceiver::messagesOnQueue(FRTTransceiver_TaskHandle partner)
    return this->_getAmountOfMessages(this->_structCommPartners[pos].rxQueue);
 }
 
+int FRTTransceiver::messagesOnQueue(eMultiSenderQueue multiSenderQueue)
+{
+   int pos;
+
+   if((pos = this->_getCommStruct(multiSenderQueue)) == -1)
+   {
+      return -1;
+   }
+   return this->_getAmountOfMessages(this->_structCommPartners[pos].rxQueue);
+}
 
 bool FRTTransceiver::hasDataFrom(FRTTransceiver_TaskHandle partner)
 {
@@ -572,11 +638,36 @@ bool FRTTransceiver::hasDataFrom(FRTTransceiver_TaskHandle partner)
    return this->_structCommPartners[pos].hasBufferedData;
 }
 
+bool FRTTransceiver::hasDataFrom(eMultiSenderQueue multiSenderQueue)
+{
+   int pos;
+
+   if((pos = this->_getCommStruct(multiSenderQueue)) == -1)
+   {
+      return false;
+   }
+
+   return this->_structCommPartners[pos].hasBufferedData;
+}
+
+
 int FRTTransceiver::amountOfBufferedDataFrom(FRTTransceiver_TaskHandle partner)
 {
    int pos;
 
    if((pos = this->_getCommStruct(partner)) == -1)
+   {
+      return -1;
+   }
+
+   return (this->_structCommPartners[pos].hasBufferedData ? this->_structCommPartners[pos].i8CurrTempcontainerPos + 1:-1);
+}
+
+int FRTTransceiver::amountOfBufferedDataFrom(eMultiSenderQueue eMultiSenderQueue)
+{
+   int pos;
+
+   if((pos = this->_getCommStruct(eMultiSenderQueue)) == -1)
    {
       return -1;
    }
@@ -640,12 +731,25 @@ int FRTTransceiver::_getCommStruct(eMultiSenderQueue multiSenderQueue)
 
 }
 
-
-
 /* get the tail of the buffer*/
 const TempDataContainer * FRTTransceiver::getNewestBufferedDataFrom(FRTTransceiver_TaskHandle partner)
 {
    int pos = this->_getCommStruct(partner);
+
+   if(pos == -1)
+   {
+      return NULL;
+   }
+
+   if(this->_structCommPartners[pos].hasBufferedData)
+   {
+      return (const TempDataContainer *)&this->_structCommPartners[pos].tempContainer[this->_structCommPartners[pos].i8CurrTempcontainerPos];
+   }
+   return NULL;
+}
+const TempDataContainer * FRTTransceiver::getNewestBufferedDataFrom(eMultiSenderQueue multiSenderQueue)
+{
+   int pos = this->_getCommStruct(multiSenderQueue);
 
    if(pos == -1)
    {
@@ -663,6 +767,21 @@ const TempDataContainer * FRTTransceiver::getNewestBufferedDataFrom(FRTTransceiv
 const TempDataContainer * FRTTransceiver::getOldestBufferedDataFrom(FRTTransceiver_TaskHandle partner)
 {
    int pos = this->_getCommStruct(partner);
+
+   if(pos == -1)
+   {
+      return NULL;
+   }
+
+   if(this->_structCommPartners[pos].hasBufferedData)
+   {
+      return (const TempDataContainer *)&this->_structCommPartners[pos].tempContainer[0];
+   }
+   return NULL;
+}
+const TempDataContainer * FRTTransceiver::getOldestBufferedDataFrom(eMultiSenderQueue eMultiSenderQueue)
+{
+   int pos = this->_getCommStruct(eMultiSenderQueue);
 
    if(pos == -1)
    {
@@ -693,6 +812,23 @@ const TempDataContainer * FRTTransceiver::getBufferedDataFrom(FRTTransceiver_Tas
    return NULL;
 }
 
+const TempDataContainer * FRTTransceiver::getBufferedDataFrom(eMultiSenderQueue multiSenderQueue, uint8_t u8PositionInBuffer)
+{
+   int pos = this->_getCommStruct(multiSenderQueue);
+   
+   if(pos == -1)
+   {
+      return NULL;
+   }
+
+   if(this->_structCommPartners[pos].hasBufferedData && u8PositionInBuffer >= 0 && u8PositionInBuffer <= this->_structCommPartners[pos].i8CurrTempcontainerPos)
+   {
+      return (const TempDataContainer *)&this->_structCommPartners[pos].tempContainer[u8PositionInBuffer];
+   }
+   
+   return NULL;
+}
+
 
 void FRTTransceiver::addDataAllocateCallback(void(*funcPointerCallback)(const DataContainerOnQueue &,TempDataContainer &))
 {
@@ -706,17 +842,29 @@ void FRTTransceiver::addDataFreeCallback(void (*funcPointerCallback)(TempDataCon
 }
 
 
-string FRTTransceiver::getPartnersName(FRTTransceiver_TaskHandle partner)
+string FRTTransceiver::_getPartnersName(FRTTransceiver_TaskHandle partner)
 {
    int pos = this->_getCommStruct(partner);
 
    if(pos == -1)
    {
-      return NULL;
+      return "";
    }
 
    return this->_structCommPartners[pos].partnersName;
 }
+
+string FRTTransceiver::_getPartnersName(eMultiSenderQueue multiSenderQueue)
+{
+   int pos;
+   if((pos = this->_getCommStruct(multiSenderQueue)) == -1)
+   {
+      return "";
+   }
+
+   return this->_structCommPartners[pos].partnersName;
+}
+
 
 
 int FRTTransceiver::_checkWaitTime(int timeMs)

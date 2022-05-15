@@ -37,6 +37,8 @@ class FRTTransceiver
       bool _hasDataInterpreters();
       bool _hasSemaphore(FRTTransceiver_TaskHandle partner, bool txLine);
       bool _hasSemaphore(eMultiSenderQueue multiSenderQueue);
+      string _getPartnersName(FRTTransceiver_TaskHandle partner);
+      string _getPartnersName(eMultiSenderQueue partner);
 
    public:
       FRTTransceiver(uint8_t u8MaxPartners = 2);
@@ -63,21 +65,37 @@ class FRTTransceiver
       bool readFromQueue(FRTTransceiver_TaskHandle source,int blockTime = FRTTRANSCEIVER_WAITMAX,int blockTimeTakeSemaphore = 100);
       bool readFromQueue(eMultiSenderQueue multiSenderQueue,int blockTime = FRTTRANSCEIVER_WAITMAX,int blockTimeTakeSemaphore = 100);
       
+
+      /* deleting allocated data    */
       bool manualDeleteAllocatedDatabufferForLine(FRTTransceiver_TaskHandle partner,uint8_t u8PositionInBuffer);
+      bool manualDeleteAllocatedDatabufferForLine(eMultiSenderQueue multiSenderQueue,uint8_t u8PositionInBuffer);
+
       bool manualDeleteAllAllocatedDatabuffersForLine(FRTTransceiver_TaskHandle partner);
-      
+      bool manualDeleteAllAllocatedDatabuffersForLine(eMultiSenderQueue multiSenderQueue);
+      /* -----------------------    */
+
+
       int messagesOnQueue(FRTTransceiver_TaskHandle partner);
+      int messagesOnQueue(eMultiSenderQueue multiSenderQueue);
       bool hasDataFrom(FRTTransceiver_TaskHandle partner);
+      bool hasDataFrom(eMultiSenderQueue multiSenderQueue);
       int amountOfBufferedDataFrom(FRTTransceiver_TaskHandle partner);
+      int amountOfBufferedDataFrom(eMultiSenderQueue eMultiSenderQueue);
       int amountOfDataInAllBuffers();
 
+      /* Read received data         */
       const TempDataContainer * getNewestBufferedDataFrom(FRTTransceiver_TaskHandle partner);
+      const TempDataContainer * getNewestBufferedDataFrom(eMultiSenderQueue multiSenderQueue);
       const TempDataContainer * getOldestBufferedDataFrom(FRTTransceiver_TaskHandle partner);
+      const TempDataContainer * getOldestBufferedDataFrom(eMultiSenderQueue eMultiSenderQueue);
       const TempDataContainer * getBufferedDataFrom(FRTTransceiver_TaskHandle partner, uint8_t u8PositionInBuffer);
+      const TempDataContainer * getBufferedDataFrom(eMultiSenderQueue multiSenderQueue, uint8_t u8PositionInBuffer);
+      /* -----------------          */
 
+      /* Add callback functions     */
       void addDataAllocateCallback(void(*fp)(const DataContainerOnQueue &,TempDataContainer &));
       void addDataFreeCallback(void (*fp)(TempDataContainer &));
-      string getPartnersName(FRTTransceiver_TaskHandle partner);
+      /* ---------------------      */
 };
 
 #endif
