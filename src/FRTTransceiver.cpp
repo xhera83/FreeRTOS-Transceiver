@@ -327,7 +327,7 @@ bool FRTTransceiver::writeToQueue(FRTTransceiver_TaskHandle destination,uint8_t 
    };
 
    /* At this point we should just be able to put data on the queue without waiting. Therefore waitingTime == 0 */
-   xQueueSendToBack(this->_structCommPartners[pos].txQueue,(const void *)&this->_structCommPartners[pos].txLineContainer[u8MessagesOnQueue],0);
+   xQueueSendToBack(this->_structCommPartners[pos].txQueue,(const void *)&this->_structCommPartners[pos].txLineContainer[u8MessagesOnQueue],timeToWaitWrite);
 
    xSemaphoreGive(s);
    return true;
