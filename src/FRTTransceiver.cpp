@@ -109,13 +109,14 @@ bool FRTTransceiver::_hasSemaphore(eMultiSenderQueue multiSenderQueue)
    {
       return false;
    }
-   
-   this->_structCommPartners[pos].semaphoreRxQueue == NULL ? false:true;
+   return this->_structCommPartners[pos].semaphoreRxQueue == NULL ? false:true;
 }
 
 
-FRTTransceiver::FRTTransceiver(uint8_t u8MaxPartners)
-{
+FRTTransceiver::FRTTransceiver(FRTTransceiver_TaskHandle ownerAddress, uint8_t u8MaxPartners)
+{  
+   /* Can be null though. Receivers wont know who you are then....*/
+   this->_ownerAddress = ownerAddress;
    this->_u8MaxPartners = u8MaxPartners;
    this->_structCommPartners = new struct CommunicationPartner[u8MaxPartners];
 }
@@ -260,7 +261,7 @@ bool FRTTransceiver::writeToQueue(FRTTransceiver_TaskHandle destination,uint8_t 
 
       DataContainerOnQueue tempDataContainerOnQueue = 
       {
-         .senderAddress = destination,
+         .senderAddress = this->_ownerAddress,
          .data = data,
          .u8DataType = u8DataType,
          #if defined(FRTTRANSCEIVER_32BITADDITIONALDATA)
@@ -284,7 +285,7 @@ bool FRTTransceiver::writeToQueue(FRTTransceiver_TaskHandle destination,uint8_t 
          
          this->_structCommPartners[pos].txLineContainer[this->_structCommPartners[pos].u8TxQueueLength - 1] =
          {
-            .senderAddress = destination,
+            .senderAddress = this->_ownerAddress,
             .data = data,
             .u8DataType = u8DataType,
             #if defined(FRTTRANSCEIVER_32BITADDITIONALDATA)
@@ -315,7 +316,7 @@ bool FRTTransceiver::writeToQueue(FRTTransceiver_TaskHandle destination,uint8_t 
 
    this->_structCommPartners[pos].txLineContainer[u8MessagesOnQueue] =
    {  
-      .senderAddress = destination,
+      .senderAddress = this->_ownerAddress,
       .data = data,
       .u8DataType = u8DataType,
       #if defined(FRTTRANSCEIVER_32BITADDITIONALDATA)

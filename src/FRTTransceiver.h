@@ -18,6 +18,7 @@ using namespace std;
 class FRTTransceiver
 {
    private:
+      FRTTransceiver_TaskHandle _ownerAddress = NULL;
       struct CommunicationPartner * _structCommPartners; 
       uint8_t _u8CurrCommPartners = 0;
       uint8_t _u8MaxPartners;
@@ -41,7 +42,7 @@ class FRTTransceiver
       string _getPartnersName(eMultiSenderQueue partner);
 
    public:
-      FRTTransceiver(uint8_t u8MaxPartners = 2);
+      FRTTransceiver(FRTTransceiver_TaskHandle ownerAddress = NULL,uint8_t u8MaxPartners = 1);
       ~FRTTransceiver();
       bool addCommPartner(FRTTransceiver_TaskHandle partnersAddress = NULL,FRTTransceiver_SemaphoreHandle semaphoreRx = NULL,FRTTransceiver_SemaphoreHandle semaphoreTx = NULL,
          FRTTransceiver_QueueHandle queueRX = NULL,uint8_t u8QueueLengthRx = -1,FRTTransceiver_QueueHandle queueTX = NULL,uint8_t u8QueueLengthTx = -1,const string partnersName = string());
