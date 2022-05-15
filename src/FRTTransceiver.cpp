@@ -169,7 +169,14 @@ bool FRTTransceiver::addCommPartner(FRTTransceiver_TaskHandle partnersAddress,FR
       this->_structCommPartners[_u8CurrCommPartners].semaphoreTxQueue = semaphoreTx;
    }
    
-   this->_structCommPartners[_u8CurrCommPartners].partnersName = partnersName;
+   if(partnersName.length() == 0)
+   {
+      this->_structCommPartners[_u8CurrCommPartners].partnersName = FRTTRANSCEIVER_DEFAULTPARTNERNAME;
+   }
+   else
+   {
+      this->_structCommPartners[_u8CurrCommPartners].partnersName = partnersName;
+   }
 
    this->_u8CurrCommPartners++;
    return true;
