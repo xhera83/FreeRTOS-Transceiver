@@ -62,6 +62,11 @@ struct CommunicationPartner
 
    TempDataContainer tempContainer[FRTTRANSCEIVER_MAXELEMENTSIZEONQUEUE];
 
+   #ifdef FRTTRANSCEIVER_ANALYTICS_ENABLE
+   int dataPackagesReceived = 0;
+   int dataPackagesSent = 0;
+   #endif
+
    bool hasBufferedData = false;
    bool rxBufferFull = false;            
    int8_t i8CurrTempcontainerPos = -1; 

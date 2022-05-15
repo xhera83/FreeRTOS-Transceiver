@@ -17,6 +17,16 @@
 
 #define FRTTRANSCEIVER_MULTISENDERDEFAULTPARTNERNAME ("MULTISENDER-QUEUE")
 
+//#define FRTTRANSCEIVER_ANALYTICS_ENABLE
+
+#if defined(FRTTRANSCEIVER_ANALYTICS_ENABLE)
+
+#define FRTTRANSCEIVER_COMMTYPE1          ("NORMAL COMMUNICATION (READ & WRITE)")
+#define FRTTRANSCEIVER_COMMTYPE2          ("MULTISENDER QUEUE (READONLY)")
+#define FRTTRANSCEIVER_UNKNOWNADDRESS     (0x00000000)
+#define FRTTRANSCEIVER_UNKNOWNNAME        ("UKNOWN NAME")
+#endif
+
 /* used to select one of your multisender queues for a read operation. Add more if needed */
 enum eMultiSenderQueue 
 {

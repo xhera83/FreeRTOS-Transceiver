@@ -7,7 +7,7 @@
 #include <FRTTransceiver.h>
 
 //#define LOG_INFO
-#define LOG_ERROR
+//#define LOG_ERROR
 #define LOG_WARNING
 
 FRTTransceiver_QueueHandle FRTTransceiver_CreateQueue(FRTTransceiver_BaseType lengthOfQueue,FRTTransceiver_BaseType elementSize)
@@ -168,7 +168,7 @@ bool FRTTransceiver::addCommPartner(FRTTransceiver_TaskHandle partnersAddress,FR
       }
       this->_structCommPartners[_u8CurrCommPartners].semaphoreTxQueue = semaphoreTx;
    }
-
+   
    this->_structCommPartners[_u8CurrCommPartners].partnersName = partnersName;
 
    this->_u8CurrCommPartners++;
@@ -295,6 +295,10 @@ bool FRTTransceiver::writeToQueue(FRTTransceiver_TaskHandle destination,uint8_t 
             #endif
          };
 
+         #ifdef FRTTRANSCEIVER_ANALYTICS_ENABLE
+         this->_structCommPartners[pos].dataPackagesSent++;
+         #endif
+
          xSemaphoreGive(s);
          return true;
       }
@@ -327,8 +331,14 @@ bool FRTTransceiver::writeToQueue(FRTTransceiver_TaskHandle destination,uint8_t 
    };
 
    /* At this point we should just be able to put data on the queue without waiting. Therefore waitingTime == 0 */
-   xQueueSendToBack(this->_structCommPartners[pos].txQueue,(const void *)&this->_structCommPartners[pos].txLineContainer[u8MessagesOnQueue],timeToWaitWrite);
+   FRTTransceiver_BaseType returnVal = xQueueSendToBack(this->_structCommPartners[pos].txQueue,(const void *)&this->_structCommPartners[pos].txLineContainer[u8MessagesOnQueue],timeToWaitWrite);
 
+   if(returnVal == pdPASS)
+   {
+      #ifdef FRTTRANSCEIVER_ANALYTICS_ENABLE
+      this->_structCommPartners[pos].dataPackagesSent++;
+      #endif
+   }
    xSemaphoreGive(s);
    return true;
    
@@ -347,13 +357,22 @@ bool FRTTransceiver::databroadcast(uint8_t u8DataType,void * data,int blockTimeW
       if(this->_structCommPartners[u8I].bReadOnlyQueue == false)
       {
          #ifdef FRTTRANSCEIVER_32BITADDITIONALDATA
-         if(this->writeToQueue(this->_structCommPartners[u8I].commPartner,u8DataType,data,blockTimeWrite,blockTimeTakeSemaphore,u32AdditionalData)) u8SuccessCounter++;
+         if(this->writeToQueue(this->_structCommPartners[u8I].commPartner,u8DataType,data,blockTimeWrite,blockTimeTakeSemaphore,u32AdditionalData)){
+            u8SuccessCounter++;
+         }
          #elif defined(FRTTRANSCEIVER_64BITADDITIONALDATA)
-         if(this->writeToQueue(this->_structCommPartners[u8I].commPartner,u8DataType,data,blockTimeWrite,blockTimeTakeSemaphore,u64AdditionalData)) u8SuccessCounter++;
+         if(this->writeToQueue(this->_structCommPartners[u8I].commPartner,u8DataType,data,blockTimeWrite,blockTimeTakeSemaphore,u64AdditionalData)){
+            u8SuccessCounter++;
+         }
          #endif
       }
    }
-
+   #ifdef FRTTRANSCEIVER_ANALYTICS_ENABLE
+   if(u8SuccessCounter > 0)
+   {
+      this->_broadcastCount++;
+   }
+   #endif
    return (u8SuccessCounter == (this->_u8CurrCommPartners - this->_u8MultiSenderQueues));
 }
 
@@ -422,7 +441,10 @@ bool FRTTransceiver::readFromQueue(FRTTransceiver_TaskHandle source,int blockTim
    {
       this->_structCommPartners[pos].rxBufferFull = true;
    }
-   
+   #ifdef FRTTRANSCEIVER_ANALYTICS_ENABLE
+   this->_structCommPartners[pos].dataPackagesReceived++;
+   #endif
+
    xSemaphoreGive(s);
    return true;
 }
@@ -491,7 +513,9 @@ bool FRTTransceiver::readFromQueue(eMultiSenderQueue multiSenderQueue,int blockT
    {
       this->_structCommPartners[pos].rxBufferFull = true;
    }
-   
+   #ifdef FRTTRANSCEIVER_ANALYTICS_ENABLE
+   this->_structCommPartners[pos].dataPackagesReceived++;
+   #endif
    xSemaphoreGive(s);
    return true;
 }
@@ -661,7 +685,7 @@ int FRTTransceiver::amountOfBufferedDataFrom(FRTTransceiver_TaskHandle partner)
       return -1;
    }
 
-   return (this->_structCommPartners[pos].hasBufferedData ? this->_structCommPartners[pos].i8CurrTempcontainerPos + 1:-1);
+   return (this->_structCommPartners[pos].hasBufferedData ? this->_structCommPartners[pos].i8CurrTempcontainerPos + 1:0);
 }
 
 int FRTTransceiver::amountOfBufferedDataFrom(eMultiSenderQueue eMultiSenderQueue)
@@ -673,7 +697,7 @@ int FRTTransceiver::amountOfBufferedDataFrom(eMultiSenderQueue eMultiSenderQueue
       return -1;
    }
 
-   return (this->_structCommPartners[pos].hasBufferedData ? this->_structCommPartners[pos].i8CurrTempcontainerPos + 1:-1);
+   return (this->_structCommPartners[pos].hasBufferedData ? this->_structCommPartners[pos].i8CurrTempcontainerPos + 1:0);
 }
 
 int FRTTransceiver::amountOfDataInAllBuffers()
@@ -893,3 +917,36 @@ void FRTTransceiver::_rearrangeTempContainerArray(uint8_t u8CommStructPos,uint8_
       this->_structCommPartners[u8CommStructPos].tempContainer[u8I-1] = this->_structCommPartners[u8CommStructPos].tempContainer[u8I];
    }
 }
+
+#ifdef FRTTRANSCEIVER_ANALYTICS_ENABLE
+
+void FRTTransceiver::printCommunicationsSummary()
+{
+   /* General Infos */
+   log_i("General Infos\n\n");
+   log_i("\tOwner address           \t\t%p\n",this->_ownerAddress == NULL ? FRTTRANSCEIVER_UNKNOWNADDRESS : this->_ownerAddress);
+   log_i("\tCommunicationpartner    \t\t(%d out of %d)\n",this->_u8CurrCommPartners,this->_u8MaxPartners);
+   log_i("\t\t- - - > (%d of those read only)\n",this->_u8MultiSenderQueues);
+   log_i("\tMax partners            \t\t%d\n",this->_u8MaxPartners);
+   log_i("\tData callbacks available\t\t%s\n",this->_hasDataInterpreters() ? "yes":"no");
+   log_i("\tBroadcasts made         \t\t%d\n\n",this->_broadcastCount);
+   
+   /* Communication partners */
+   
+   for(uint8_t u8I = 0; u8I < this->_u8CurrCommPartners;u8I++)
+   {
+      log_i("Line [%d]",u8I+1);
+      log_i("\tName                    \t\t%s\n",this->_structCommPartners[u8I].partnersName.length() == 0 ? FRTTRANSCEIVER_UNKNOWNNAME : this->_structCommPartners[u8I].partnersName.c_str());
+      log_i("\tAddress                 \t\t%p\n",this->_structCommPartners[u8I].commPartner == NULL ? FRTTRANSCEIVER_UNKNOWNADDRESS : this->_structCommPartners[u8I].commPartner);
+      log_i("\tComm-Type               \t\t%s\n",this->_structCommPartners[u8I].bReadOnlyQueue ? FRTTRANSCEIVER_COMMTYPE2:FRTTRANSCEIVER_COMMTYPE1);
+      log_i("\tTX-LINE                 \t\t%s\n",this->_structCommPartners[u8I].txQueue == NULL ? "OFF":"ON");
+      log_i("\t\tLength                %d\n",this->_structCommPartners[u8I].u8TxQueueLength);
+      log_i("\tRX-LINE                 \t\t%s\n",this->_structCommPartners[u8I].rxQueue == NULL ? "OFF":"ON");
+      log_i("\t\tLength                %d\n",this->_structCommPartners[u8I].u8RxQueueLength);
+      log_i("\tPackages sent           \t\t%d\n",this->_structCommPartners[u8I].dataPackagesSent);
+      log_i("\tPackages received       \t\t%d\n",this->_structCommPartners[u8I].dataPackagesReceived);
+      log_i("\tHas buffered data       \t\t%s\n",this->_structCommPartners[u8I].hasBufferedData ? "YES":"NO");
+   }
+}
+
+#endif

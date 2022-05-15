@@ -24,6 +24,10 @@ class FRTTransceiver
       uint8_t _u8MaxPartners;
       uint8_t _u8MultiSenderQueues = 0;
 
+      #ifdef FRTTRANSCEIVER_ANALYTICS_ENABLE
+      int _broadcastCount = 0;
+      #endif
+
       funcPointer_dataAllocateCallback _dataAllocator = NULL;
       funcPointer_dataFreeCallback _dataDestroyer = NULL;
 
@@ -97,6 +101,10 @@ class FRTTransceiver
       void addDataAllocateCallback(void(*fp)(const DataContainerOnQueue &,TempDataContainer &));
       void addDataFreeCallback(void (*fp)(TempDataContainer &));
       /* ---------------------      */
+
+      #if defined(FRTTRANSCEIVER_ANALYTICS_ENABLE)
+      void printCommunicationsSummary();
+      #endif
 };
 
 #endif
