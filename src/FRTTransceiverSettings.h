@@ -17,14 +17,14 @@
 
 #define FRTTRANSCEIVER_MULTISENDERDEFAULTPARTNERNAME ("MULTISENDER-QUEUE")
 
-/* add more if needed */
+/* used to select one of your multisender queues for a read operation. Add more if needed */
 enum eMultiSenderQueue 
 {
-      eQUEUE1 = 1,
-      eQUEUE2 = 2,
-      eQUEUE3 = 3,
-      eQUEUE4 = 5,
-      eQUEUE5 = 6
+      eMULTISENDERQ0 = 0,
+      eMULTISENDERQ1 = 1,
+      eMULTISENDERQ2 = 2,
+      eMULTISENDERQ3 = 3,
+      eMULTISENDERQ4 = 4
 };
 
 #endif

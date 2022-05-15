@@ -31,20 +31,21 @@ class FRTTransceiver
       int _checkWaitTime(int timeMS);
       void _rearrangeTempContainerArray(uint8_t u8CommStructPos,uint8_t u8PosRemoved);
       int _getCommStruct(FRTTransceiver_TaskHandle partner);
+      int _getCommStruct(eMultiSenderQueue multiSenderQueue);
       bool _checkForMessages(FRTTransceiver_QueueHandle queue);
       int _getAmountOfMessages(FRTTransceiver_QueueHandle queue);
       bool _hasDataInterpreters();
       bool _hasSemaphore(FRTTransceiver_TaskHandle partner, bool txLine);
+      bool _hasSemaphore(eMultiSenderQueue multiSenderQueue);
 
    public:
       FRTTransceiver(uint8_t u8MaxPartners = 2);
       ~FRTTransceiver();
       bool addCommPartner(FRTTransceiver_TaskHandle partnersAddress = NULL,FRTTransceiver_SemaphoreHandle semaphoreRx = NULL,FRTTransceiver_SemaphoreHandle semaphoreTx = NULL,
          FRTTransceiver_QueueHandle queueRX = NULL,uint8_t u8QueueLengthRx = -1,FRTTransceiver_QueueHandle queueTX = NULL,uint8_t u8QueueLengthTx = -1,const string partnersName = string());
-      /* Aquivalent to addCommPartner but only for multisenderqueues (multiple partners, readonly)*/
-      bool addMultiSenderQueue(FRTTransceiver_SemaphoreHandle semaphoreRx,FRTTransceiver_QueueHandle queueRX,uint8_t u8QueueLengthRx);
       
-      bool addCommQueue(FRTTransceiver_TaskHandle partner, FRTTransceiver_QueueHandle queueRxOrTx,uint8_t u8QueueLength = -1,bool TX = false);
+      /* Aquivalent to addCommPartner but only for multisenderqueues (multiple partners, readonly)*/
+      bool addMultiSenderReadOnlyQueue(FRTTransceiver_SemaphoreHandle semaphoreRx,FRTTransceiver_QueueHandle queueRX,uint8_t u8QueueLengthRx,const string multiSenderQueueName = string());
 
       #if defined(FRTTRANSCEIVER_32BITADDITIONALDATA)
          bool writeToQueue(FRTTransceiver_TaskHandle destination,uint8_t u8Datatype,void * data,int blockTimeWrite = FRTTRANSCEIVER_WAITMAX,int blockTimeTakeSemaphore = 100,uint32_t u32AdditionalInfo = 0);
@@ -60,6 +61,7 @@ class FRTTransceiver
       
       
       bool readFromQueue(FRTTransceiver_TaskHandle source,int blockTime = FRTTRANSCEIVER_WAITMAX,int blockTimeTakeSemaphore = 100);
+      bool readFromQueue(eMultiSenderQueue multiSenderQueue,int blockTime = FRTTRANSCEIVER_WAITMAX,int blockTimeTakeSemaphore = 100);
       
       bool manualDeleteAllocatedDatabufferForLine(FRTTransceiver_TaskHandle partner,uint8_t u8PositionInBuffer);
       bool manualDeleteAllAllocatedDatabuffersForLine(FRTTransceiver_TaskHandle partner);

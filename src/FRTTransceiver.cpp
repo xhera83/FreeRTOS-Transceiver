@@ -101,6 +101,18 @@ bool FRTTransceiver::_hasSemaphore(FRTTransceiver_TaskHandle partner,bool txLine
    }
 }
 
+bool FRTTransceiver::_hasSemaphore(eMultiSenderQueue multiSenderQueue)
+{
+   int pos;
+
+   if((pos = this->_getCommStruct(multiSenderQueue)) == -1)
+   {
+      return false;
+   }
+   
+   this->_structCommPartners[pos].semaphoreRxQueue == NULL ? false:true;
+}
+
 
 FRTTransceiver::FRTTransceiver(uint8_t u8MaxPartners)
 {
@@ -162,7 +174,7 @@ bool FRTTransceiver::addCommPartner(FRTTransceiver_TaskHandle partnersAddress,FR
    return true;
 }
 
-bool FRTTransceiver::addMultiSenderQueue(FRTTransceiver_SemaphoreHandle semaphoreRx,FRTTransceiver_QueueHandle queueRX,uint8_t u8QueueLengthRx)
+bool FRTTransceiver::addMultiSenderReadOnlyQueue(FRTTransceiver_SemaphoreHandle semaphoreRx,FRTTransceiver_QueueHandle queueRX,uint8_t u8QueueLengthRx,const string multiSenderQueueName)
 {
    if(this->_u8CurrCommPartners + 1 > this->_u8MaxPartners)
    {
@@ -181,7 +193,15 @@ bool FRTTransceiver::addMultiSenderQueue(FRTTransceiver_SemaphoreHandle semaphor
       this->_structCommPartners[_u8CurrCommPartners].semaphoreRxQueue = semaphoreRx;
    }
 
-   this->_structCommPartners[_u8CurrCommPartners].partnersName = FRTTRANSCEIVER_MULTISENDERDEFAULTPARTNERNAME;
+   if(multiSenderQueueName.length() == 0)
+   {
+      this->_structCommPartners[_u8CurrCommPartners].partnersName = FRTTRANSCEIVER_MULTISENDERDEFAULTPARTNERNAME;
+   }
+   else
+   {
+      this->_structCommPartners[_u8CurrCommPartners].partnersName = multiSenderQueueName;
+   }
+
    this->_structCommPartners[_u8CurrCommPartners].bReadOnlyQueue = true; /* means multisender queue, where we dont send ourselves*/
    this->_u8MultiSenderQueues++;
    this->_u8CurrCommPartners++;
@@ -320,42 +340,18 @@ bool FRTTransceiver::databroadcast(uint8_t u8DataType,void * data,int blockTimeW
    uint8_t u8SuccessCounter = 0;
    for(uint8_t u8I = 0; u8I < this->_u8CurrCommPartners ; u8I++)
    {
-      #ifdef FRTTRANSCEIVER_32BITADDITIONALDATA
-      if(this->writeToQueue(this->_structCommPartners[u8I].commPartner,u8DataType,data,blockTimeWrite,blockTimeTakeSemaphore,u32AdditionalData)) u8SuccessCounter++;
-      #elif defined(FRTTRANSCEIVER_64BITADDITIONALDATA)
-      if(this->writeToQueue(this->_structCommPartners[u8I].commPartner,u8DataType,data,blockTimeWrite,blockTimeTakeSemaphore,u64AdditionalData)) u8SuccessCounter++;
-      #endif
+      if(this->_structCommPartners[u8I].bReadOnlyQueue == false)
+      {
+         #ifdef FRTTRANSCEIVER_32BITADDITIONALDATA
+         if(this->writeToQueue(this->_structCommPartners[u8I].commPartner,u8DataType,data,blockTimeWrite,blockTimeTakeSemaphore,u32AdditionalData)) u8SuccessCounter++;
+         #elif defined(FRTTRANSCEIVER_64BITADDITIONALDATA)
+         if(this->writeToQueue(this->_structCommPartners[u8I].commPartner,u8DataType,data,blockTimeWrite,blockTimeTakeSemaphore,u64AdditionalData)) u8SuccessCounter++;
+         #endif
+      }
    }
 
-   return (u8SuccessCounter == this->_u8CurrCommPartners);
+   return (u8SuccessCounter == (this->_u8CurrCommPartners - this->_u8MultiSenderQueues));
 }
-
-bool FRTTransceiver::addCommQueue(FRTTransceiver_TaskHandle partner, FRTTransceiver_QueueHandle queueRxOrTx,uint8_t u8QueueLength,bool isTxQueue)
-{
-   int pos;
-
-   if((pos = this->_getCommStruct(partner)) == -1 || queueRxOrTx == NULL)
-   {
-      return false;
-   }
-
-   CommunicationPartner & temp = this->_structCommPartners[pos];
-
-   if(isTxQueue == true)
-   {
-      
-      temp.txQueue = queueRxOrTx;
-      temp.u8TxQueueLength = u8QueueLength;
-   }
-   else
-   {
-      temp.rxQueue = queueRxOrTx;
-      temp.u8RxQueueLength = u8QueueLength;
-   }
-
-   return true;
-}
-
 
 bool FRTTransceiver::readFromQueue(FRTTransceiver_TaskHandle source,int blockTimeRead,int blockTimeTakeSemaphore)
 {
@@ -427,6 +423,74 @@ bool FRTTransceiver::readFromQueue(FRTTransceiver_TaskHandle source,int blockTim
    return true;
 }
 
+bool FRTTransceiver::readFromQueue(eMultiSenderQueue multiSenderQueue,int blockTimeRead,int blockTimeTakeSemaphore)
+{
+   if(!this->_hasDataInterpreters() || !this->_hasSemaphore(multiSenderQueue))
+   {
+      return false;
+   }
+
+   int pos;
+
+   if((pos = this->_getCommStruct(multiSenderQueue)) == -1 || this->_structCommPartners[pos].rxQueue == NULL)
+   {
+      return false;
+
+   }
+
+   unsigned long timeToWaitRead = this->_checkWaitTime(blockTimeRead);
+   unsigned long timeToWaitSemaphore = this->_checkWaitTime(blockTimeTakeSemaphore);
+
+   if(timeToWaitRead == -2 || timeToWaitSemaphore == -2)
+   {
+      return false;
+   }
+
+   timeToWaitRead = (timeToWaitRead == FRTTRANSCEIVER_WAITMAX ? portMAX_DELAY : pdMS_TO_TICKS(timeToWaitRead));
+   timeToWaitSemaphore = (timeToWaitSemaphore == FRTTRANSCEIVER_WAITMAX ? portMAX_DELAY : pdMS_TO_TICKS(timeToWaitSemaphore));
+   
+   
+
+   FRTTransceiver_BaseType returnVal = xQueueReceive(this->_structCommPartners[pos].rxQueue,(void *)&this->_structCommPartners[pos].rxLineContainer,(TickType_t)timeToWaitRead);
+
+
+   /* errQUEUE_EMPTY returned if expression true*/
+   if(!(returnVal == pdPASS))
+   {
+      return false;
+   }
+
+   SemaphoreHandle_t s = this->_structCommPartners[pos].semaphoreRxQueue;
+
+   if(xSemaphoreTake(s,timeToWaitSemaphore) == pdFALSE)
+   {
+      return false;
+   }
+
+   /* Here it needs to be checked whether we still have space in the tempcontainer array or not*/
+   if(this->_structCommPartners[pos].rxBufferFull)
+   {
+      /* remove oldest data */
+      this->_dataDestroyer(this->_structCommPartners[pos].tempContainer[0]);
+      /* rearrange array if length at least 2 */
+      if(this->_structCommPartners[pos].u8RxQueueLength - 1 > 0)
+      {
+         this->_rearrangeTempContainerArray(pos,0);
+      }
+      this->_structCommPartners[pos].i8CurrTempcontainerPos--;
+   }
+
+   this->_dataAllocator(this->_structCommPartners[pos].rxLineContainer,this->_structCommPartners[pos].tempContainer[++this->_structCommPartners[pos].i8CurrTempcontainerPos]);
+   this->_structCommPartners[pos].hasBufferedData = true;
+
+   if(this->_structCommPartners[pos].i8CurrTempcontainerPos+1 == this->_structCommPartners[pos].u8RxQueueLength)
+   {
+      this->_structCommPartners[pos].rxBufferFull = true;
+   }
+   
+   xSemaphoreGive(s);
+   return true;
+}
 
 
 bool FRTTransceiver::manualDeleteAllocatedDatabufferForLine(FRTTransceiver_TaskHandle partner,uint8_t u8PositionInBuffer)
@@ -548,6 +612,32 @@ int FRTTransceiver::_getCommStruct(FRTTransceiver_TaskHandle partner)
       }
    }
    return -1;
+}
+int FRTTransceiver::_getCommStruct(eMultiSenderQueue multiSenderQueue)
+{
+   if(!(multiSenderQueue >= 0 && multiSenderQueue < this->_u8MultiSenderQueues))
+   {
+      return -1;
+   }
+
+   uint8_t counter = 0;
+
+   for(uint8_t u8I = 0; u8I < this->_u8CurrCommPartners;u8I++)
+   {
+      if(this->_structCommPartners[u8I].bReadOnlyQueue)
+      {
+         if(multiSenderQueue == counter)
+         {
+            return u8I;
+         }
+         else
+         {
+            counter++;
+         }
+      }
+   }
+   return -1;
+
 }
 
 

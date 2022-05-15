@@ -45,6 +45,7 @@ struct CommunicationPartner
 {
    FRTTransceiver_TaskHandle commPartner = NULL;           
    string partnersName;
+   
    bool bReadOnlyQueue = false;
 
    FRTTransceiver_SemaphoreHandle semaphoreRxQueue = NULL;
