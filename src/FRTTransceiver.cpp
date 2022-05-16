@@ -83,35 +83,30 @@ bool FRTTransceiver::_hasDataInterpreters()
    return (this->_dataAllocator && this->_dataDestroyer) ? true:false;
 }
 
-bool FRTTransceiver::_hasSemaphore(FRTTransceiver_TaskHandle partner,bool txLine)
+bool FRTTransceiver::_hasSemaphore(FRTTransceiver_TaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar, bool txLine)
 {
-   int pos;
-   if((pos  = this->_getCommStruct(partner)) == -1)
+   int pos = this->_getCommStruct(partner,multiSenderQueue,bUseTaskHandleVar);
+   if(pos == -1)
    {
       return false;
    }
-
-   if(txLine)
+   
+   if(bUseTaskHandleVar)
    {
-      return this->_structCommPartners[pos].semaphoreTxQueue == NULL ? false:true;
+      if(txLine)
+      {
+         return this->_structCommPartners[pos].semaphoreTxQueue == NULL ? false:true;
+      }
+      else
+      {
+         return this->_structCommPartners[pos].semaphoreRxQueue == NULL ? false:true;
+      }
    }
    else
    {
-      return this->_structCommPartners[pos].semaphoreRxQueue == NULL ? false:true;
+      this->_structCommPartners[pos].semaphoreRxQueue == NULL ? false:true;
    }
 }
-
-bool FRTTransceiver::_hasSemaphore(eMultiSenderQueue multiSenderQueue)
-{
-   int pos;
-
-   if((pos = this->_getCommStruct(multiSenderQueue)) == -1)
-   {
-      return false;
-   }
-   return this->_structCommPartners[pos].semaphoreRxQueue == NULL ? false:true;
-}
-
 
 FRTTransceiver::FRTTransceiver(FRTTransceiver_TaskHandle ownerAddress, uint8_t u8MaxPartners)
 {  
@@ -127,8 +122,9 @@ FRTTransceiver::~FRTTransceiver()
 }
 
 
-bool FRTTransceiver::addCommPartner(FRTTransceiver_TaskHandle partnersAddress,FRTTransceiver_SemaphoreHandle semaphoreRx,FRTTransceiver_SemaphoreHandle semaphoreTx,FRTTransceiver_QueueHandle queueRX,uint8_t u8QueueLengthRx,
-                                                                                                FRTTransceiver_QueueHandle queueTX,uint8_t u8QueueLengthTx,const string partnersName)
+bool FRTTransceiver::addCommPartner(FRTTransceiver_TaskHandle partnersAddress,FRTTransceiver_QueueHandle queueRX,
+               uint8_t u8QueueLengthRx,FRTTransceiver_SemaphoreHandle semaphoreRx,
+               FRTTransceiver_QueueHandle queueTX,uint8_t u8QueueLengthTx,FRTTransceiver_SemaphoreHandle semaphoreTx,const string partnersName)
 {
 
    if(this->_u8CurrCommPartners + 1 > this->_u8MaxPartners)
@@ -182,7 +178,8 @@ bool FRTTransceiver::addCommPartner(FRTTransceiver_TaskHandle partnersAddress,FR
    return true;
 }
 
-bool FRTTransceiver::addMultiSenderReadOnlyQueue(FRTTransceiver_SemaphoreHandle semaphoreRx,FRTTransceiver_QueueHandle queueRX,uint8_t u8QueueLengthRx,const string multiSenderQueueName)
+bool FRTTransceiver::addMultiSenderReadOnlyQueue(FRTTransceiver_QueueHandle queueRX,uint8_t u8QueueLengthRx,FRTTransceiver_SemaphoreHandle semaphoreRx,
+                                                const string multiSenderQueueName)
 {
    if(this->_u8CurrCommPartners + 1 > this->_u8MaxPartners)
    {
@@ -224,7 +221,8 @@ bool FRTTransceiver::writeToQueue(FRTTransceiver_TaskHandle destination,uint8_t 
 {
    int pos;
 
-   if(!this->_hasDataInterpreters() || !this->_hasSemaphore(destination,true) || (pos  = this->_getCommStruct(destination)) == -1)
+   if(!this->_hasDataInterpreters() || !this->_hasSemaphore(destination,(eMultiSenderQueue)0,true,true) || 
+                                       (pos  = this->_getCommStruct(destination,(eMultiSenderQueue)0,true)) == -1)
    {
       #ifdef LOG_WARNING
       log_e("You are not allowed to write to a queue \nOne of the following things happened:\n"
@@ -338,7 +336,8 @@ bool FRTTransceiver::writeToQueue(FRTTransceiver_TaskHandle destination,uint8_t 
    };
 
    /* At this point we should just be able to put data on the queue without waiting. Therefore waitingTime == 0 */
-   FRTTransceiver_BaseType returnVal = xQueueSendToBack(this->_structCommPartners[pos].txQueue,(const void *)&this->_structCommPartners[pos].txLineContainer[u8MessagesOnQueue],timeToWaitWrite);
+   FRTTransceiver_BaseType returnVal = xQueueSendToBack(this->_structCommPartners[pos].txQueue,(const void *)&this->_structCommPartners[pos].txLineContainer[u8MessagesOnQueue],
+                                                                                                                                                               timeToWaitWrite);
 
    if(returnVal == pdPASS)
    {
@@ -383,17 +382,18 @@ bool FRTTransceiver::databroadcast(uint8_t u8DataType,void * data,int blockTimeW
    return (u8SuccessCounter == (this->_u8CurrCommPartners - this->_u8MultiSenderQueues));
 }
 
-bool FRTTransceiver::readFromQueue(FRTTransceiver_TaskHandle source,int blockTimeRead,int blockTimeTakeSemaphore)
-{
+//bool readFromQueue(FRTTransceiver_TaskHandle partner,eMultiSenderQueue,bool bUseTaskHandleVar,int blockTime = 100,int blockTimeTakeSemaphore = 100);
 
-   if(!this->_hasDataInterpreters() || !this->_hasSemaphore(source,false))
+bool FRTTransceiver::readFromQueue(FRTTransceiver_TaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar,int blockTimeRead,int blockTimeTakeSemaphore)
+{
+   if(!this->_hasDataInterpreters() || !this->_hasSemaphore(partner,multiSenderQueue,bUseTaskHandleVar,false))
    {
       return false;
    }
 
    int pos;
 
-   if((pos = this->_getCommStruct(source)) == -1 || this->_structCommPartners[pos].rxQueue == NULL)
+   if((pos = this->_getCommStruct(partner,multiSenderQueue,bUseTaskHandleVar)) == -1 || this->_structCommPartners[pos].rxQueue == NULL)
    {
       return false;
 
@@ -456,144 +456,66 @@ bool FRTTransceiver::readFromQueue(FRTTransceiver_TaskHandle source,int blockTim
    return true;
 }
 
-bool FRTTransceiver::readFromQueue(eMultiSenderQueue multiSenderQueue,int blockTimeRead,int blockTimeTakeSemaphore)
-{
-   if(!this->_hasDataInterpreters() || !this->_hasSemaphore(multiSenderQueue))
+bool FRTTransceiver::queueFlush(FRTTransceiver_TaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandle,int blockTimeTakeSemaphore,bool bTxQueue)
+{  
+   int pos = this->_getCommStruct(partner,multiSenderQueue,bUseTaskHandle);
+
+   if(pos == -1)
    {
       return false;
    }
 
-   int pos;
-
-   if((pos = this->_getCommStruct(multiSenderQueue)) == -1 || this->_structCommPartners[pos].rxQueue == NULL)
-   {
-      return false;
-
-   }
-
-   unsigned long timeToWaitRead = this->_checkWaitTime(blockTimeRead);
    unsigned long timeToWaitSemaphore = this->_checkWaitTime(blockTimeTakeSemaphore);
 
-   if(timeToWaitRead == -2 || timeToWaitSemaphore == -2)
+   if(timeToWaitSemaphore == -2)
    {
       return false;
    }
 
-   timeToWaitRead = (timeToWaitRead == FRTTRANSCEIVER_WAITMAX ? portMAX_DELAY : pdMS_TO_TICKS(timeToWaitRead));
+   if(bTxQueue && this->_structCommPartners[pos].txQueue == NULL || !bTxQueue && this->_structCommPartners[pos].rxQueue == NULL)
+   {
+      return false;
+   }
+
+   
    timeToWaitSemaphore = (timeToWaitSemaphore == FRTTRANSCEIVER_WAITMAX ? portMAX_DELAY : pdMS_TO_TICKS(timeToWaitSemaphore));
-   
-   
-
-   FRTTransceiver_BaseType returnVal = xQueueReceive(this->_structCommPartners[pos].rxQueue,(void *)&this->_structCommPartners[pos].rxLineContainer,(TickType_t)timeToWaitRead);
-
-
-   /* errQUEUE_EMPTY returned if expression true*/
-   if(!(returnVal == pdPASS))
-   {
-      return false;
-   }
 
    SemaphoreHandle_t s = this->_structCommPartners[pos].semaphoreRxQueue;
 
-   if(xSemaphoreTake(s,timeToWaitSemaphore) == pdFALSE)
-   {
-      return false;
-   }
 
-   /* Here it needs to be checked whether we still have space in the tempcontainer array or not*/
-   if(this->_structCommPartners[pos].rxBufferFull)
-   {
-      /* remove oldest data */
-      this->_dataDestroyer(this->_structCommPartners[pos].tempContainer[0]);
-      /* rearrange array if length at least 2 */
-      if(this->_structCommPartners[pos].u8RxQueueLength - 1 > 0)
-      {
-         this->_rearrangeTempContainerArray(pos,0);
-      }
-      this->_structCommPartners[pos].i8CurrTempcontainerPos--;
-   }
+   xQueueReset(bTxQueue ? this->_structCommPartners[pos].txQueue : this->_structCommPartners[pos].rxQueue);
 
-   this->_dataAllocator(this->_structCommPartners[pos].rxLineContainer,this->_structCommPartners[pos].tempContainer[++this->_structCommPartners[pos].i8CurrTempcontainerPos]);
-   this->_structCommPartners[pos].hasBufferedData = true;
-
-   if(this->_structCommPartners[pos].i8CurrTempcontainerPos+1 == this->_structCommPartners[pos].u8RxQueueLength)
-   {
-      this->_structCommPartners[pos].rxBufferFull = true;
-   }
-   #ifdef FRTTRANSCEIVER_ANALYTICS_ENABLE
-   this->_structCommPartners[pos].dataPackagesReceived++;
-   #endif
-   xSemaphoreGive(s);
+   
    return true;
 }
+
+
+
 bool FRTTransceiver::manualDeleteOldestAllocatedDatabufferForLine(FRTTransceiver_TaskHandle partner)
 {
-   return this->manualDeleteAllocatedDatabufferForLine(partner,0);
+   return this->manualDeleteAllocatedDatabufferForLine(partner,(eMultiSenderQueue)0,true,0);
 }
 bool FRTTransceiver::manualDeleteOldestAllocatedDatabufferForLine(eMultiSenderQueue multiSenderQueue)
 {
-   return this->manualDeleteAllocatedDatabufferForLine(multiSenderQueue,0);
+   return this->manualDeleteAllocatedDatabufferForLine(NULL,multiSenderQueue,false,0);
 }
 
-bool FRTTransceiver::manualDeleteNewestAllocatedDatabufferForLine(FRTTransceiver_TaskHandle partner)
+bool FRTTransceiver::manualDeleteNewestAllocatedDatabufferForLine(FRTTransceiver_TaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar)
 {
-   int pos = this->_getCommStruct(partner);
+   int pos = this->_getCommStruct(partner,multiSenderQueue,bUseTaskHandleVar);
 
    if(pos == -1)
    {
       return false;
    }
 
-   return this->manualDeleteAllocatedDatabufferForLine(partner,this->_structCommPartners[pos].i8CurrTempcontainerPos);
-}
-bool FRTTransceiver::manualDeleteNewestAllocatedDatabufferForLine(eMultiSenderQueue multiSenderQueue)
-{
-   int pos = this->_getCommStruct(multiSenderQueue);
-
-   if(pos == -1)
-   {
-      return false;
-   }
-
-   return this->manualDeleteAllocatedDatabufferForLine(multiSenderQueue,this->_structCommPartners[pos].i8CurrTempcontainerPos);
+   return this->manualDeleteAllocatedDatabufferForLine(partner,multiSenderQueue,bUseTaskHandleVar,this->_structCommPartners[pos].i8CurrTempcontainerPos);
 }
 
-bool FRTTransceiver::manualDeleteAllocatedDatabufferForLine(FRTTransceiver_TaskHandle partner,uint8_t u8PositionInBuffer)
+bool FRTTransceiver::manualDeleteAllocatedDatabufferForLine(FRTTransceiver_TaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar,uint8_t u8PositionInBuffer)
 {
    int pos;
-   if(!this->_hasDataInterpreters() || (pos = this->_getCommStruct(partner)) == -1)
-   {
-      return false;
-   }
-
-   if(this->_structCommPartners[pos].hasBufferedData && u8PositionInBuffer >= 0 && u8PositionInBuffer <= this->_structCommPartners[pos].i8CurrTempcontainerPos)
-   {
-      #ifdef LOG_INFO
-      log_i("Manually deleting allocated data");
-      #endif
-       
-      this->_dataDestroyer(this->_structCommPartners[pos].tempContainer[u8PositionInBuffer]);
-      
-      if(this->_structCommPartners[pos].i8CurrTempcontainerPos == 0)
-      {
-         this->_structCommPartners[pos].hasBufferedData = false;
-
-      }
-      else
-      {
-         this->_rearrangeTempContainerArray(pos,u8PositionInBuffer);
-         this->_structCommPartners[pos].i8CurrTempcontainerPos--;
-      }
-      this->_structCommPartners[pos].rxBufferFull = false;
-      return true;
-   }
-   return false;
-}
-
-bool FRTTransceiver::manualDeleteAllocatedDatabufferForLine(eMultiSenderQueue multiSenderQueue,uint8_t u8PositionInBuffer)
-{
-   int pos;
-   if(!this->_hasDataInterpreters() || (pos = this->_getCommStruct(multiSenderQueue)) == -1)
+   if(!this->_hasDataInterpreters() || (pos = this->_getCommStruct(partner,multiSenderQueue,bUseTaskHandleVar)) == -1)
    {
       return false;
    }
@@ -623,10 +545,10 @@ bool FRTTransceiver::manualDeleteAllocatedDatabufferForLine(eMultiSenderQueue mu
 }
 
 
-bool FRTTransceiver::manualDeleteAllAllocatedDatabuffersForLine(FRTTransceiver_TaskHandle partner)
+bool FRTTransceiver::manualDeleteAllAllocatedDatabuffersForLine(FRTTransceiver_TaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar)
 {
    int pos;
-   if(!this->_hasDataInterpreters() || (pos = this->_getCommStruct(partner) == -1))
+   if(!this->_hasDataInterpreters() || (pos = this->_getCommStruct(partner,multiSenderQueue,bUseTaskHandleVar) == -1))
    {
       return false;
    }
@@ -641,27 +563,7 @@ bool FRTTransceiver::manualDeleteAllAllocatedDatabuffersForLine(FRTTransceiver_T
       this->_structCommPartners[pos].rxBufferFull = false;
       this->_structCommPartners[pos].i8CurrTempcontainerPos = -1;
    }
-   return true;
-}
-
-bool FRTTransceiver::manualDeleteAllAllocatedDatabuffersForLine(eMultiSenderQueue multiSenderQueue)
-{
-   int pos;
-   if(!this->_hasDataInterpreters() || (pos = this->_getCommStruct(multiSenderQueue) == -1))
-   {
-      return false;
-   }
-
-   if(this->_structCommPartners[pos].hasBufferedData)
-   {
-      for(uint8_t u8I = 0;u8I <= this->_structCommPartners[pos].i8CurrTempcontainerPos;u8I++)
-      {
-         this->_dataDestroyer(this->_structCommPartners[pos].tempContainer[u8I]);
-      }
-      this->_structCommPartners[pos].hasBufferedData = false;
-      this->_structCommPartners[pos].rxBufferFull = false;
-      this->_structCommPartners[pos].i8CurrTempcontainerPos = -1;
-   }
+   
    return true;
 }
 
@@ -670,44 +572,41 @@ int FRTTransceiver::messagesOnQueue(FRTTransceiver_TaskHandle partner,bool bChec
 {
    int pos;
 
-   if((pos = this->_getCommStruct(partner)) == -1)
+   if((pos = this->_getCommStruct(partner,(eMultiSenderQueue)0,true)) == -1)
    {
       return -1;
    }
 
    FRTTransceiver_QueueHandle temp = (bCheckTxQueue ? this->_structCommPartners[pos].txQueue:this->_structCommPartners[pos].rxQueue);
-   
+   if(temp == NULL)
+   {
+      return -1;
+   }
+
    return this->_getAmountOfMessages(temp);
 }
 
 int FRTTransceiver::messagesOnQueue(eMultiSenderQueue multiSenderQueue)
 {
    int pos;
-
-   if((pos = this->_getCommStruct(multiSenderQueue)) == -1)
+   if((pos = this->_getCommStruct(NULL,multiSenderQueue,false)) == -1)
    {
       return -1;
    }
+
+   if(this->_structCommPartners[pos].rxQueue == NULL)
+   {
+      return -1;
+   }
+
    return this->_getAmountOfMessages(this->_structCommPartners[pos].rxQueue);
 }
 
-bool FRTTransceiver::hasDataFrom(FRTTransceiver_TaskHandle partner)
+bool FRTTransceiver::hasDataFrom(FRTTransceiver_TaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar)
 {
    int pos;
 
-   if((pos = this->_getCommStruct(partner)) == -1)
-   {
-      return false;
-   }
-
-   return this->_structCommPartners[pos].hasBufferedData;
-}
-
-bool FRTTransceiver::hasDataFrom(eMultiSenderQueue multiSenderQueue)
-{
-   int pos;
-
-   if((pos = this->_getCommStruct(multiSenderQueue)) == -1)
+   if((pos = this->_getCommStruct(partner,multiSenderQueue,bUseTaskHandleVar)) == -1)
    {
       return false;
    }
@@ -716,23 +615,11 @@ bool FRTTransceiver::hasDataFrom(eMultiSenderQueue multiSenderQueue)
 }
 
 
-int FRTTransceiver::amountOfBufferedDataFrom(FRTTransceiver_TaskHandle partner)
+int FRTTransceiver::amountOfBufferedDataFrom(FRTTransceiver_TaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar)
 {
    int pos;
 
-   if((pos = this->_getCommStruct(partner)) == -1)
-   {
-      return -1;
-   }
-
-   return (this->_structCommPartners[pos].hasBufferedData ? this->_structCommPartners[pos].i8CurrTempcontainerPos + 1:0);
-}
-
-int FRTTransceiver::amountOfBufferedDataFrom(eMultiSenderQueue eMultiSenderQueue)
-{
-   int pos;
-
-   if((pos = this->_getCommStruct(eMultiSenderQueue)) == -1)
+   if((pos = this->_getCommStruct(partner,multiSenderQueue,bUseTaskHandleVar)) == -1)
    {
       return -1;
    }
@@ -753,77 +640,55 @@ int FRTTransceiver::amountOfDataInAllBuffers()
 }
 
 
-int FRTTransceiver::_getCommStruct(FRTTransceiver_TaskHandle partner)
+int FRTTransceiver::_getCommStruct(FRTTransceiver_TaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar)
 {
-   if(!partner)
+   if(bUseTaskHandleVar)
    {
-      return -1;
-   }
-
-   for(int i = 0; i < this->_u8CurrCommPartners;i++)
-   {
-      if(this->_structCommPartners[i].commPartner == partner)
+      if(!partner)
       {
-         return i;
+         return -1;
       }
-   }
-   return -1;
-}
-int FRTTransceiver::_getCommStruct(eMultiSenderQueue multiSenderQueue)
-{
-   if(!(multiSenderQueue >= 0 && multiSenderQueue < this->_u8MultiSenderQueues))
-   {
-      return -1;
-   }
 
-   uint8_t counter = 0;
-
-   for(uint8_t u8I = 0; u8I < this->_u8CurrCommPartners;u8I++)
-   {
-      if(this->_structCommPartners[u8I].bReadOnlyQueue)
+      for(int i = 0; i < this->_u8CurrCommPartners;i++)
       {
-         if(multiSenderQueue == counter)
+         if(this->_structCommPartners[i].commPartner == partner)
          {
-            return u8I;
-         }
-         else
-         {
-            counter++;
+            return i;
          }
       }
+      return -1;
    }
-   return -1;
+   else
+   {
+      if(!(multiSenderQueue >= 0 && multiSenderQueue < this->_u8MultiSenderQueues))
+      {
+         return -1;
+      }
 
+      uint8_t counter = 0;
+
+      for(uint8_t u8I = 0; u8I < this->_u8CurrCommPartners;u8I++)
+      {
+         if(this->_structCommPartners[u8I].bReadOnlyQueue)
+         {
+            if(multiSenderQueue == counter)
+            {
+               return u8I;
+            }
+            else
+            {
+               counter++;
+            }
+         }
+      }
+      return -1;
+   }
 }
 
 /* returned amount of occurences of dtype u8Datatype in buffer*/
-int FRTTransceiver::checkIfDataTypeInBuffer(FRTTransceiver_TaskHandle partner,uint8_t u8Datatype)
+int FRTTransceiver::checkIfDataTypeInBuffer(FRTTransceiver_TaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar,uint8_t u8Datatype)
 {
-   int pos = this->_getCommStruct(partner);
-
-   if(pos == -1)
-   {
-      return -1;
-   }
-
-   int counter = 0;
-   if(this->_structCommPartners[pos].hasBufferedData)
-   {
-      for(uint8_t u8I = 0;u8I <= this->_structCommPartners[pos].i8CurrTempcontainerPos;u8I++)
-      {
-         if(this->_structCommPartners[pos].tempContainer[u8I].u8DataType == u8Datatype)
-         {
-            counter++;
-         }
-      }
-   }
-   
-   return counter;
-}
-
-int FRTTransceiver::checkIfDataTypeInBuffer(eMultiSenderQueue multiSenderQueue,uint8_t u8Datatype)
-{
-   int pos = this->_getCommStruct(multiSenderQueue);
+   int pos = this->_getCommStruct(partner,multiSenderQueue,bUseTaskHandleVar);
 
    if(pos == -1)
    {
@@ -846,24 +711,9 @@ int FRTTransceiver::checkIfDataTypeInBuffer(eMultiSenderQueue multiSenderQueue,u
 }
 
 /* get the tail of the buffer*/
-const TempDataContainer * FRTTransceiver::getNewestBufferedDataFrom(FRTTransceiver_TaskHandle partner)
+const TempDataContainer * FRTTransceiver::getNewestBufferedDataFrom(FRTTransceiver_TaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar)
 {
-   int pos = this->_getCommStruct(partner);
-
-   if(pos == -1)
-   {
-      return NULL;
-   }
-
-   if(this->_structCommPartners[pos].hasBufferedData)
-   {
-      return (const TempDataContainer *)&this->_structCommPartners[pos].tempContainer[this->_structCommPartners[pos].i8CurrTempcontainerPos];
-   }
-   return NULL;
-}
-const TempDataContainer * FRTTransceiver::getNewestBufferedDataFrom(eMultiSenderQueue multiSenderQueue)
-{
-   int pos = this->_getCommStruct(multiSenderQueue);
+   int pos = this->_getCommStruct(partner,multiSenderQueue,bUseTaskHandleVar);
 
    if(pos == -1)
    {
@@ -878,24 +728,9 @@ const TempDataContainer * FRTTransceiver::getNewestBufferedDataFrom(eMultiSender
 }
 
 /* get the head of the buffer */
-const TempDataContainer * FRTTransceiver::getOldestBufferedDataFrom(FRTTransceiver_TaskHandle partner)
+const TempDataContainer * FRTTransceiver::getOldestBufferedDataFrom(FRTTransceiver_TaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar)
 {
-   int pos = this->_getCommStruct(partner);
-
-   if(pos == -1)
-   {
-      return NULL;
-   }
-
-   if(this->_structCommPartners[pos].hasBufferedData)
-   {
-      return (const TempDataContainer *)&this->_structCommPartners[pos].tempContainer[0];
-   }
-   return NULL;
-}
-const TempDataContainer * FRTTransceiver::getOldestBufferedDataFrom(eMultiSenderQueue eMultiSenderQueue)
-{
-   int pos = this->_getCommStruct(eMultiSenderQueue);
+   int pos = this->_getCommStruct(partner,multiSenderQueue,bUseTaskHandleVar);
 
    if(pos == -1)
    {
@@ -909,9 +744,10 @@ const TempDataContainer * FRTTransceiver::getOldestBufferedDataFrom(eMultiSender
    return NULL;
 }
 
-const TempDataContainer * FRTTransceiver::getBufferedDataFrom(FRTTransceiver_TaskHandle partner, uint8_t u8PositionInBuffer)
+const TempDataContainer * FRTTransceiver::getBufferedDataFrom(FRTTransceiver_TaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar, 
+                                                                                                                                   uint8_t u8PositionInBuffer)
 {
-   int pos = this->_getCommStruct(partner);
+   int pos = this->_getCommStruct(partner,multiSenderQueue,bUseTaskHandleVar);
    
    if(pos == -1)
    {
@@ -925,24 +761,6 @@ const TempDataContainer * FRTTransceiver::getBufferedDataFrom(FRTTransceiver_Tas
    
    return NULL;
 }
-
-const TempDataContainer * FRTTransceiver::getBufferedDataFrom(eMultiSenderQueue multiSenderQueue, uint8_t u8PositionInBuffer)
-{
-   int pos = this->_getCommStruct(multiSenderQueue);
-   
-   if(pos == -1)
-   {
-      return NULL;
-   }
-
-   if(this->_structCommPartners[pos].hasBufferedData && u8PositionInBuffer >= 0 && u8PositionInBuffer <= this->_structCommPartners[pos].i8CurrTempcontainerPos)
-   {
-      return (const TempDataContainer *)&this->_structCommPartners[pos].tempContainer[u8PositionInBuffer];
-   }
-   
-   return NULL;
-}
-
 
 void FRTTransceiver::addDataAllocateCallback(void(*funcPointerCallback)(const DataContainerOnQueue &,TempDataContainer &))
 {
@@ -956,22 +774,11 @@ void FRTTransceiver::addDataFreeCallback(void (*funcPointerCallback)(TempDataCon
 }
 
 
-string FRTTransceiver::_getPartnersName(FRTTransceiver_TaskHandle partner)
+string FRTTransceiver::_getPartnersName(FRTTransceiver_TaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar)
 {
-   int pos = this->_getCommStruct(partner);
+   int pos = this->_getCommStruct(partner,multiSenderQueue,bUseTaskHandleVar);
 
    if(pos == -1)
-   {
-      return "";
-   }
-
-   return this->_structCommPartners[pos].partnersName;
-}
-
-string FRTTransceiver::_getPartnersName(eMultiSenderQueue multiSenderQueue)
-{
-   int pos;
-   if((pos = this->_getCommStruct(multiSenderQueue)) == -1)
    {
       return "";
    }
