@@ -526,7 +526,37 @@ bool FRTTransceiver::readFromQueue(eMultiSenderQueue multiSenderQueue,int blockT
    xSemaphoreGive(s);
    return true;
 }
+bool FRTTransceiver::manualDeleteOldestAllocatedDatabufferForLine(FRTTransceiver_TaskHandle partner)
+{
+   return this->manualDeleteAllocatedDatabufferForLine(partner,0);
+}
+bool FRTTransceiver::manualDeleteOldestAllocatedDatabufferForLine(eMultiSenderQueue multiSenderQueue)
+{
+   return this->manualDeleteAllocatedDatabufferForLine(multiSenderQueue,0);
+}
 
+bool FRTTransceiver::manualDeleteNewestAllocatedDatabufferForLine(FRTTransceiver_TaskHandle partner)
+{
+   int pos = this->_getCommStruct(partner);
+
+   if(pos == -1)
+   {
+      return false;
+   }
+
+   return this->manualDeleteAllocatedDatabufferForLine(partner,this->_structCommPartners[pos].i8CurrTempcontainerPos);
+}
+bool FRTTransceiver::manualDeleteNewestAllocatedDatabufferForLine(eMultiSenderQueue multiSenderQueue)
+{
+   int pos = this->_getCommStruct(multiSenderQueue);
+
+   if(pos == -1)
+   {
+      return false;
+   }
+
+   return this->manualDeleteAllocatedDatabufferForLine(multiSenderQueue,this->_structCommPartners[pos].i8CurrTempcontainerPos);
+}
 
 bool FRTTransceiver::manualDeleteAllocatedDatabufferForLine(FRTTransceiver_TaskHandle partner,uint8_t u8PositionInBuffer)
 {
@@ -764,6 +794,55 @@ int FRTTransceiver::_getCommStruct(eMultiSenderQueue multiSenderQueue)
    }
    return -1;
 
+}
+
+/* returned amount of occurences of dtype u8Datatype in buffer*/
+int FRTTransceiver::checkIfDataTypeInBuffer(FRTTransceiver_TaskHandle partner,uint8_t u8Datatype)
+{
+   int pos = this->_getCommStruct(partner);
+
+   if(pos == -1)
+   {
+      return -1;
+   }
+
+   int counter = 0;
+   if(this->_structCommPartners[pos].hasBufferedData)
+   {
+      for(uint8_t u8I = 0;u8I <= this->_structCommPartners[pos].i8CurrTempcontainerPos;u8I++)
+      {
+         if(this->_structCommPartners[pos].tempContainer[u8I].u8DataType == u8Datatype)
+         {
+            counter++;
+         }
+      }
+   }
+   
+   return counter;
+}
+
+int FRTTransceiver::checkIfDataTypeInBuffer(eMultiSenderQueue multiSenderQueue,uint8_t u8Datatype)
+{
+   int pos = this->_getCommStruct(multiSenderQueue);
+
+   if(pos == -1)
+   {
+      return -1;
+   }
+
+   int counter = 0;
+   if(this->_structCommPartners[pos].hasBufferedData)
+   {
+      for(uint8_t u8I = 0;u8I <= this->_structCommPartners[pos].i8CurrTempcontainerPos;u8I++)
+      {
+         if(this->_structCommPartners[pos].tempContainer[u8I].u8DataType == u8Datatype)
+         {
+            counter++;
+         }
+      }
+   }
+   
+   return counter;
 }
 
 /* get the tail of the buffer*/

@@ -75,6 +75,18 @@ class FRTTransceiver
       bool manualDeleteAllocatedDatabufferForLine(FRTTransceiver_TaskHandle partner,uint8_t u8PositionInBuffer);
       bool manualDeleteAllocatedDatabufferForLine(eMultiSenderQueue multiSenderQueue,uint8_t u8PositionInBuffer);
 
+      /**
+       * 
+       *       [Pos 0][Pos 1][].....[][currentContainerPos][][][Pos N]
+       *          |                            |
+       *          |___-> oldest data           |___-> newest data
+       *          
+      */
+      bool manualDeleteOldestAllocatedDatabufferForLine(FRTTransceiver_TaskHandle partner);
+      bool manualDeleteOldestAllocatedDatabufferForLine(eMultiSenderQueue multiSenderQueue);
+      bool manualDeleteNewestAllocatedDatabufferForLine(FRTTransceiver_TaskHandle partner);
+      bool manualDeleteNewestAllocatedDatabufferForLine(eMultiSenderQueue multiSenderQueue);
+
       bool manualDeleteAllAllocatedDatabuffersForLine(FRTTransceiver_TaskHandle partner);
       bool manualDeleteAllAllocatedDatabuffersForLine(eMultiSenderQueue multiSenderQueue);
       /* -----------------------    */
@@ -87,6 +99,9 @@ class FRTTransceiver
       int amountOfBufferedDataFrom(FRTTransceiver_TaskHandle partner);
       int amountOfBufferedDataFrom(eMultiSenderQueue eMultiSenderQueue);
       int amountOfDataInAllBuffers();
+
+      int checkIfDataTypeInBuffer(FRTTransceiver_TaskHandle partner,uint8_t u8Datatype);
+      int checkIfDataTypeInBuffer(eMultiSenderQueue multiSenderQueue,uint8_t u8Datatype);
 
       /* Read received data         */
       const TempDataContainer * getNewestBufferedDataFrom(FRTTransceiver_TaskHandle partner);
