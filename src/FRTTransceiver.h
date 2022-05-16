@@ -80,7 +80,7 @@ class FRTTransceiver
       /* -----------------------    */
 
 
-      int messagesOnQueue(FRTTransceiver_TaskHandle partner);
+      int messagesOnQueue(FRTTransceiver_TaskHandle partner, bool bCheckTxQueue);
       int messagesOnQueue(eMultiSenderQueue multiSenderQueue);
       bool hasDataFrom(FRTTransceiver_TaskHandle partner);
       bool hasDataFrom(eMultiSenderQueue multiSenderQueue);

@@ -636,7 +636,7 @@ bool FRTTransceiver::manualDeleteAllAllocatedDatabuffersForLine(eMultiSenderQueu
 }
 
 
-int FRTTransceiver::messagesOnQueue(FRTTransceiver_TaskHandle partner)
+int FRTTransceiver::messagesOnQueue(FRTTransceiver_TaskHandle partner,bool bCheckTxQueue)
 {
    int pos;
 
@@ -644,7 +644,10 @@ int FRTTransceiver::messagesOnQueue(FRTTransceiver_TaskHandle partner)
    {
       return -1;
    }
-   return this->_getAmountOfMessages(this->_structCommPartners[pos].rxQueue);
+
+   FRTTransceiver_QueueHandle temp = (bCheckTxQueue ? this->_structCommPartners[pos].txQueue:this->_structCommPartners[pos].rxQueue);
+   
+   return this->_getAmountOfMessages(temp);
 }
 
 int FRTTransceiver::messagesOnQueue(eMultiSenderQueue multiSenderQueue)
