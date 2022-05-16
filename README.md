@@ -39,6 +39,7 @@ A modular C++ library to simplify the use of FreeRtos inter-task communication.
   - TBA
 
 - Threadsafe
+  - Semaphores for each communication queue
 
 # Supported Devices
 
