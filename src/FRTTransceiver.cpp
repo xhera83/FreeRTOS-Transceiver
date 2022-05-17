@@ -834,7 +834,15 @@ void FRTTransceiver::printCommunicationsSummary()
       log_i("Line [%d]",u8I+1);
       log_i("\tName                    \t\t%s\n",this->_structCommPartners[u8I].partnersName.length() == 0 ? FRTTRANSCEIVER_UNKNOWNNAME : this->_structCommPartners[u8I].partnersName.c_str());
       log_i("\tAddress                 \t\t%p\n",this->_structCommPartners[u8I].commPartner == NULL ? FRTTRANSCEIVER_UNKNOWNADDRESS : this->_structCommPartners[u8I].commPartner);
-      log_i("\tComm-Type               \t\t%s\n",this->_structCommPartners[u8I].bReadOnlyQueue ? FRTTRANSCEIVER_COMMTYPE2:FRTTRANSCEIVER_COMMTYPE1);
+
+      if(!this->_structCommPartners[u8I].bReadOnlyQueue)
+      {
+         log_i("\tComm-Type               \t\t%s\n",this->_ownerAddress == this->_structCommPartners[u8I].commPartner ? FRTTRANSCEIVER_COMMTYPE3:FRTTRANSCEIVER_COMMTYPE1);
+      }
+      else
+      {
+         log_i("\tComm-Type               \t\t%s\n",FRTTRANSCEIVER_COMMTYPE1);
+      }
       log_i("\tTX-LINE                 \t\t%s\n",this->_structCommPartners[u8I].txQueue == NULL ? "OFF":"ON");
       log_i("\t\tLength                %d\n",this->_structCommPartners[u8I].u8TxQueueLength);
       log_i("\tRX-LINE                 \t\t%s\n",this->_structCommPartners[u8I].rxQueue == NULL ? "OFF":"ON");

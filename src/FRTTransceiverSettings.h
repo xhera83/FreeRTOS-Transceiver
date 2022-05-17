@@ -27,6 +27,8 @@
 
 #define FRTTRANSCEIVER_COMMTYPE1                      ("NORMAL COMMUNICATION (READ & WRITE)")
 #define FRTTRANSCEIVER_COMMTYPE2                      ("MULTISENDER QUEUE (READONLY)")
+#define FRTTRANSCEIVER_COMMTYPE3                      ("ECHO")
+
 #define FRTTRANSCEIVER_UNKNOWNADDRESS                 (0x00000000)
 #define FRTTRANSCEIVER_UNKNOWNNAME                    ("UKNOWN NAME")
 #endif
