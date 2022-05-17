@@ -31,8 +31,8 @@ FRTTransceiver_SemaphoreHandle SEMAPHORE_MOTOR;
 FRTTransceiver_SemaphoreHandle SEMAPHORE_UART;
 FRTTransceiver_SemaphoreHandle SEMAPHORE_SENSOR;
 
-#define QUEUELENGTH_MULTISENDERQ        (2u)
-#define QUEUELENGTH_GENERAL             (1u)
+#define QUEUELENGTH_MULTISENDERQ        (2u)    // multi-sender queuelength
+#define QUEUELENGTH_GENERAL             (1u)    // queuelength of all other queues
 
 #define COMMAND_SEND                    (0u)    // send current stored values
 #define COMMAND_REFRESHDATA             (1u)    // read new values from uart|motor|sensor

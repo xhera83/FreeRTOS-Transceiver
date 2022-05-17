@@ -10,6 +10,18 @@
  *                  - Unidirectional communication
  *                  - RECEIVER_TASK also reads u32AdditionalData to check when to stop itself
  *                  - Both Queues have length 1
+ * 
+ *  
+ *              "WIRING":
+ * 
+ * 
+ *                      ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄                                     ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+ *                      █                █         → DATA                      █                      █
+ *                      █    SENDER      █═════════════════════════════════════█       RECEIVER       █
+ *                      █                █                                     █                      █
+ *                      █▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄█                                     █▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄█
+ * 
+ * 
  *                    
  * \author      Xhemail Ramabaja (x.ramabaja@outlook.de)
  */

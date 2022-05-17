@@ -11,7 +11,19 @@
  *                  - Muliple datatypes the same time on one queue
  *                  - Check if datatype in buffer
  *                  - Flush buffer
- *                    
+ * 
+ * 
+ * 
+ *              "WIRING":
+ * 
+ * 
+ *                      ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄                                     ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+ *                      █                █         → DATA                      █                      █
+ *                      █    SENDER      █═════════════════════════════════════█       RECEIVER       █
+ *                      █                █                                     █                      █
+ *                      █▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄█                                     █▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄█
+ * 
+ *               
  * \author      Xhemail Ramabaja (x.ramabaja@outlook.de)
  */
 

@@ -7,9 +7,26 @@
  *                  - Reading/Writing to/from a queue
  *                  - Checking how many messages on queue or in the buffer
  *                  - Reading/deleting buffered data
- *                  - "Bidirectional" communication
- *                  - Echo communication
+ *                  - "Bidirectional" communication / Echo communication
  *                  - Flush buffer
+ * 
+ * 
+ *              "WIRING":
+ * 
+ * 
+ * 
+ *                                          ←→ DATA
+ *                             ╔════════════════════════════════════╗
+ *                             ║                                    ║
+ *                             ║                                    ║
+ *                  ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄                           ║
+ *                  █                   █                           ║
+ *                  █    ECHO TASK      █═══════════════════════════╝
+ *                  █                   █
+ *                  █▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄█
+ * 
+ * 
+ * 
  *                    
  * \author      Xhemail Ramabaja (x.ramabaja@outlook.de)
  */
