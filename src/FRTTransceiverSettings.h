@@ -16,7 +16,7 @@
  * Keep it as small as possible to save memory (only sizes > 0 valid) 
  * 
  */ 
-#define FRTTRANSCEIVER_MAXELEMENTSIZEONQUEUE          (4u)
+#define FRTTRANSCEIVER_MAXELEMENTSIZEONQUEUE          (2u)
 
 #define FRTTRANSCEIVER_DEFAULTPARTNERNAME             ("UNKNOWN NAME") 
 #define FRTTRANSCEIVER_MULTISENDERDEFAULTPARTNERNAME  ("MULTISENDER-QUEUE")
@@ -50,15 +50,15 @@
 enum eMultiSenderQueue 
 {
       eNOMULTIQSELECTED   = -1,
-      eMULTISENDERQ0 = 1,
-      eMULTISENDERQ1 = 2,
-      eMULTISENDERQ2 = 3,
-      eMULTISENDERQ3 = 4,
-      eMULTISENDERQ4 = 5,
-      eMULTISENDERQ5 = 6,
-      eMULTISENDERQ6 = 7,
-      eMULTISENDERQ7 = 8,
-      eMULTISENDERQ8 = 9
+      eMULTISENDERQ0 = 0,
+      eMULTISENDERQ1 = 1,
+      eMULTISENDERQ2 = 2,
+      eMULTISENDERQ3 = 3,
+      eMULTISENDERQ4 = 4,
+      eMULTISENDERQ5 = 5,
+      eMULTISENDERQ6 = 6,
+      eMULTISENDERQ7 = 7,
+      eMULTISENDERQ8 = 8
 };
 
 #endif

@@ -841,7 +841,7 @@ void FRTTransceiver::printCommunicationsSummary()
       }
       else
       {
-         log_i("\tComm-Type               \t\t%s\n",FRTTRANSCEIVER_COMMTYPE1);
+         log_i("\tComm-Type               \t\t%s\n",FRTTRANSCEIVER_COMMTYPE2);
       }
       log_i("\tTX-LINE                 \t\t%s\n",this->_structCommPartners[u8I].txQueue == NULL ? "OFF":"ON");
       log_i("\t\tLength                %d\n",this->_structCommPartners[u8I].u8TxQueueLength);
