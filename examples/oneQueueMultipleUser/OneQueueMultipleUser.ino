@@ -218,10 +218,10 @@ void setup() {
     log_i("Setup() running.\n\n");
     disableCore0WDT();
     
-    MULTISENDERQ = FRTTransceiver_CreateQueue(QUEUELENGTH_MULTISENDERQ,sizeof(struct FRTTransceiver_DataContainerOnQueue));
-    QUEUE_TO_MOTOR = FRTTransceiver_CreateQueue(QUEUELENGTH_GENERAL,sizeof(struct FRTTransceiver_DataContainerOnQueue));
-    QUEUE_TO_UART = FRTTransceiver_CreateQueue(QUEUELENGTH_GENERAL,sizeof(struct FRTTransceiver_DataContainerOnQueue));
-    QUEUE_TO_SENSOR = FRTTransceiver_CreateQueue(QUEUELENGTH_GENERAL,sizeof(struct FRTTransceiver_DataContainerOnQueue));
+    MULTISENDERQ = FRTTransceiver_CreateQueue(QUEUELENGTH_MULTISENDERQ);
+    QUEUE_TO_MOTOR = FRTTransceiver_CreateQueue(QUEUELENGTH_GENERAL);
+    QUEUE_TO_UART = FRTTransceiver_CreateQueue(QUEUELENGTH_GENERAL);
+    QUEUE_TO_SENSOR = FRTTransceiver_CreateQueue(QUEUELENGTH_GENERAL);
     
     SEMAPHORE_MULTIQ = FRTTransceiver_CreateSemaphore();
     SEMAPHORE_MOTOR = FRTTransceiver_CreateSemaphore();

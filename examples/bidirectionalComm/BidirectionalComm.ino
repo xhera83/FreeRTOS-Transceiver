@@ -181,8 +181,8 @@ void setup() {
     log_i("Setup() running.\n\n");
     disableCore0WDT();
 
-    QUEUE_TO_RECEIVER = FRTTransceiver_CreateQueue(QUEUELENGTH,sizeof(struct FRTTransceiver_DataContainerOnQueue));
-    QUEUE_FROM_RECEIVER = FRTTransceiver_CreateQueue(QUEUELENGTH,sizeof(struct FRTTransceiver_DataContainerOnQueue));
+    QUEUE_TO_RECEIVER = FRTTransceiver_CreateQueue(QUEUELENGTH);
+    QUEUE_FROM_RECEIVER = FRTTransceiver_CreateQueue(QUEUELENGTH);
 
     SEMAPHORE1 = FRTTransceiver_CreateSemaphore();
     SEMAPHORE2 = FRTTransceiver_CreateSemaphore();

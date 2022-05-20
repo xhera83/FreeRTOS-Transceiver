@@ -9,7 +9,7 @@
 
 //#define LOG_INFO
 
-FRTTransceiver_QueueHandle FRTTransceiver_CreateQueue(FRTTransceiver_BaseType lengthOfQueue,FRTTransceiver_BaseType elementSize)
+FRTTransceiver_QueueHandle FRTTransceiver_CreateQueue(FRTTransceiver_BaseType lengthOfQueue)
 {
 
    if(lengthOfQueue <= 0 || lengthOfQueue > FRTTRANSCEIVER_MAXELEMENTSIZEONQUEUE)
@@ -20,7 +20,7 @@ FRTTransceiver_QueueHandle FRTTransceiver_CreateQueue(FRTTransceiver_BaseType le
       return NULL;
    }
 
-   FRTTransceiver_QueueHandle queue = xQueueCreate(lengthOfQueue,elementSize);
+   FRTTransceiver_QueueHandle queue = xQueueCreate(lengthOfQueue,sizeof(struct FRTTransceiver_DataContainerOnQueue));
 
    if(!queue)
    {

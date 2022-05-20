@@ -19,10 +19,9 @@ using namespace std;
 /*! 
  * \brief                       Creates a queue
  * \param   lengthOfQueue       Holds the desired queuelength
- * \param   elementSize         Size of one item on the queue
  * \return                      ::FRTTransceiver_QueueHandle or NULL                                      
 */
-FRTTransceiver_QueueHandle FRTTransceiver_CreateQueue(FRTTransceiver_BaseType lengthOfQueue,FRTTransceiver_BaseType elementSize);
+FRTTransceiver_QueueHandle FRTTransceiver_CreateQueue(FRTTransceiver_BaseType lengthOfQueue);
 /*! 
  * \brief                       Creates a semaphore
  * \return                      Address to the semaphore or NULL
