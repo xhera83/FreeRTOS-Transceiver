@@ -32,7 +32,7 @@ FRTTransceiver_SemaphoreHandle SEMAPHORE2;
 #define COMMAND_TURNLEDOFF       (3u)
 
 
-void dataAllocator (const DataContainerOnQueue & origingalContainer_onQueue ,TempDataContainer & internalBuffer){
+void dataAllocator (const FRTTransceiver_DataContainerOnQueue & origingalContainer_onQueue ,FRTTransceiver_TempDataContainer & internalBuffer){
 
     /**
      *      In order to use the library in its current version you need to supply both a
@@ -68,7 +68,7 @@ void dataAllocator (const DataContainerOnQueue & origingalContainer_onQueue ,Tem
     }
 }
 
-void dataDestroyer(TempDataContainer & internalBuffer) {
+void dataDestroyer(FRTTransceiver_TempDataContainer & internalBuffer) {
 
     /**
      *      In order to use the library in its current version you need to supply both a

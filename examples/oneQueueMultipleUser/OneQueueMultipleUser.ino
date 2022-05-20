@@ -107,7 +107,7 @@ void Master(void *)
             if(res)
             {   
                 u8PackagesReceived++;
-                const TempDataContainer * t = comm.getOldestBufferedDataFrom(NULL,eMULTISENDERQ0,false);
+                const FRTTransceiver_TempDataContainer * t = comm.getOldestBufferedDataFrom(NULL,eMULTISENDERQ0,false);
 
                 if(t != NULL)
                 {   
@@ -218,10 +218,10 @@ void setup() {
     log_i("Setup() running.\n\n");
     disableCore0WDT();
     
-    MULTISENDERQ = FRTTransceiver_CreateQueue(QUEUELENGTH_MULTISENDERQ,sizeof(struct DataContainerOnQueue));
-    QUEUE_TO_MOTOR = FRTTransceiver_CreateQueue(QUEUELENGTH_GENERAL,sizeof(struct DataContainerOnQueue));
-    QUEUE_TO_UART = FRTTransceiver_CreateQueue(QUEUELENGTH_GENERAL,sizeof(struct DataContainerOnQueue));
-    QUEUE_TO_SENSOR = FRTTransceiver_CreateQueue(QUEUELENGTH_GENERAL,sizeof(struct DataContainerOnQueue));
+    MULTISENDERQ = FRTTransceiver_CreateQueue(QUEUELENGTH_MULTISENDERQ,sizeof(struct FRTTransceiver_DataContainerOnQueue));
+    QUEUE_TO_MOTOR = FRTTransceiver_CreateQueue(QUEUELENGTH_GENERAL,sizeof(struct FRTTransceiver_DataContainerOnQueue));
+    QUEUE_TO_UART = FRTTransceiver_CreateQueue(QUEUELENGTH_GENERAL,sizeof(struct FRTTransceiver_DataContainerOnQueue));
+    QUEUE_TO_SENSOR = FRTTransceiver_CreateQueue(QUEUELENGTH_GENERAL,sizeof(struct FRTTransceiver_DataContainerOnQueue));
     
     SEMAPHORE_MULTIQ = FRTTransceiver_CreateSemaphore();
     SEMAPHORE_MOTOR = FRTTransceiver_CreateSemaphore();

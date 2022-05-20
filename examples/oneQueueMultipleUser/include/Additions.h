@@ -42,7 +42,7 @@ FRTTransceiver_SemaphoreHandle SEMAPHORE_SENSOR;
 #define SLEEP_MS                        (1200u)
 #define COMMANDS                        (15u)
 
-void dataAllocator (const DataContainerOnQueue & origingalContainer_onQueue ,TempDataContainer & internalBuffer){
+void dataAllocator (const FRTTransceiver_DataContainerOnQueue & origingalContainer_onQueue ,FRTTransceiver_TempDataContainer & internalBuffer){
 
     /**
      *      In order to use the library in its current version you need to supply both a
@@ -68,7 +68,7 @@ void dataAllocator (const DataContainerOnQueue & origingalContainer_onQueue ,Tem
     internalBuffer.data = origingalContainer_onQueue.data;
 }
 
-void dataDestroyer(TempDataContainer & internalBuffer) {
+void dataDestroyer(FRTTransceiver_TempDataContainer & internalBuffer) {
 
     /**
      *      In order to use the library in its current version you need to supply both a
@@ -117,7 +117,7 @@ void handleSlaveWork(FRTTransceiver * comm,int * buffer,uint8_t u8Length,FRTTran
         bool res = comm->readFromQueue(partnertask,eNOMULTIQSELECTED,true,FRTTRANSCEIVER_WAITMAX,FRTTRANSCEIVER_WAITMAX);
         if(res)
         {   
-            const TempDataContainer * t = comm->getOldestBufferedDataFrom(partnertask,eNOMULTIQSELECTED,true);
+            const FRTTransceiver_TempDataContainer * t = comm->getOldestBufferedDataFrom(partnertask,eNOMULTIQSELECTED,true);
 
             if(t != NULL)
             {

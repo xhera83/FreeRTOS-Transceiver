@@ -30,7 +30,7 @@
 #include <Arduino.h>
 #include <include/Additions.h>
 
-void dataAllocator (const DataContainerOnQueue & origingalContainer_onQueue ,TempDataContainer & internalBuffer){
+void dataAllocator (const FRTTransceiver_DataContainerOnQueue & origingalContainer_onQueue ,FRTTransceiver_TempDataContainer & internalBuffer){
 
     /**
      *      In order to use the library in its current version you need to supply both a
@@ -56,7 +56,7 @@ void dataAllocator (const DataContainerOnQueue & origingalContainer_onQueue ,Tem
     internalBuffer.data = origingalContainer_onQueue.data;
 }
 
-void dataDestroyer(TempDataContainer & internalBuffer) {
+void dataDestroyer(FRTTransceiver_TempDataContainer & internalBuffer) {
 
     /**
      *      In order to use the library in its current version you need to supply both a
@@ -148,9 +148,9 @@ void RECEIVER(void *)
             if(res1 && res2 && res3)
             {
                 log_i("All data read into internal buffers");
-                const TempDataContainer * t1 = comm.getBufferedDataFrom(TASK_SENDER,eNOMULTIQSELECTED,true,0);
-                const TempDataContainer * t2 = comm.getBufferedDataFrom(TASK_SENDER,eNOMULTIQSELECTED,true,1);
-                const TempDataContainer * t3 = comm.getBufferedDataFrom(TASK_SENDER,eNOMULTIQSELECTED,true,2);
+                const FRTTransceiver_TempDataContainer * t1 = comm.getBufferedDataFrom(TASK_SENDER,eNOMULTIQSELECTED,true,0);
+                const FRTTransceiver_TempDataContainer * t2 = comm.getBufferedDataFrom(TASK_SENDER,eNOMULTIQSELECTED,true,1);
+                const FRTTransceiver_TempDataContainer * t3 = comm.getBufferedDataFrom(TASK_SENDER,eNOMULTIQSELECTED,true,2);
                 
                 if(t1 && t2 && t3)
                 {
@@ -185,7 +185,7 @@ void setup() {
     log_i("Setup() running.\n\n");
     disableCore0WDT();
 
-    QUEUE_TO_RECEIVER = FRTTransceiver_CreateQueue(QUEUELENGTH,sizeof(struct DataContainerOnQueue));
+    QUEUE_TO_RECEIVER = FRTTransceiver_CreateQueue(QUEUELENGTH,sizeof(struct FRTTransceiver_DataContainerOnQueue));
 
     SEMAPHORE1 = FRTTransceiver_CreateSemaphore();
 

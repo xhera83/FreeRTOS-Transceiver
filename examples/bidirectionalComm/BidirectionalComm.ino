@@ -72,7 +72,7 @@ void SENDER(void *)
 
             if(retVal && comm.hasDataFrom(TASK_RECEIVER,eNOMULTIQSELECTED,true))
             {
-                const TempDataContainer * t = comm.getNewestBufferedDataFrom(TASK_RECEIVER,eNOMULTIQSELECTED,true);
+                const FRTTransceiver_TempDataContainer * t = comm.getNewestBufferedDataFrom(TASK_RECEIVER,eNOMULTIQSELECTED,true);
                 
                 if(t != NULL)
                 {
@@ -133,7 +133,7 @@ void RECEIVER(void *)
 
             if(retVal && comm.hasDataFrom(TASK_SENDER,eNOMULTIQSELECTED,true))
             {
-                const TempDataContainer * t = comm.getNewestBufferedDataFrom(TASK_SENDER,eNOMULTIQSELECTED,true);
+                const FRTTransceiver_TempDataContainer * t = comm.getNewestBufferedDataFrom(TASK_SENDER,eNOMULTIQSELECTED,true);
                 
                 if(t != NULL)
                 {
@@ -181,8 +181,8 @@ void setup() {
     log_i("Setup() running.\n\n");
     disableCore0WDT();
 
-    QUEUE_TO_RECEIVER = FRTTransceiver_CreateQueue(QUEUELENGTH,sizeof(struct DataContainerOnQueue));
-    QUEUE_FROM_RECEIVER = FRTTransceiver_CreateQueue(QUEUELENGTH,sizeof(struct DataContainerOnQueue));
+    QUEUE_TO_RECEIVER = FRTTransceiver_CreateQueue(QUEUELENGTH,sizeof(struct FRTTransceiver_DataContainerOnQueue));
+    QUEUE_FROM_RECEIVER = FRTTransceiver_CreateQueue(QUEUELENGTH,sizeof(struct FRTTransceiver_DataContainerOnQueue));
 
     SEMAPHORE1 = FRTTransceiver_CreateSemaphore();
     SEMAPHORE2 = FRTTransceiver_CreateSemaphore();

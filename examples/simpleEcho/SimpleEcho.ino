@@ -81,7 +81,7 @@ void setup() {
     log_i("Setup() running.\n\n");
     disableCore0WDT();
 
-    ECHO_QUEUE = FRTTransceiver_CreateQueue(QUEUELENGTH,sizeof(struct DataContainerOnQueue));
+    ECHO_QUEUE = FRTTransceiver_CreateQueue(QUEUELENGTH,sizeof(struct FRTTransceiver_DataContainerOnQueue));
 
     SEMAPHORE1 = FRTTransceiver_CreateSemaphore();
 

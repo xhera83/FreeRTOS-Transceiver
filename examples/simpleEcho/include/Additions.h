@@ -22,7 +22,7 @@ FRTTransceiver_SemaphoreHandle SEMAPHORE1; /* In this example just neccessary be
 
 #define QUEUELENGTH  (1u)
 
-void dataAllocator (const DataContainerOnQueue & origingalContainer_onQueue ,TempDataContainer & internalBuffer){
+void dataAllocator (const FRTTransceiver_DataContainerOnQueue & origingalContainer_onQueue ,FRTTransceiver_TempDataContainer & internalBuffer){
 
     /**
      *      In order to use the library in its current version you need to supply both a
@@ -48,7 +48,7 @@ void dataAllocator (const DataContainerOnQueue & origingalContainer_onQueue ,Tem
     internalBuffer.data = origingalContainer_onQueue.data;
 }
 
-void dataDestroyer(TempDataContainer & internalBuffer) {
+void dataDestroyer(FRTTransceiver_TempDataContainer & internalBuffer) {
 
     /**
      *      In order to use the library in its current version you need to supply both a
