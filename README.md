@@ -169,33 +169,48 @@ Now with this setup you can proceed to write to 'TASK2' and read from 'TASK1'. P
 - Passing data over the queue  
   - Sending data to every possible task
   - Simultaneous transmission of x different datatypes (over the same queue)
-  - Simultaneous transmission of x different datatypes to y different queues
+  - Simultaneous transmission of x different datatypes to y different queues (databroadcast)
   
 - Receiving data over the queue  
   - Receiving data sent by any task in the system
 
-- Formatted representation regarding information about the connection with other tasks  
-  - Amount of communication partners
-  - Amount of tx-lines connected (outgoing data)
-  - Amount of rx-lines connected (incoming data)
+- Formatted representation of details regarding all connections to other tasks
+  - Address of the owner task
+  - Maximum possible connections
+  - Amount of current normal connections to partner tasks
+  - Amount of current multi-sender-queue connections
+  - Info whether neccessary callbacks are supplied by the user
+  - Amount of databroadcasts carried out
+  - Informations for each connection
+    - Name of the communication partner
+    - Address of the communication partner
+    - Communication type (Normal, Multi-Sender-Queue, Echo)
+    - Information whether tx/rx queues are ON or OFF
+    - Length of tx/rx queues
+    - Amount of datapackages sent
+    - Amount of datapackages received
+    - Information if buffered data available
 
-- A single queue can be used by multiple tasks
-  - Adressing data by supplying the target-taskhandle
+- A single queue can be used by multiple tasks (Multi-Sender-Queue)
+  - Tasks add their task handle as a "source"
   - 1...n transmitter of data
-  - 1...n receiver of data
+  - Multi-Sender-Queue connections are read only. It is not possible to add a tx queue to this connection.
 
-- Queue manipulation  
-  - Check if datatype x available on queue y
-  - Removing an element  
-    - Removing the x. element from queue y
-    - Removing the oldest element x from queue y
-    - Flushing the queue
-    - ...
+- Queue/Buffer manipulation  
+  - Check if datatype x available in buffer
+  - Removing an element in buffer  
+    - Removing the x. element from buffer
+    - Removing the oldest element from buffer
+    - Removing the newest element from buffer
+    - Buffer flush
+  - Queue Flush
 
 - Task notification functionality  
-  - TBA
+  - TBA. Is planned
 
-- Threadsafe
+- Secure access to data
+  - Maximum of 2 semaphores per connection. One for the tx queue, one for the rx queue.
+  - Threadsafe
 
 # Supported Devices
 
