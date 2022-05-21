@@ -1,6 +1,6 @@
 {
       "name": "FreeRTOS-TransceiverV1",
-	  "version":"1.0.1",
+	  "version":"1.0.2",
       "keywords": "esp32,esp8266,freertos,arduino-framework,arduino,queue,task,inter-task-communication,data,master-slave",
       "description": "A C++ library to simplify the use of FreeRTOS inter-task communication.",
       "repository":
@@ -15,6 +15,6 @@
       },
 	  "license":"Apache-2.0",
 	  "frameworks": ["arduino"],
-	  "platforms": ["espressif32","espressif8266"],
+	  "platforms": ["espressif32","espressif8266"]
 
 }
