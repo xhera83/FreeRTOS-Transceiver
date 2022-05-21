@@ -5,7 +5,7 @@
  * \file       FRTTransceiverSettings.h
  * \brief      Configuration file for the FreeRTOS-Transceiver library
  * \author     Xhemail Ramabaja (x.ramabaja@outlook.de)
- * \copyright  Copyright [2022] [Xhemail Ramabaja]
+ * \copyright  Copyright 2022 Xhemail Ramabaja
  *
  */
 

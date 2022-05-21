@@ -5,7 +5,7 @@
  * \file       FRTTransceiver.h
  * \brief      Class definition headerfile
  * \author     Xhemail Ramabaja (x.ramabaja@outlook.de)
- * \copyright  Copyright [2022] [Xhemail Ramabaja]
+ * \copyright  Copyright 2022 Xhemail Ramabaja
  */
 
 

@@ -2,7 +2,7 @@
  * \file       FRTTransceiver.cpp
  * \brief      Transceiver class methods implementation
  * \author     Xhemail Ramabaja (x.ramabaja@outlook.de)
- * \copyright  Copyright [2022] [Xhemail Ramabaja]
+ * \copyright  Copyright 2022 Xhemail Ramabaja
  */
 
 #include <FRTTransceiver.h>

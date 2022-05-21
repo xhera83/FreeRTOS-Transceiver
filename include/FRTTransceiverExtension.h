@@ -4,7 +4,7 @@
  * \file       FRTTransceiverExtension.h
  * \brief      Extends the library to important structures, defines and variable types
  * \author     Xhemail Ramabaja (x.ramabaja@outlook.de)
- * \copyright  Copyright [2022] [Xhemail Ramabaja]
+ * \copyright  Copyright 2022 Xhemail Ramabaja
  *
  */
 
