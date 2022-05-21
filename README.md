@@ -30,7 +30,7 @@ Following points particularly struck me:
 The FreeRTOS-Transceiver C++ library simplifies the use of FreeRTOS inter-task communication and encapsulates related queues (tx/rx) to one communication line.<br>
 
 ### General overview <a name="generalOverview"></a> 
-![FreeRTOS-TransceiverBlockdiagram](https://github.com/xhera83/FreeRTOS-Transceiver/blob/release/documentation/diagrams/FreeRTOS-TransceiverBlockdiagram.JPG?raw=true) *Example inter-task communication setup with FreeRTOS-Transceiver*
+![FreeRTOS-TransceiverBlockdiagram](https://github.com/xhera83/FreeRTOS-Transceiver/blob/main/documentation/diagrams/FreeRTOS-TransceiverBlockdiagram.JPG?raw=true) *Example inter-task communication setup with FreeRTOS-Transceiver*
 
 This blockdiagram shows an example of how a possible FreeRTOS-Transceiver setup could look like. We have a normal communication between 'Task A' and 'Task_Data_1'. Normal, because the communication line is only used by two tasks. 'Task A' and 'Task_Data_1' are set up this way, so that a bidirectional communication is possible. Leaving one of the queues out could change it to a unidirectional one. Ultimately it is up to the developer what kind of communication is needed.
 
@@ -45,7 +45,7 @@ There is also a multi-sender-queue in the blockdiagram above, where 'Task_Data_1
 ### A brief look under the hood of the library <a name="briefLookInto"></a>
 In the following blockdiagram you can see a very short **incomplete** description about the internal library structure. Each communication line has its seperate rx buffers of length ```FRTTRANSCEIVER_MAXELEMENTSIZEONQUEUE```, but only the length of the queue will be used (because we read max. ```queue length``` amount of data into rx buffers)
 
-![FreeRTOS-TransceiverUnderTheHood](https://github.com/xhera83/FreeRTOS-Transceiver/blob/release/documentation/diagrams/FreeRTOS-TransceiverUnderTheHood.JPG?raw=true) 
+![FreeRTOS-TransceiverUnderTheHood](https://github.com/xhera83/FreeRTOS-Transceiver/blob/main/documentation/diagrams/FreeRTOS-TransceiverUnderTheHood.JPG?raw=true) 
 
 *Internal rx buffers*
 
