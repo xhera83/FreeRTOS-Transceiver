@@ -212,6 +212,10 @@ Now with this setup you can proceed to write to 'TASK2' and read from 'TASK1'. P
   - Maximum of 2 semaphores per connection. One for the tx queue, one for the rx queue.
   - Threadsafe
 
+# Installation
+
+This library has been developed and tested on an ESP32-WROOM-32 microcontroller inside a PlatformIO environment. 
+
 # Supported Devices
 
 Mainly in development for the ESP32 microcontroller. Portability planned.

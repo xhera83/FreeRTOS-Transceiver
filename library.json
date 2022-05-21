@@ -1,0 +1,20 @@
+{
+      "name": "FreeRTOS-Transceiver",
+	  "version":"1.0",
+      "keywords": "esp32,esp8266,freertos,arduino-framework,arduino,queues",
+      "description": "A C++ library to simplify the use of FreeRTOS inter-task communication.",
+      "repository":
+      {
+            "type": "git",
+            "url": "https://github.com/xhera83/FreeRTOS-Transceiver"
+      },
+      "authors":
+      {
+            "name": "Xhemail Ramabaja",
+            "email": "x.ramabaja@outlook.de"
+      },
+	  "license":"Apache-2.0",
+	  "frameworks": ["arduino"],
+	  "platforms": ["Espressif 32","Espressif 8266"],
+
+}
