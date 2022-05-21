@@ -214,7 +214,8 @@ Now with this setup you can proceed to write to 'TASK2' and read from 'TASK1'. P
 
 # Installation
 
-This library has been developed and tested on an ESP32-WROOM-32 microcontroller inside a PlatformIO environment. 
+This library has been developed and tested on an ESP32-WROOM-32 microcontroller inside a PlatformIO environment.
+Library installation possible here: https://registry.platformio.org/libraries/xhera83/FreeRTOS-Transceiver 
 
 # Supported Devices
 
