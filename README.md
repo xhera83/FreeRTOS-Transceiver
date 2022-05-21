@@ -1,3 +1,5 @@
+[![PlatformIO Registry](https://badges.registry.platformio.org/packages/xhera83/library/FreeRTOS-TransceiverV1.svg)](https://registry.platformio.org/libraries/xhera83/FreeRTOS-TransceiverV1)
+
 # Table of Contents :page_with_curl:
 1. [About the project](#aboutTheProject)
     - [Motivation](#motivation)
@@ -6,6 +8,10 @@
         - [A brief look under the hood of the library](#briefLookInto)
 2. [Quickstart](#quickStart)
 3. [Features](#features)
+4. [Installation](#installation)
+5. [Supported devices](#supportedDevices)
+6. [License](#license)
+7. [Useful Resources](#resources)
 
 # About the project <a name="aboutTheProject"></a>
 ## Motivation :muscle: <a name="motivation"></a>
@@ -209,14 +215,22 @@ Now with this setup you can proceed to write to 'TASK2' and read from 'TASK1'. P
   - TBA. Is planned
 
 - Secure access to data
-  - Maximum of 2 semaphores per connection. One for the tx queue, one for the rx queue.
-  - Threadsafe
+  - Maximum of 2 semaphores per connection. One for the tx queue, one for the rx queue
 
-# Installation
+# Installation <a name="installation"></a>
 
 This library has been developed and tested on an ESP32-WROOM-32 microcontroller inside a PlatformIO environment.
+
 Library installation possible here: https://registry.platformio.org/libraries/xhera83/FreeRTOS-TransceiverV1 
 
-# Supported Devices
+# Supported Devices <a name= "supportedDevices"></a>
 
-Mainly in development for the ESP32 microcontroller. Portability planned.
+Mainly in development for the ESP32 microcontroller. Other microcontrollers have not been tested yet.
+
+# License <a name="license"></a>
+
+Apache 2.0 License
+
+# Useful Resources <a name="resources"></a>
+
+- https://www.freertos.org/fr-content-src/uploads/2018/07/161204_Mastering_the_FreeRTOS_Real_Time_Kernel-A_Hands-On_Tutorial_Guide.pdf
