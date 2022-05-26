@@ -73,7 +73,7 @@ In the allocator callback a user can now do (Basically what ever your project re
 - Future implementations will introduce some sort of memory pool
 
 In the de-allocator callback a user must do:
-- Free the memory previously allocated wiht malloc
+- Free the memory previously allocated with malloc
 - Future implementations will introduce some sort of memory pool
 
 To further understand how the library works, please take a look at the documented source code (/documentation/html/index.html) and also the examples that are provided in this repo (/examples).
@@ -219,13 +219,49 @@ Now with this setup you can proceed to write to 'TASK2' and read from 'TASK1'. P
 
 # Installation <a name="installation"></a>
 
-This library has been developed and tested on an ESP32-WROOM-32 microcontroller inside a PlatformIO environment.
+This library has been developed and tested on an **ESP32-WROOM-32** microcontroller inside a PlatformIO environment.
+- Install the PlatformIO VSCODE extension
+    - Create a new project
+        - Name of the project
+        - ESP32 board in use
+        - Select Arduino Framework 
+        - Then follow the section "Installation" here: https://registry.platformio.org/libraries/xhera83/FreeRTOS-TransceiverV1/installation
 
-Library installation possible here: https://registry.platformio.org/libraries/xhera83/FreeRTOS-TransceiverV1 
+    - Create your project, then build and flash
+
+FRTTransceiver library also works for the **ESP8266**
+- Projects can be set up in a ESP-IDF style: https://docs.espressif.com/projects/esp8266-rtos-sdk/en/latest/get-started/index.html
+    - An installation guide (linux, docker file) + ESP8266 examples in "/examples" will be provided in a feature patch
+    - FRTTransceiver library must be included as a "component". Infos regarding projects folder structure here: https://docs.espressif.com/projects/esp8266-rtos-sdk/en/latest/api-guides/build-system.html
+    - FRTTransceiver library uses C++, so all Files should be with an .cpp extension. 
+    - Main.cpp's app_main() (entry point for your projects software) function must be treated as a C function. Enclose as follows:
+            
+```  
+#ifdef __cplusplus
+extern "C"{
+#endif
+
+void app_main()
+{
+    // Very first code of your project
+}
+
+#ifdef __cplusplus
+}
+#endif
+
+```
+            
+    
 
 # Supported Devices <a name= "supportedDevices"></a>
 
-Mainly in development for the ESP32 microcontroller. Other microcontrollers have not been tested yet.
+- Mainly in development for the ESP32 microcontroller
+
+- Works for the ESP8266 but the installation is 'harder'
+    - See [Installation](#installation)
+    - FRTTransceiver library is not useable with the PlatformIO Arduino-Framework for the ESP8266 (The Arduino-Framework does not use FreeRTOS, they use the ESP-NONOS-SDK)
+    - FRTTransceiver library is currently not adjusted to the PlatformIO ESP8266-RTOS-SDK framework (did not get it to work yet, PlatformIO also uses a very outdated version of the ESP8266-RTOS-SDK)
 
 # License <a name="license"></a>
 
