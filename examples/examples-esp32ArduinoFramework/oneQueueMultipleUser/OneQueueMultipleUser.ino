@@ -51,7 +51,7 @@
  */
 
 #include <Arduino.h>
-#include <include/Additions.h>
+#include "Additions.h"
 
 
 void UART_SLAVE(void *);
