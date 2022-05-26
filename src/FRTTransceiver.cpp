@@ -104,7 +104,7 @@ bool FRTTransceiver::_hasSemaphore(FRTTransceiver_TaskHandle partner,eMultiSende
    }
    else
    {
-      this->_structCommPartners[pos].semaphoreRxQueue == NULL ? false:true;
+      return this->_structCommPartners[pos].semaphoreRxQueue == NULL ? false:true;
    }
 }
 
@@ -471,7 +471,7 @@ bool FRTTransceiver::queueFlush(FRTTransceiver_TaskHandle partner,eMultiSenderQu
       return false;
    }
 
-   if(bTxQueue && this->_structCommPartners[pos].txQueue == NULL || !bTxQueue && this->_structCommPartners[pos].rxQueue == NULL)
+   if(((bTxQueue) && this->_structCommPartners[pos].txQueue == NULL) || ((!bTxQueue) && this->_structCommPartners[pos].rxQueue == NULL))
    {
       return false;
    }
@@ -519,7 +519,7 @@ bool FRTTransceiver::manualDeleteAllocatedDatabufferForLine(FRTTransceiver_TaskH
       return false;
    }
 
-   if(this->_structCommPartners[pos].hasBufferedData && u8PositionInBuffer >= 0 && u8PositionInBuffer <= this->_structCommPartners[pos].i8CurrTempcontainerPos)
+   if(this->_structCommPartners[pos].hasBufferedData && u8PositionInBuffer <= this->_structCommPartners[pos].i8CurrTempcontainerPos)
    {
       this->_dataDestroyer(this->_structCommPartners[pos].tempContainer[u8PositionInBuffer]);
       
@@ -748,7 +748,7 @@ const FRTTransceiver_TempDataContainer * FRTTransceiver::getBufferedDataFrom(FRT
       return NULL;
    }
 
-   if(this->_structCommPartners[pos].hasBufferedData && u8PositionInBuffer >= 0 && u8PositionInBuffer <= this->_structCommPartners[pos].i8CurrTempcontainerPos)
+   if(this->_structCommPartners[pos].hasBufferedData && u8PositionInBuffer <= this->_structCommPartners[pos].i8CurrTempcontainerPos)
    {
       return (const FRTTransceiver_TempDataContainer *)&this->_structCommPartners[pos].tempContainer[u8PositionInBuffer];
    }
