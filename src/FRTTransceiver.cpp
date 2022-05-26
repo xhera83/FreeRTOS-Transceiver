@@ -479,9 +479,6 @@ bool FRTTransceiver::queueFlush(FRTTransceiver_TaskHandle partner,eMultiSenderQu
    
    timeToWaitSemaphore = (timeToWaitSemaphore == FRTTRANSCEIVER_WAITMAX ? portMAX_DELAY : pdMS_TO_TICKS(timeToWaitSemaphore));
 
-   SemaphoreHandle_t s = this->_structCommPartners[pos].semaphoreRxQueue;
-
-
    xQueueReset(bTxQueue ? this->_structCommPartners[pos].txQueue : this->_structCommPartners[pos].rxQueue);
 
    
