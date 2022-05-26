@@ -8,10 +8,7 @@
  * \copyright  Copyright 2022 Xhemail Ramabaja
  */
 
-
-#include <Arduino.h>
-#include <FRTTransceiverExtension.h>
-#include <FRTTransceiverSettings.h>
+#include "FRTTransceiverExtension.h"
 #include <string>
 
 using namespace std;

@@ -5,7 +5,8 @@
  * \copyright  Copyright 2022 Xhemail Ramabaja
  */
 
-#include <FRTTransceiver.h>
+#include "../include/FRTTransceiver.h"
+#include <cstdio>
 
 //#define LOG_INFO
 
@@ -812,37 +813,37 @@ void FRTTransceiver::_rearrangeTempContainerArray(uint8_t u8CommStructPos,uint8_
 void FRTTransceiver::printCommunicationsSummary()
 {
    /* General Infos */
-   log_i("General Infos\n\n");
-   log_i("\tOwner address           \t\t%p\n",this->_ownerAddress == NULL ? FRTTRANSCEIVER_UNKNOWNADDRESS : this->_ownerAddress);
-   log_i("\tCommunicationpartner    \t\t(%d out of %d)\n",this->_u8CurrCommPartners,this->_u8MaxPartners);
-   log_i("\t\t- - - > (%d of those read only)\n",this->_u8MultiSenderQueues);
-   log_i("\tMax partners            \t\t%d\n",this->_u8MaxPartners);
-   log_i("\tData callbacks available\t\t%s\n",this->_hasDataInterpreters() ? "yes":"no");
-   log_i("\tBroadcasts made         \t\t%d\n\n",this->_broadcastCount);
+   printf("General Infos\n\n");
+   printf("\tOwner address           \t\t%p\n",this->_ownerAddress == NULL ? FRTTRANSCEIVER_UNKNOWNADDRESS : this->_ownerAddress);
+   printf("\tCommunicationpartner    \t\t(%d out of %d)\n",this->_u8CurrCommPartners,this->_u8MaxPartners);
+   printf("\t\t- - - > (%d of those read only)\n",this->_u8MultiSenderQueues);
+   printf("\tMax partners            \t\t%d\n",this->_u8MaxPartners);
+   printf("\tData callbacks available\t\t%s\n",this->_hasDataInterpreters() ? "yes":"no");
+   printf("\tBroadcasts made         \t\t%d\n\n",this->_broadcastCount);
    
    /* Communication partners */
    
    for(uint8_t u8I = 0; u8I < this->_u8CurrCommPartners;u8I++)
    {
-      log_i("Line [%d]",u8I+1);
-      log_i("\tName                    \t\t%s\n",this->_structCommPartners[u8I].partnersName.c_str());
-      log_i("\tAddress                 \t\t%p\n",this->_structCommPartners[u8I].commPartner == NULL ? FRTTRANSCEIVER_UNKNOWNADDRESS : this->_structCommPartners[u8I].commPartner);
+      printf("Line [%d]\n",u8I+1);
+      printf("\tName                    \t\t%s\n",this->_structCommPartners[u8I].partnersName.c_str());
+      printf("\tAddress                 \t\t%p\n",this->_structCommPartners[u8I].commPartner == NULL ? FRTTRANSCEIVER_UNKNOWNADDRESS : this->_structCommPartners[u8I].commPartner);
 
       if(!this->_structCommPartners[u8I].bReadOnlyCommunication)
       {
-         log_i("\tComm-Type               \t\t%s\n",this->_ownerAddress == this->_structCommPartners[u8I].commPartner ? FRTTRANSCEIVER_COMMTYPE3:FRTTRANSCEIVER_COMMTYPE1);
+         printf("\tComm-Type               \t\t%s\n",this->_ownerAddress == this->_structCommPartners[u8I].commPartner ? FRTTRANSCEIVER_COMMTYPE3:FRTTRANSCEIVER_COMMTYPE1);
       }
       else
       {
-         log_i("\tComm-Type               \t\t%s\n",FRTTRANSCEIVER_COMMTYPE2);
+         printf("\tComm-Type               \t\t%s\n",FRTTRANSCEIVER_COMMTYPE2);
       }
-      log_i("\tTX-LINE                 \t\t%s\n",this->_structCommPartners[u8I].txQueue == NULL ? "OFF":"ON");
-      log_i("\t\tLength                %d\n",this->_structCommPartners[u8I].u8TxQueueLength);
-      log_i("\tRX-LINE                 \t\t%s\n",this->_structCommPartners[u8I].rxQueue == NULL ? "OFF":"ON");
-      log_i("\t\tLength                %d\n",this->_structCommPartners[u8I].u8RxQueueLength);
-      log_i("\tPackages sent           \t\t%d\n",this->_structCommPartners[u8I].dataPackagesSent);
-      log_i("\tPackages received       \t\t%d\n",this->_structCommPartners[u8I].dataPackagesReceived);
-      log_i("\tHas buffered data       \t\t%s\n",this->_structCommPartners[u8I].hasBufferedData ? "YES":"NO");
+      printf("\tTX-LINE                 \t\t%s\n",this->_structCommPartners[u8I].txQueue == NULL ? "OFF":"ON");
+      printf("\t\tLength                %d\n",this->_structCommPartners[u8I].u8TxQueueLength);
+      printf("\tRX-LINE                 \t\t%s\n",this->_structCommPartners[u8I].rxQueue == NULL ? "OFF":"ON");
+      printf("\t\tLength                %d\n",this->_structCommPartners[u8I].u8RxQueueLength);
+      printf("\tPackages sent           \t\t%d\n",this->_structCommPartners[u8I].dataPackagesSent);
+      printf("\tPackages received       \t\t%d\n",this->_structCommPartners[u8I].dataPackagesReceived);
+      printf("\tHas buffered data       \t\t%s\n",this->_structCommPartners[u8I].hasBufferedData ? "YES":"NO");
    }
 }
 
