@@ -16,7 +16,7 @@ FRTTransceiver_QueueHandle FRTTransceiver_CreateQueue(FRTTransceiver_BaseType le
    if(lengthOfQueue <= 0 || lengthOfQueue > FRTTRANSCEIVER_MAXELEMENTSIZEONQUEUE)
    {
       #ifdef LOG_INFO
-      log_i("Supplied length of the queue is not valid. NULL returned [Either too small or too big]");
+      printf("Supplied length of the queue is not valid. NULL returned [Either too small or too big]\n");
       #endif
       return NULL;
    }
@@ -26,13 +26,13 @@ FRTTransceiver_QueueHandle FRTTransceiver_CreateQueue(FRTTransceiver_BaseType le
    if(!queue)
    {
       #ifdef LOG_INFO
-      log_i("Queue cannot be created [Insufficient heap memory]\n");
+      printf("Queue cannot be created [Insufficient heap memory]\n");
       #endif
    }
    else
    {
       #ifdef LOG_INFO
-      log_i("Queue successfully created. Queue handle returned\n");
+      printf("Queue successfully created. Queue handle returned\n");
       #endif
    }
    return queue;
@@ -46,13 +46,13 @@ FRTTransceiver_SemaphoreHandle FRTTransceiver_CreateSemaphore()
    if(!semaphore)
    {
       #ifdef LOG_INFO
-      log_i("Semaphore cannot be created [Insufficient heap memory]\n");
+      printf("Semaphore cannot be created [Insufficient heap memory]\n");
       #endif
    }
    else
    {
       #ifdef LOG_INFO
-      log_i("Semaphore successfully created. Semaphore handle returned\n");
+      printf("Semaphore successfully created. Semaphore handle returned\n");
       #endif
    }
    return semaphore;
@@ -112,6 +112,9 @@ FRTTransceiver::FRTTransceiver(FRTTransceiver_TaskHandle ownerAddress, uint8_t u
 {  
    /* Can be null. Receivers wont know who you are then....*/
    this->_ownerAddress = ownerAddress;
+   
+   u8MaxPartners = (u8MaxPartners == 0 ? 1:u8MaxPartners);
+
    this->_u8MaxPartners = u8MaxPartners;
    this->_structCommPartners = new struct FRTTransceiver_CommunicationPartner[u8MaxPartners];
 }
@@ -146,7 +149,7 @@ bool FRTTransceiver::addCommPartner(FRTTransceiver_TaskHandle partner,FRTTransce
       this->_structCommPartners[_u8CurrCommPartners].rxQueue = queueRX;
       this->_structCommPartners[_u8CurrCommPartners].u8RxQueueLength = u8QueueLengthRx;
 
-      if(semaphoreRx == NULL)
+      if(semaphoreRx == NULL || (this->_checkValidQueueLength(u8QueueLengthRx) == false))
       {
          return false;
       }
@@ -158,7 +161,7 @@ bool FRTTransceiver::addCommPartner(FRTTransceiver_TaskHandle partner,FRTTransce
       this->_structCommPartners[_u8CurrCommPartners].txQueue = queueTX;
       this->_structCommPartners[_u8CurrCommPartners].u8TxQueueLength = u8QueueLengthTx;
 
-      if(semaphoreTx == NULL)
+      if(semaphoreTx == NULL || (this->_checkValidQueueLength(u8QueueLengthTx) == false))
       {
          return false;
       }
@@ -191,11 +194,15 @@ bool FRTTransceiver::addMultiSenderReadOnlyQueue(FRTTransceiver_QueueHandle queu
       this->_structCommPartners[_u8CurrCommPartners].rxQueue = queueRX;
       this->_structCommPartners[_u8CurrCommPartners].u8RxQueueLength = u8QueueLengthRx;
 
-      if(semaphoreRx == NULL)
+      if(semaphoreRx == NULL || (this->_checkValidQueueLength(u8QueueLengthRx) == false))
       {
          return false;
       }
       this->_structCommPartners[_u8CurrCommPartners].semaphoreRxQueue = semaphoreRx;
+   }
+   else
+   {
+      return false;
    }
 
    if(multiSenderQueueName.length() == 0)
@@ -221,11 +228,11 @@ bool FRTTransceiver::writeToQueue(FRTTransceiver_TaskHandle destination,uint8_t 
 {
    int pos;
 
-   if(!this->_hasDataInterpreters() || !this->_hasSemaphore(destination,(eMultiSenderQueue)0,true,true) || 
-                                       (pos  = this->_getCommStruct(destination,(eMultiSenderQueue)0,true)) == -1)
+   if(!this->_hasDataInterpreters() || !this->_hasSemaphore(destination,eNOMULTIQSELECTED,true,true) || 
+                                       (pos  = this->_getCommStruct(destination,eNOMULTIQSELECTED,true)) == -1)
    {
       #ifdef LOG_INFO
-      log_i("You are not allowed to write to a queue \nOne of the following things happened:\n"
+      printf("You are not allowed to write to a queue \nOne of the following things happened:\n"
             "-[no callback functions for (allocating,freeing) data supplied]\n"
             "-[no semphores supplied]\n"
             "-[destination task unknown]\n");
@@ -236,7 +243,7 @@ bool FRTTransceiver::writeToQueue(FRTTransceiver_TaskHandle destination,uint8_t 
    if(this->_structCommPartners[pos].txQueue == NULL || this->_checkValidQueueLength(this->_structCommPartners[pos].u8TxQueueLength) == false || data == NULL)
    {
       #ifdef LOG_INFO
-      log_i("Action now allowed \nOne of the following things happened:\n"
+      printf("Action now allowed \nOne of the following things happened:\n"
             "-[no tx queue supplied]\n"
             "-[queue length invalid]\n"
             "-[data pointer null]\n");
@@ -283,7 +290,7 @@ bool FRTTransceiver::writeToQueue(FRTTransceiver_TaskHandle destination,uint8_t 
          if(xSemaphoreTake(s,timeToWaitSemaphore) == pdFALSE)
          {
             #ifdef LOG_INFO
-            log_i("Semaphore was not available before block time expired.");
+            printf("Semaphore was not available before block time expired.\n");
             #endif
             return false;
          }
@@ -315,7 +322,7 @@ bool FRTTransceiver::writeToQueue(FRTTransceiver_TaskHandle destination,uint8_t 
    if(xSemaphoreTake(s,timeToWaitSemaphore) == pdFALSE)
    {
       #ifdef LOG_INFO
-      log_i("Semaphore was not available before block time expired.");
+      printf("Semaphore was not available before block time expired.\n");
       #endif
       return false;
    }
@@ -360,7 +367,7 @@ bool FRTTransceiver::databroadcast(uint8_t u8DataType,void * data,int blockTimeW
    uint8_t u8SuccessCounter = 0;
    for(uint8_t u8I = 0; u8I < this->_u8CurrCommPartners ; u8I++)
    {
-      if(this->_structCommPartners[u8I].bReadOnlyCommunication == false)
+      if(this->_structCommPartners[u8I].bReadOnlyCommunication == false || this->_structCommPartners[u8I].txQueue != NULL)
       {
          #ifdef FRTTRANSCEIVER_32BITADDITIONALDATA
          if(this->writeToQueue(this->_structCommPartners[u8I].commPartner,u8DataType,data,blockTimeWrite,blockTimeTakeSemaphore,u32AdditionalData)){
@@ -379,7 +386,8 @@ bool FRTTransceiver::databroadcast(uint8_t u8DataType,void * data,int blockTimeW
       this->_broadcastCount++;
    }
    #endif
-   return (u8SuccessCounter == (this->_u8CurrCommPartners - this->_u8MultiSenderQueues));
+
+   return (u8SuccessCounter == this->_getAmountOfQueues(true));
 }
 
 
@@ -564,7 +572,7 @@ int FRTTransceiver::messagesOnQueue(FRTTransceiver_TaskHandle partner,bool bChec
 {
    int pos;
 
-   if((pos = this->_getCommStruct(partner,(eMultiSenderQueue)0,true)) == -1)
+   if((pos = this->_getCommStruct(partner,eNOMULTIQSELECTED,true)) == -1)
    {
       return -1;
    }
@@ -777,7 +785,22 @@ string FRTTransceiver::_getPartnersName(FRTTransceiver_TaskHandle partner,eMulti
    return this->_structCommPartners[pos].partnersName;
 }
 
-
+int FRTTransceiver::_getAmountOfQueues(bool bTxQueue)
+{
+	int amount = 0;
+	for(uint8_t u8I = 0;u8I < this->_u8CurrCommPartners;u8I++)
+	{
+		if(bTxQueue)
+		{
+			if(!(this->_structCommPartners[u8I].txQueue == NULL)) amount++;
+		}
+		else
+		{
+			if(!(this->_structCommPartners[u8I].rxQueue == NULL)) amount++;
+		}
+	}
+	return amount;
+}
 
 int FRTTransceiver::_checkWaitTime(int time_ms)
 {
@@ -785,7 +808,7 @@ int FRTTransceiver::_checkWaitTime(int time_ms)
    if(time_ms < FRTTRANSCEIVER_WAITMAX || (time_ms > FRTTRANSCEIVER_WAITMAX && time_ms < 0))
    {
       #ifdef LOG_INFO
-      log_i("Nothing sent [invalid wait time specified]\n");
+      printf("Nothing sent [invalid wait time specified]\n");
       #endif
       return -2;
    }
@@ -815,6 +838,8 @@ void FRTTransceiver::printCommunicationsSummary()
    printf("\tCommunicationpartner    \t\t(%d out of %d)\n",this->_u8CurrCommPartners,this->_u8MaxPartners);
    printf("\t\t- - - > (%d of those read only)\n",this->_u8MultiSenderQueues);
    printf("\tMax partners            \t\t%d\n",this->_u8MaxPartners);
+   printf("\tTX-QUEUE CONNECTIONS	 \t\t%d\n",this->_getAmountOfQueues(true));
+   printf("\tRX-QUEUES CONNECTIONS	 \t\t%d\n",this->_getAmountOfQueues(false));
    printf("\tData callbacks available\t\t%s\n",this->_hasDataInterpreters() ? "yes":"no");
    printf("\tBroadcasts made         \t\t%d\n\n",this->_broadcastCount);
    

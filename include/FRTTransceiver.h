@@ -46,6 +46,13 @@ class FRTTransceiver
         fP_dataFreeCallback _dataDestroyer = NULL;                            /*!< Function pointer to the data de-allocator callback supplied by the user */
 
         /*! 
+        * \brief                        Returns the amount of queues (rx or tx)
+        * \param bTxQueue               Signals whether to calculate the amount of rx or tx queues          
+        * \return                       The amount of queues (rx or tx)                           
+        */
+        int _getAmountOfQueues(bool bTxQueue);
+
+        /*! 
         * \brief                        Checks if the supplied length of one queue is valid
         * \param u8QueueLength          Length of the queue
         * \return                       True if the length is valid                           
