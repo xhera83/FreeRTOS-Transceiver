@@ -112,6 +112,9 @@ FRTTransceiver::FRTTransceiver(FRTTransceiver_TaskHandle ownerAddress, uint8_t u
 {  
    /* Can be null. Receivers wont know who you are then....*/
    this->_ownerAddress = ownerAddress;
+   
+   u8MaxPartners = (u8MaxPartners == 0 ? 1:u8MaxPartners);
+
    this->_u8MaxPartners = u8MaxPartners;
    this->_structCommPartners = new struct FRTTransceiver_CommunicationPartner[u8MaxPartners];
 }
