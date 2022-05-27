@@ -146,7 +146,7 @@ bool FRTTransceiver::addCommPartner(FRTTransceiver_TaskHandle partner,FRTTransce
       this->_structCommPartners[_u8CurrCommPartners].rxQueue = queueRX;
       this->_structCommPartners[_u8CurrCommPartners].u8RxQueueLength = u8QueueLengthRx;
 
-      if(semaphoreRx == NULL)
+      if(semaphoreRx == NULL || (this->_checkValidQueueLength(u8QueueLengthRx) == false))
       {
          return false;
       }
@@ -158,7 +158,7 @@ bool FRTTransceiver::addCommPartner(FRTTransceiver_TaskHandle partner,FRTTransce
       this->_structCommPartners[_u8CurrCommPartners].txQueue = queueTX;
       this->_structCommPartners[_u8CurrCommPartners].u8TxQueueLength = u8QueueLengthTx;
 
-      if(semaphoreTx == NULL)
+      if(semaphoreTx == NULL || (this->_checkValidQueueLength(u8QueueLengthTx) == false))
       {
          return false;
       }
@@ -191,11 +191,15 @@ bool FRTTransceiver::addMultiSenderReadOnlyQueue(FRTTransceiver_QueueHandle queu
       this->_structCommPartners[_u8CurrCommPartners].rxQueue = queueRX;
       this->_structCommPartners[_u8CurrCommPartners].u8RxQueueLength = u8QueueLengthRx;
 
-      if(semaphoreRx == NULL)
+      if(semaphoreRx == NULL || (this->_checkValidQueueLength(u8QueueLengthRx) == false))
       {
          return false;
       }
       this->_structCommPartners[_u8CurrCommPartners].semaphoreRxQueue = semaphoreRx;
+   }
+   else
+   {
+      return false;
    }
 
    if(multiSenderQueueName.length() == 0)
