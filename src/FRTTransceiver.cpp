@@ -364,7 +364,10 @@ bool FRTTransceiver::databroadcast(uint8_t u8DataType,void * data,int blockTimeW
 bool FRTTransceiver::databroadcast(uint8_t u8DataType,void * data,int blockTimeWrite,int blockTimeTakeSemaphore,uint64_t u64AdditionalData)
 #endif
 {
+   if(this->_getAmountOfQueues(true) == 0) return false;
+
    uint8_t u8SuccessCounter = 0;
+   
    for(uint8_t u8I = 0; u8I < this->_u8CurrCommPartners ; u8I++)
    {
       if(this->_structCommPartners[u8I].bReadOnlyCommunication == false || this->_structCommPartners[u8I].txQueue != NULL)
