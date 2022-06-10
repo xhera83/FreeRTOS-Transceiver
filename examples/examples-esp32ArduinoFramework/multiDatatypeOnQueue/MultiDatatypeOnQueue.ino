@@ -70,21 +70,21 @@ void dataDestroyer(FRTTTempDataContainer & internalBuffer) {
 
     internalBuffer.u8DataType = 0;
     internalBuffer.u32AdditionalData = 0;
-    internalBuffer.senderAddress = NULL;
-    internalBuffer.data = NULL;
+    internalBuffer.senderAddress = nullptr;
+    internalBuffer.data = nullptr;
 }
 
 /* ######################################################################## EXAMPLE START ######################################################################## */
 
 void SENDER(void *)
 {
-    while(TASK_SENDER == NULL || TASK_RECEIVER == NULL) vTaskDelay(pdMS_TO_TICKS(1));
+    while(TASK_SENDER == nullptr || TASK_RECEIVER == nullptr) vTaskDelay(pdMS_TO_TICKS(1));
 
     FRTTransceiver comm(TASK_SENDER,1);
     comm.addDataAllocateCallback(dataAllocator);
     comm.addDataFreeCallback(dataDestroyer);
 
-    bool retVal = comm.addCommPartner(TASK_RECEIVER,NULL,0,NULL,QUEUE_TO_RECEIVER,QUEUELENGTH,SEMAPHORE1,"RECEIVER");
+    bool retVal = comm.addCommPartner(TASK_RECEIVER,nullptr,0,nullptr,QUEUE_TO_RECEIVER,QUEUELENGTH,SEMAPHORE1,"RECEIVER");
 
     if(retVal)
     {
@@ -116,12 +116,12 @@ void SENDER(void *)
     vTaskDelay(pdMS_TO_TICKS(1000));
     //comm.printCommunicationsSummary();
     comm.~FRTTransceiver();
-    vTaskDelete(NULL);
+    vTaskDelete(nullptr);
 }
 
 void RECEIVER(void *)
 {
-    while(TASK_SENDER == NULL || TASK_RECEIVER == NULL) vTaskDelay(pdMS_TO_TICKS(1));
+    while(TASK_SENDER == nullptr || TASK_RECEIVER == nullptr) vTaskDelay(pdMS_TO_TICKS(1));
 
     vTaskDelay(pdMS_TO_TICKS(50)); /* So that no overlapping occurs if log_i()'s happen */
 
@@ -129,7 +129,7 @@ void RECEIVER(void *)
     comm.addDataAllocateCallback(dataAllocator);
     comm.addDataFreeCallback(dataDestroyer);
 
-    bool retVal = comm.addCommPartner(TASK_SENDER,QUEUE_TO_RECEIVER,QUEUELENGTH,SEMAPHORE1,NULL,0,NULL,"SENDER");
+    bool retVal = comm.addCommPartner(TASK_SENDER,QUEUE_TO_RECEIVER,QUEUELENGTH,SEMAPHORE1,nullptr,0,nullptr,"SENDER");
 
     if(retVal)
     {
@@ -176,7 +176,7 @@ void RECEIVER(void *)
     vTaskDelay(pdMS_TO_TICKS(1000));
     comm.printCommunicationsSummary();
     comm.~FRTTransceiver();
-    vTaskDelete(NULL);
+    vTaskDelete(nullptr);
 }
 
 
@@ -189,8 +189,8 @@ void setup() {
 
     SEMAPHORE1 = FRTTCreateSemaphore();
 
-    xTaskCreatePinnedToCore(SENDER,"sender-task",5000,NULL,5,&TASK_SENDER,0);
-    xTaskCreatePinnedToCore(RECEIVER,"receiver-task",5000,NULL,4,&TASK_RECEIVER,1);
+    xTaskCreatePinnedToCore(SENDER,"sender-task",5000,nullptr,5,&TASK_SENDER,0);
+    xTaskCreatePinnedToCore(RECEIVER,"receiver-task",5000,nullptr,4,&TASK_RECEIVER,1);
 }
 
 /* This loop is running when no other task is on */

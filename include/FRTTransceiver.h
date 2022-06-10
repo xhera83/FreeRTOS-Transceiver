@@ -33,18 +33,18 @@ namespace FRTT {
     class FRTTransceiver
     {
         private:                                                                 
-            FRTTTaskHandle _ownerAddress = NULL;                       /*!< Address of the task owning this object */                                           
-            struct FRTTCommunicationPartner * _structCommPartners;     /*!< Array of all connections */
-            uint8_t _u8CurrCommPartners = 0;                                      /*!< Amount of communications connected to*/
-            uint8_t _u8MaxPartners;                                               /*!< Max amount of possible connections*/
-            uint8_t _u8MultiSenderQueues = 0;                                     /*!< Amount of multi-sender-queues (multiple tasks write on the tx line)*/
+            FRTTTaskHandle _ownerAddress = nullptr;                                 /*!< Address of the task owning this object */                                           
+            struct FRTTCommunicationPartner * _structCommPartners = nullptr;        /*!< Array of all connections */
+            uint8_t _u8CurrCommPartners = 0;                                        /*!< Amount of communications connected to*/
+            uint8_t _u8MaxPartners = 0;                                             /*!< Max amount of possible connections*/
+            uint8_t _u8MultiSenderQueues = 0;                                       /*!< Amount of multi-sender-queues (multiple tasks write on the tx line)*/
 
             #ifdef FRTTRANSCEIVER_ANALYTICS_ENABLE
-            int _broadcastCount = 0;                                              /*!< Amount of broadcasts made. Important for FRTTransceiver::printCommunicationsSummary() */
+            int _broadcastCount = 0;                                                /*!< Amount of broadcasts made. Important for FRTTransceiver::printCommunicationsSummary() */
             #endif
 
-            fP_dataAllocateCallback _dataAllocator = NULL;                        /*!< Function pointer to the data allocator callback supplied by the user */
-            fP_dataFreeCallback _dataDestroyer = NULL;                            /*!< Function pointer to the data de-allocator callback supplied by the user */
+            fP_dataAllocateCallback _dataAllocator = nullptr;                       /*!< Function pointer to the data allocator callback supplied by the user */
+            fP_dataFreeCallback _dataDestroyer = nullptr;                           /*!< Function pointer to the data de-allocator callback supplied by the user */
 
             /*! 
             * \brief                        Returns the amount of queues (rx or tx)
@@ -149,9 +149,8 @@ namespace FRTT {
             * \param partnersName           Partners name
             * \return                       True if communication was added
             */
-            bool addCommPartner(FRTTTaskHandle partner = NULL,FRTTQueueHandle queueRX = NULL,
-                        uint8_t u8QueueLengthRx = -1,FRTTSemaphoreHandle semaphoreRx = NULL,FRTTQueueHandle queueTX = NULL,
-                        uint8_t u8QueueLengthTx = -1,FRTTSemaphoreHandle semaphoreTx = NULL,const string partnersName = string());
+            bool addCommPartner(FRTTTaskHandle partner,FRTTQueueHandle queueRX,uint8_t u8QueueLengthRx,FRTTSemaphoreHandle semaphoreRx,FRTTQueueHandle queueTX,
+                                                       uint8_t u8QueueLengthTx,FRTTSemaphoreHandle semaphoreTx,const string partnersName = string());
         
             /*! 
             * \brief                        Adds a new multi-sender-queue connection (multiple tasks write on the tx line)
@@ -181,8 +180,7 @@ namespace FRTT {
             *                               You can have the same functionality but with an additional 64 bit payload instead, by uncommenting FRTTRANSCEIVER_64BITADDITIONALDATA
             *                               in FRTTransceiverSettings.h
             */
-            bool writeToQueue(FRTTTaskHandle destination,uint8_t u8Datatype,void * data,
-                            int blockTimeWrite = 100,int blockTimeTakeSemaphore = 100,uint32_t u32AdditionalInfo = 0);
+            bool writeToQueue(FRTTTaskHandle destination,uint8_t u8Datatype,void * data,int blockTimeWrite,int blockTimeTakeSemaphore,uint32_t u32AdditionalInfo);
             #elif defined(FRTTRANSCEIVER_64BITADDITIONALDATA)
             /*! 
             * \brief                        Writes to a selected tx queue
@@ -197,8 +195,7 @@ namespace FRTT {
             *                               You can have the same functionality but with an additional 32 bit payload instead, by uncommenting FRTTRANSCEIVER_32BITADDITIONALDATA
             *                               in FRTTransceiverSettings.h
             */
-            bool writeToQueue(FRTTTaskHandle destination,uint8_t u8Datatype,void * data,
-                            int blockTimeWrite = 100,int blockTimeTakeSemaphore = 100,uint64_t u64AdditionalData = 0);
+            bool writeToQueue(FRTTTaskHandle destination,uint8_t u8Datatype,void * data,int blockTimeWrite,int blockTimeTakeSemaphore,uint64_t u64AdditionalData);
             #endif
 
             #if defined(FRTTRANSCEIVER_32BITADDITIONALDATA)
@@ -219,8 +216,7 @@ namespace FRTT {
             * \attention                    Do not use this feature when you have a lot of tx connections
             *                               and it's particularly hard to get instant permission to write on at least one of them                          
             */
-            bool databroadcast(uint8_t u8Datatype,void * data,int blockTimeWrite = 100,
-                            int blockTimeTakeSemaphore = 100,uint32_t u32AdditionalInfo = 0);
+            bool databroadcast(uint8_t u8Datatype,void * data,int blockTimeWrite,int blockTimeTakeSemaphore,uint32_t u32AdditionalInfo);
             #elif defined(FRTTRANSCEIVER_64BITADDITIONALDATA)
             /*! 
             * \brief                        Broadcasts data to all communication lines with a tx connection
@@ -239,8 +235,7 @@ namespace FRTT {
             * \attention                    Do not use this feature when you have a lot of tx connections
             *                               and it's particularly hard to get instant permission to write on at least one of them                          
             */
-            bool databroadcast(uint8_t u8Datatype,void * data,int blockTimeWrite = 100,
-                            int blockTimeTakeSemaphore = 100,uint64_t u64AdditionalData = 0);
+            bool databroadcast(uint8_t u8Datatype,void * data,int blockTimeWrite,int blockTimeTakeSemaphore,uint64_t u64AdditionalData);
             #endif
         
         
@@ -256,7 +251,7 @@ namespace FRTT {
             *                               If partner is used, bUseTaskHandleVar is set to true.<br>
             *                               If multiSenderQueue is used, bUseTaskHandleVar is set to false                         
             */
-            bool readFromQueue(FRTTTaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar,int blockTimeRead = 100,int blockTimeTakeSemaphore = 100);
+            bool readFromQueue(FRTTTaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar,int blockTimeRead,int blockTimeTakeSemaphore);
             /*! 
             * \brief                        Flushes rx/tx queue                      
             * \param partner                To select the queue to flush (Used to select the right entry in FRTTransceiver_CommunicationPartner)
@@ -269,7 +264,7 @@ namespace FRTT {
             *                               If partner is used, bUseTaskHandleVar is set to true.<br>
             *                               If multiSenderQueue is used, bUseTaskHandleVar is set to false                                                 
             */
-            bool queueFlush(FRTTTaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar,int blockTimeTakeSemaphore = 100,bool bTxQueue = true);
+            bool queueFlush(FRTTTaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar,int blockTimeTakeSemaphore,bool bTxQueue);
 
             /*! 
             * \brief                        Deletes an entry in the internal rx buffer                      

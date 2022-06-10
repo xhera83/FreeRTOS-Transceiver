@@ -62,8 +62,8 @@ void MOTOR_SLAVE(void *);
 
 void Master(void *)
 {
-    while(TASK_MASTER == NULL || TASK_MOTOR_SLAVE == NULL ||
-          TASK_SENSOR_SLAVE  == NULL || TASK_UART_SLAVE == NULL) vTaskDelay(pdMS_TO_TICKS(1));
+    while(TASK_MASTER == nullptr || TASK_MOTOR_SLAVE == nullptr ||
+          TASK_SENSOR_SLAVE  == nullptr || TASK_UART_SLAVE == nullptr) vTaskDelay(pdMS_TO_TICKS(1));
 
     vTaskDelay(pdMS_TO_TICKS(1000));
 
@@ -73,9 +73,9 @@ void Master(void *)
     comm.addDataFreeCallback(dataDestroyer);
 
     bool res = comm.addMultiSenderPartner(MULTISENDERQ,QUEUELENGTH_MULTISENDERQ,SEMAPHORE_MULTIQ,"Master-Slaves Channel");
-    res = res && comm.addCommPartner(TASK_UART_SLAVE,NULL,0,NULL,QUEUE_TO_UART,QUEUELENGTH_GENERAL,SEMAPHORE_UART,"UART TASK");
-    res = res && comm.addCommPartner(TASK_SENSOR_SLAVE,NULL,0,NULL,QUEUE_TO_SENSOR,QUEUELENGTH_GENERAL,SEMAPHORE_SENSOR,"SENSOR TASK");
-    res = res && comm.addCommPartner(TASK_MOTOR_SLAVE,NULL,0,NULL,QUEUE_TO_MOTOR,QUEUELENGTH_GENERAL,SEMAPHORE_MOTOR,"UART TASK");
+    res = res && comm.addCommPartner(TASK_UART_SLAVE,nullptr,0,nullptr,QUEUE_TO_UART,QUEUELENGTH_GENERAL,SEMAPHORE_UART,"UART TASK");
+    res = res && comm.addCommPartner(TASK_SENSOR_SLAVE,nullptr,0,nullptr,QUEUE_TO_SENSOR,QUEUELENGTH_GENERAL,SEMAPHORE_SENSOR,"SENSOR TASK");
+    res = res && comm.addCommPartner(TASK_MOTOR_SLAVE,nullptr,0,nullptr,QUEUE_TO_MOTOR,QUEUELENGTH_GENERAL,SEMAPHORE_MOTOR,"UART TASK");
 
     if(res)
     {
@@ -85,7 +85,7 @@ void Master(void *)
     {
         log_i("Something went wrong!");
         comm.~FRTTransceiver();
-        vTaskDelete(NULL);
+        vTaskDelete(nullptr);
     }
 
     uint8_t u8CommandPos = 0;
@@ -102,14 +102,14 @@ void Master(void *)
         if(comm.messagesOnQueue(eMultiSenderQueue::eMULTISENDERQ0) > 0)
         {   
 
-            res = comm.readFromQueue(NULL,eMultiSenderQueue::eMULTISENDERQ0,false,FRTTRANSCEIVER_WAITMAX,FRTTRANSCEIVER_WAITMAX);
+            res = comm.readFromQueue(nullptr,eMultiSenderQueue::eMULTISENDERQ0,false,FRTTRANSCEIVER_WAITMAX,FRTTRANSCEIVER_WAITMAX);
 
             if(res)
             {   
                 u8PackagesReceived++;
-                const FRTTTempDataContainer * t = comm.getOldestBufferedDataFrom(NULL,eMultiSenderQueue::eMULTISENDERQ0,false);
+                const FRTTTempDataContainer * t = comm.getOldestBufferedDataFrom(nullptr,eMultiSenderQueue::eMULTISENDERQ0,false);
 
-                if(t != NULL)
+                if(t != nullptr)
                 {   
                     uint8_t u8LengthOfBuffers = t->u32AdditionalData;
                     String datatype("");
@@ -133,7 +133,7 @@ void Master(void *)
                     String temp = printBuffer((int * )t->data,t->u32AdditionalData);
                     log_i("%s",temp.c_str());
                 }
-                comm.delAllDatabuffForLine(NULL,eMultiSenderQueue::eMULTISENDERQ0,false);
+                comm.delAllDatabuffForLine(nullptr,eMultiSenderQueue::eMULTISENDERQ0,false);
             }
         }
         else if(u8PackagesReceived == 3 || u8Commands[u8CommandPos-1] == COMMAND_REFRESHDATA || u8Commands[u8CommandPos-1] == COMMAND_SLEEP)
@@ -155,12 +155,12 @@ void Master(void *)
     vTaskDelay(pdMS_TO_TICKS(3000));
     comm.printCommunicationsSummary();
     comm.~FRTTransceiver();
-    vTaskDelete(NULL);
+    vTaskDelete(nullptr);
 }
 
 void UART_SLAVE(void *)
 {
-    while(TASK_MASTER == NULL || TASK_UART_SLAVE == NULL) vTaskDelay(pdMS_TO_TICKS(1));
+    while(TASK_MASTER == nullptr || TASK_UART_SLAVE == nullptr) vTaskDelay(pdMS_TO_TICKS(1));
 
     FRTTransceiver comm(TASK_UART_SLAVE,1);
     comm.addDataAllocateCallback(dataAllocator);
@@ -174,12 +174,12 @@ void UART_SLAVE(void *)
     handleSlaveWork(&comm,&buffer[0],u8BuffLength,TASK_MASTER,eUARTBUFFER);
 
     vTaskDelay(pdMS_TO_TICKS(3000));
-    vTaskDelete(NULL);
+    vTaskDelete(nullptr);
 }
 
 void SENSOR_SLAVE(void *)
 {
-    while(TASK_MASTER == NULL || TASK_SENSOR_SLAVE == NULL) vTaskDelay(pdMS_TO_TICKS(1));
+    while(TASK_MASTER == nullptr || TASK_SENSOR_SLAVE == nullptr) vTaskDelay(pdMS_TO_TICKS(1));
 
     FRTTransceiver comm(TASK_UART_SLAVE,1);
     comm.addDataAllocateCallback(dataAllocator);
@@ -193,12 +193,12 @@ void SENSOR_SLAVE(void *)
     handleSlaveWork(&comm,&buffer[0],u8BuffLength,TASK_MASTER,eSENSORBUFFER);
 
     vTaskDelay(pdMS_TO_TICKS(3000));
-    vTaskDelete(NULL);
+    vTaskDelete(nullptr);
 }
 
 void MOTOR_SLAVE(void *)
 {
-    while(TASK_MASTER == NULL || TASK_MOTOR_SLAVE == NULL) vTaskDelay(pdMS_TO_TICKS(1));
+    while(TASK_MASTER == nullptr || TASK_MOTOR_SLAVE == nullptr) vTaskDelay(pdMS_TO_TICKS(1));
     FRTTransceiver comm(TASK_UART_SLAVE,1);
     comm.addDataAllocateCallback(dataAllocator);
     comm.addDataFreeCallback(dataDestroyer);
@@ -211,7 +211,7 @@ void MOTOR_SLAVE(void *)
     handleSlaveWork(&comm,&buffer[0],u8BuffLength,TASK_MASTER,eMOTORBUFFER);
 
     vTaskDelay(pdMS_TO_TICKS(3000));
-    vTaskDelete(NULL);
+    vTaskDelete(nullptr);
 }
 
 void setup() {
@@ -228,11 +228,11 @@ void setup() {
     SEMAPHORE_UART = FRTTCreateSemaphore();
     SEMAPHORE_SENSOR = FRTTCreateSemaphore();
     
-    xTaskCreatePinnedToCore(Master,"master",5000,NULL,4,&TASK_MASTER,1);
+    xTaskCreatePinnedToCore(Master,"master",5000,nullptr,4,&TASK_MASTER,1);
 
-    xTaskCreatePinnedToCore(SENSOR_SLAVE,"sensor-slave",5000,NULL,5,&TASK_SENSOR_SLAVE,0);
-    xTaskCreatePinnedToCore(UART_SLAVE,"uart-slave",5000,NULL,5,&TASK_UART_SLAVE,0);
-    xTaskCreatePinnedToCore(MOTOR_SLAVE,"motor-slave",5000,NULL,5,&TASK_MOTOR_SLAVE,0);
+    xTaskCreatePinnedToCore(SENSOR_SLAVE,"sensor-slave",5000,nullptr,5,&TASK_SENSOR_SLAVE,0);
+    xTaskCreatePinnedToCore(UART_SLAVE,"uart-slave",5000,nullptr,5,&TASK_UART_SLAVE,0);
+    xTaskCreatePinnedToCore(MOTOR_SLAVE,"motor-slave",5000,nullptr,5,&TASK_MOTOR_SLAVE,0);
 }
 
 /* This loop is running when no other task is on */
@@ -282,8 +282,8 @@ void dataDestroyer(FRTTTempDataContainer & internalBuffer) {
 
     internalBuffer.u8DataType = 0;
     internalBuffer.u32AdditionalData = 0;
-    internalBuffer.senderAddress = NULL;
-    internalBuffer.data = NULL;
+    internalBuffer.senderAddress = nullptr;
+    internalBuffer.data = nullptr;
 }
 
 
@@ -319,7 +319,7 @@ void handleSlaveWork(FRTTransceiver * comm,int * buffer,uint8_t u8Length,FRTTTas
         {   
             const FRTTTempDataContainer * t = comm->getOldestBufferedDataFrom(partnertask,eMultiSenderQueue::eNOMULTIQSELECTED,true);
 
-            if(t != NULL)
+            if(t != nullptr)
             {
                 if(t->u8DataType == eCOMMAND)
                 {

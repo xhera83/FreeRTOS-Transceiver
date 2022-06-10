@@ -40,7 +40,7 @@
 
 void ECHO(void *)
 {
-    while(TASK_ECHO == NULL) vTaskDelay(pdMS_TO_TICKS(1));
+    while(TASK_ECHO == nullptr) vTaskDelay(pdMS_TO_TICKS(1));
 
     vTaskDelay(pdMS_TO_TICKS(50)); /* So that no overlapping occurs if log_i()'s happen */
 
@@ -72,7 +72,7 @@ void ECHO(void *)
     }
     comm.printCommunicationsSummary();
     comm.~FRTTransceiver();
-    vTaskDelete(NULL);
+    vTaskDelete(nullptr);
 }
 
 
@@ -85,7 +85,7 @@ void setup() {
 
     SEMAPHORE1 = FRTTCreateSemaphore();
 
-    xTaskCreatePinnedToCore(ECHO,"receiver-task",5000,NULL,4,&TASK_ECHO,1);
+    xTaskCreatePinnedToCore(ECHO,"receiver-task",5000,nullptr,4,&TASK_ECHO,1);
 }
 
 /* This loop is running when no other task is on */
@@ -134,6 +134,6 @@ void dataDestroyer(FRTTTempDataContainer & internalBuffer) {
 
     internalBuffer.u8DataType = 0;
     internalBuffer.u32AdditionalData = 0;
-    internalBuffer.senderAddress = NULL;
-    internalBuffer.data = NULL;
+    internalBuffer.senderAddress = nullptr;
+    internalBuffer.data = nullptr;
 }

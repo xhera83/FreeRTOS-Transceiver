@@ -18,7 +18,7 @@ namespace FRTT {
          #ifdef LOG_INFO
          printf("Supplied length of the queue is not valid. NULL returned [Either too small or too big]\n");
          #endif
-         return NULL;
+         return nullptr;
       }
 
       FRTTQueueHandle queue = xQueueCreate(lengthOfQueue,sizeof(struct FRTTDataContainerOnQueue));
@@ -95,16 +95,16 @@ namespace FRTT {
       {
          if(txLine)
          {
-            return this->_structCommPartners[pos].semaphoreTxQueue == NULL ? false:true;
+            return this->_structCommPartners[pos].semaphoreTxQueue == nullptr ? false:true;
          }
          else
          {
-            return this->_structCommPartners[pos].semaphoreRxQueue == NULL ? false:true;
+            return this->_structCommPartners[pos].semaphoreRxQueue == nullptr ? false:true;
          }
       }
       else
       {
-         return this->_structCommPartners[pos].semaphoreRxQueue == NULL ? false:true;
+         return this->_structCommPartners[pos].semaphoreRxQueue == nullptr ? false:true;
       }
    }
 
@@ -135,7 +135,7 @@ namespace FRTT {
          return false;
       }
 
-      if(partner != NULL)
+      if(partner != nullptr)
       {
          this->_structCommPartners[_u8CurrCommPartners].commPartner = partner;
       }
@@ -144,24 +144,24 @@ namespace FRTT {
          return false;
       }
 
-      if(queueRX != NULL)
+      if(queueRX != nullptr)
       {
          this->_structCommPartners[_u8CurrCommPartners].rxQueue = queueRX;
          this->_structCommPartners[_u8CurrCommPartners].u8RxQueueLength = u8QueueLengthRx;
 
-         if(semaphoreRx == NULL || (this->_checkValidQueueLength(u8QueueLengthRx) == false))
+         if(semaphoreRx == nullptr || (this->_checkValidQueueLength(u8QueueLengthRx) == false))
          {
             return false;
          }
          this->_structCommPartners[_u8CurrCommPartners].semaphoreRxQueue = semaphoreRx;
       }
 
-      if(queueTX != NULL)
+      if(queueTX != nullptr)
       {
          this->_structCommPartners[_u8CurrCommPartners].txQueue = queueTX;
          this->_structCommPartners[_u8CurrCommPartners].u8TxQueueLength = u8QueueLengthTx;
 
-         if(semaphoreTx == NULL || (this->_checkValidQueueLength(u8QueueLengthTx) == false))
+         if(semaphoreTx == nullptr || (this->_checkValidQueueLength(u8QueueLengthTx) == false))
          {
             return false;
          }
@@ -189,12 +189,12 @@ namespace FRTT {
          return false;
       }
 
-      if(queueRX != NULL)
+      if(queueRX != nullptr)
       {
          this->_structCommPartners[_u8CurrCommPartners].rxQueue = queueRX;
          this->_structCommPartners[_u8CurrCommPartners].u8RxQueueLength = u8QueueLengthRx;
 
-         if(semaphoreRx == NULL || (this->_checkValidQueueLength(u8QueueLengthRx) == false))
+         if(semaphoreRx == nullptr || (this->_checkValidQueueLength(u8QueueLengthRx) == false))
          {
             return false;
          }
@@ -239,7 +239,7 @@ namespace FRTT {
          return false;
       }
 
-      if(this->_structCommPartners[pos].txQueue == NULL || this->_checkValidQueueLength(this->_structCommPartners[pos].u8TxQueueLength) == false || data == NULL)
+      if(this->_structCommPartners[pos].txQueue == nullptr || this->_checkValidQueueLength(this->_structCommPartners[pos].u8TxQueueLength) == false || data == nullptr)
       {
          #ifdef LOG_INFO
          printf("Action now allowed \nOne of the following things happened:\n"
@@ -269,18 +269,18 @@ namespace FRTT {
       if(this->_structCommPartners[pos].u8TxQueueLength == this->_getAmountOfMessages(this->_structCommPartners[pos].txQueue))
       {
          /* does not end when data arrives, so if timeToWaitWrite == MAXWAIT -----> doesnt go further than below code */
+         /* c++11 no aggregate initialization possible */
+         struct FRTTDataContainerOnQueue tempDataContainerOnQueue;
+         tempDataContainerOnQueue.senderAddress = this->_ownerAddress;
+         tempDataContainerOnQueue.data = data;
+         tempDataContainerOnQueue.u8DataType = u8DataType;
 
-         FRTTDataContainerOnQueue tempDataContainerOnQueue = 
-         {
-            .senderAddress = this->_ownerAddress,
-            .data = data,
-            .u8DataType = u8DataType,
-            #if defined(FRTTRANSCEIVER_32BITADDITIONALDATA)
-            .u32AdditionalData = u32AdditionalData,
-            #elif defined(FRTTRANSCEIVER_64BITADDITIONALDATA)
-            .u64AdditionalData = u64AdditionalData,
-            #endif
-         };
+         #if defined(FRTTRANSCEIVER_32BITADDITIONALDATA)
+         tempDataContainerOnQueue.u32AdditionalData = u32AdditionalData;
+         #elif defined(FRTTRANSCEIVER_64BITADDITIONALDATA)
+         tempDataContainerOnQueue.u64AdditionalData = u64AdditionalData;
+         #endif
+
          
          FRTTBaseType returnVal = xQueueSendToBack(this->_structCommPartners[pos].txQueue,(const void *)&tempDataContainerOnQueue,timeToWaitWrite);
 
@@ -294,17 +294,15 @@ namespace FRTT {
                return false;
             }
             
-            this->_structCommPartners[pos].txLineContainer[this->_structCommPartners[pos].u8TxQueueLength - 1] =
-            {
-               .senderAddress = this->_ownerAddress,
-               .data = data,
-               .u8DataType = u8DataType,
-               #if defined(FRTTRANSCEIVER_32BITADDITIONALDATA)
-               .u32AdditionalData = u32AdditionalData,
-               #elif defined(FRTTRANSCEIVER_64BITADDITIONALDATA)
-               .u64AdditionalData = u64AdditionalData,
-               #endif
-            };
+            /* c++11 no aggregate initialization possible */
+            this->_structCommPartners[pos].txLineContainer[this->_structCommPartners[pos].u8TxQueueLength - 1].senderAddress = this->_ownerAddress;
+            this->_structCommPartners[pos].txLineContainer[this->_structCommPartners[pos].u8TxQueueLength - 1].data = data;
+            this->_structCommPartners[pos].txLineContainer[this->_structCommPartners[pos].u8TxQueueLength - 1].u8DataType = u8DataType;
+            #if defined(FRTTRANSCEIVER_32BITADDITIONALDATA)
+            this->_structCommPartners[pos].txLineContainer[this->_structCommPartners[pos].u8TxQueueLength - 1].u32AdditionalData = u32AdditionalData;
+            #elif defined(FRTTRANSCEIVER_64BITADDITIONALDATA)
+            this->_structCommPartners[pos].txLineContainer[this->_structCommPartners[pos].u8TxQueueLength - 1].u64AdditionalData = u64AdditionalData,
+            #endif
 
             #ifdef FRTTRANSCEIVER_ANALYTICS_ENABLE
             this->_structCommPartners[pos].dataPackagesSent++;
@@ -328,18 +326,17 @@ namespace FRTT {
 
       /* space left for another element */
       uint8_t u8MessagesOnQueue = this->_getAmountOfMessages(this->_structCommPartners[pos].txQueue);
+      
+      /* c++11 no aggregate initialization possible */
+      this->_structCommPartners[pos].txLineContainer[u8MessagesOnQueue].senderAddress = this->_ownerAddress;
+      this->_structCommPartners[pos].txLineContainer[u8MessagesOnQueue].data = data;
+      this->_structCommPartners[pos].txLineContainer[u8MessagesOnQueue].u8DataType = u8DataType;
+      #if defined(FRTTRANSCEIVER_32BITADDITIONALDATA)
+      this->_structCommPartners[pos].txLineContainer[u8MessagesOnQueue].u32AdditionalData = u32AdditionalData;
+      #elif defined(FRTTRANSCEIVER_64BITADDITIONALDATA)
+      this->_structCommPartners[pos].txLineContainer[u8MessagesOnQueue].u64AdditionalData = u64AdditionalData;
+      #endif
 
-      this->_structCommPartners[pos].txLineContainer[u8MessagesOnQueue] =
-      {  
-         .senderAddress = this->_ownerAddress,
-         .data = data,
-         .u8DataType = u8DataType,
-         #if defined(FRTTRANSCEIVER_32BITADDITIONALDATA)
-         .u32AdditionalData = u32AdditionalData,
-         #elif defined(FRTTRANSCEIVER_64BITADDITIONALDATA)
-         .u64AdditionalData = u64AdditionalData,
-         #endif
-      };
 
       /* At this point we should just be able to put data on the queue without waiting. */
       FRTTBaseType returnVal = xQueueSendToBack(this->_structCommPartners[pos].txQueue,(const void *)&this->_structCommPartners[pos].txLineContainer[u8MessagesOnQueue],
@@ -369,7 +366,7 @@ namespace FRTT {
       
       for(uint8_t u8I = 0; u8I < this->_u8CurrCommPartners ; u8I++)
       {
-         if(this->_structCommPartners[u8I].bReadOnlyCommunication == false || this->_structCommPartners[u8I].txQueue != NULL)
+         if(this->_structCommPartners[u8I].bReadOnlyCommunication == false || this->_structCommPartners[u8I].txQueue != nullptr)
          {
             #ifdef FRTTRANSCEIVER_32BITADDITIONALDATA
             if(this->writeToQueue(this->_structCommPartners[u8I].commPartner,u8DataType,data,blockTimeWrite,blockTimeTakeSemaphore,u32AdditionalData)){
@@ -402,7 +399,7 @@ namespace FRTT {
 
       int pos = this->_getCommStruct(partner,multiSenderQueue,bUseTaskHandleVar);
 
-      if(pos == -1 || this->_structCommPartners[pos].rxQueue == NULL)
+      if(pos == -1 || this->_structCommPartners[pos].rxQueue == nullptr)
       {
          return false;
 
@@ -438,7 +435,7 @@ namespace FRTT {
       }
 
       /* Here it needs to be checked whether we still have space in the tempcontainer array or not*/
-      if(this->_structCommPartners[pos].rxBufferFull)
+      if(this->_structCommPartners[pos].bRxBufferFull)
       {
          /* remove oldest data */
          this->_dataDestroyer(this->_structCommPartners[pos].tempContainer[0]);
@@ -451,11 +448,11 @@ namespace FRTT {
       }
 
       this->_dataAllocator(this->_structCommPartners[pos].rxLineContainer,this->_structCommPartners[pos].tempContainer[++this->_structCommPartners[pos].i8CurrTempcontainerPos]);
-      this->_structCommPartners[pos].hasBufferedData = true;
+      this->_structCommPartners[pos].bHasBufferedData = true;
 
       if(this->_structCommPartners[pos].i8CurrTempcontainerPos+1 == this->_structCommPartners[pos].u8RxQueueLength)
       {
-         this->_structCommPartners[pos].rxBufferFull = true;
+         this->_structCommPartners[pos].bRxBufferFull = true;
       }
       #ifdef FRTTRANSCEIVER_ANALYTICS_ENABLE
       this->_structCommPartners[pos].dataPackagesReceived++;
@@ -481,7 +478,7 @@ namespace FRTT {
          return false;
       }
 
-      if(((bTxQueue) && this->_structCommPartners[pos].txQueue == NULL) || ((!bTxQueue) && this->_structCommPartners[pos].rxQueue == NULL))
+      if(((bTxQueue) && this->_structCommPartners[pos].txQueue == nullptr) || ((!bTxQueue) && this->_structCommPartners[pos].rxQueue == nullptr))
       {
          return false;
       }
@@ -503,7 +500,7 @@ namespace FRTT {
    }
    bool FRTTransceiver::delOldestDatabuffForLine(eMultiSenderQueue multiSenderQueue)
    {
-      return this->delDatabuffForLine(NULL,multiSenderQueue,false,0);
+      return this->delDatabuffForLine(nullptr,multiSenderQueue,false,0);
    }
 
    bool FRTTransceiver::delNewestDatabuffForLine(FRTTTaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar)
@@ -525,13 +522,13 @@ namespace FRTT {
          return false;
       }
 
-      if(this->_structCommPartners[pos].hasBufferedData && u8PositionInBuffer <= this->_structCommPartners[pos].i8CurrTempcontainerPos)
+      if(this->_structCommPartners[pos].bHasBufferedData && u8PositionInBuffer <= this->_structCommPartners[pos].i8CurrTempcontainerPos)
       {
          this->_dataDestroyer(this->_structCommPartners[pos].tempContainer[u8PositionInBuffer]);
          
          if(this->_structCommPartners[pos].i8CurrTempcontainerPos == 0)
          {
-            this->_structCommPartners[pos].hasBufferedData = false;
+            this->_structCommPartners[pos].bHasBufferedData = false;
 
          }
          else
@@ -539,7 +536,7 @@ namespace FRTT {
             this->_rearrangeTempContainerArray(pos,u8PositionInBuffer);
          }
          this->_structCommPartners[pos].i8CurrTempcontainerPos--;
-         this->_structCommPartners[pos].rxBufferFull = false;
+         this->_structCommPartners[pos].bRxBufferFull = false;
          return true;
       }
       return false;
@@ -554,14 +551,14 @@ namespace FRTT {
          return false;
       }
 
-      if(this->_structCommPartners[pos].hasBufferedData)
+      if(this->_structCommPartners[pos].bHasBufferedData)
       {  
          for(uint8_t u8I = 0;u8I <= this->_structCommPartners[pos].i8CurrTempcontainerPos;u8I++)
          {
             this->_dataDestroyer(this->_structCommPartners[pos].tempContainer[u8I]);
          }
-         this->_structCommPartners[pos].hasBufferedData = false;
-         this->_structCommPartners[pos].rxBufferFull = false;
+         this->_structCommPartners[pos].bHasBufferedData = false;
+         this->_structCommPartners[pos].bRxBufferFull = false;
          this->_structCommPartners[pos].i8CurrTempcontainerPos = -1;
          return true;
       }
@@ -579,7 +576,7 @@ namespace FRTT {
       }
 
       FRTTQueueHandle temp = (bCheckTxQueue ? this->_structCommPartners[pos].txQueue:this->_structCommPartners[pos].rxQueue);
-      if(temp == NULL)
+      if(temp == nullptr)
       {
          return -1;
       }
@@ -589,14 +586,14 @@ namespace FRTT {
 
    int FRTTransceiver::messagesOnQueue(eMultiSenderQueue multiSenderQueue)
    {
-      int pos = this->_getCommStruct(NULL,multiSenderQueue,false);
+      int pos = this->_getCommStruct(nullptr,multiSenderQueue,false);
 
       if(pos == -1)
       {
          return -1;
       }
 
-      if(this->_structCommPartners[pos].rxQueue == NULL)
+      if(this->_structCommPartners[pos].rxQueue == nullptr)
       {
          return -1;
       }
@@ -613,7 +610,7 @@ namespace FRTT {
          return false;
       }
 
-      return this->_structCommPartners[pos].hasBufferedData;
+      return this->_structCommPartners[pos].bHasBufferedData;
    }
 
 
@@ -626,7 +623,7 @@ namespace FRTT {
          return -1;
       }
 
-      return (this->_structCommPartners[pos].hasBufferedData ? this->_structCommPartners[pos].i8CurrTempcontainerPos + 1:0);
+      return (this->_structCommPartners[pos].bHasBufferedData ? this->_structCommPartners[pos].i8CurrTempcontainerPos + 1:0);
    }
 
    int FRTTransceiver::bufferedDataInAllBuffers()
@@ -634,7 +631,7 @@ namespace FRTT {
       int amountOfDataAvail = 0;
       for(uint8_t u8I = 0;u8I < this->_u8CurrCommPartners;u8I++)
       {
-         if(this->_structCommPartners[u8I].hasBufferedData){
+         if(this->_structCommPartners[u8I].bHasBufferedData){
             amountOfDataAvail += this->_structCommPartners[u8I].i8CurrTempcontainerPos + 1;
          }
       }
@@ -698,7 +695,7 @@ namespace FRTT {
       }
 
       int counter = 0;
-      if(this->_structCommPartners[pos].hasBufferedData)
+      if(this->_structCommPartners[pos].bHasBufferedData)
       {
          for(uint8_t u8I = 0;u8I <= this->_structCommPartners[pos].i8CurrTempcontainerPos;u8I++)
          {
@@ -718,14 +715,14 @@ namespace FRTT {
 
       if(pos == -1)
       {
-         return NULL;
+         return nullptr;
       }
 
-      if(this->_structCommPartners[pos].hasBufferedData)
+      if(this->_structCommPartners[pos].bHasBufferedData)
       {
          return (const FRTTTempDataContainer *)&this->_structCommPartners[pos].tempContainer[this->_structCommPartners[pos].i8CurrTempcontainerPos];
       }
-      return NULL;
+      return nullptr;
    }
 
 
@@ -735,14 +732,14 @@ namespace FRTT {
 
       if(pos == -1)
       {
-         return NULL;
+         return nullptr;
       }
 
-      if(this->_structCommPartners[pos].hasBufferedData)
+      if(this->_structCommPartners[pos].bHasBufferedData)
       {
          return (const FRTTTempDataContainer *)&this->_structCommPartners[pos].tempContainer[0];
       }
-      return NULL;
+      return nullptr;
    }
 
    const FRTTTempDataContainer * FRTTransceiver::getBufferedDataFrom(FRTTTaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar, 
@@ -752,15 +749,15 @@ namespace FRTT {
       
       if(pos == -1)
       {
-         return NULL;
+         return nullptr;
       }
 
-      if(this->_structCommPartners[pos].hasBufferedData && u8PositionInBuffer <= this->_structCommPartners[pos].i8CurrTempcontainerPos)
+      if(this->_structCommPartners[pos].bHasBufferedData && u8PositionInBuffer <= this->_structCommPartners[pos].i8CurrTempcontainerPos)
       {
          return (const FRTTTempDataContainer *)&this->_structCommPartners[pos].tempContainer[u8PositionInBuffer];
       }
       
-      return NULL;
+      return nullptr;
    }
 
    void FRTTransceiver::addDataAllocateCallback(void(*fP)(const FRTTDataContainerOnQueue &,FRTTTempDataContainer &))
@@ -794,11 +791,11 @@ namespace FRTT {
       {
          if(bTxQueue)
          {
-            if(!(this->_structCommPartners[u8I].txQueue == NULL)) amount++;
+            if(!(this->_structCommPartners[u8I].txQueue == nullptr)) amount++;
          }
          else
          {
-            if(!(this->_structCommPartners[u8I].rxQueue == NULL)) amount++;
+            if(!(this->_structCommPartners[u8I].rxQueue == nullptr)) amount++;
          }
       }
       return amount;
@@ -836,7 +833,7 @@ namespace FRTT {
    {
       /* General Infos */
       printf("General Infos\n\n");
-      printf("\tOwner address           \t\t%p\n",this->_ownerAddress == NULL ? FRTTRANSCEIVER_UNKNOWNADDRESS : this->_ownerAddress);
+      printf("\tOwner address           \t\t%p\n",this->_ownerAddress == nullptr ? FRTTRANSCEIVER_UNKNOWNADDRESS : this->_ownerAddress);
       printf("\tCommunicationpartner    \t\t(%d out of %d)\n",this->_u8CurrCommPartners,this->_u8MaxPartners);
       printf("\t\t- - - > (%d of those read only)\n",this->_u8MultiSenderQueues);
       printf("\tMax partners            \t\t%d\n",this->_u8MaxPartners);
@@ -851,7 +848,7 @@ namespace FRTT {
       {
          printf("Line [%d]\n",u8I+1);
          printf("\tName                    \t\t%s\n",this->_structCommPartners[u8I].partnersName.c_str());
-         printf("\tAddress                 \t\t%p\n",this->_structCommPartners[u8I].commPartner == NULL ? FRTTRANSCEIVER_UNKNOWNADDRESS : this->_structCommPartners[u8I].commPartner);
+         printf("\tAddress                 \t\t%p\n",this->_structCommPartners[u8I].commPartner == nullptr ? FRTTRANSCEIVER_UNKNOWNADDRESS : this->_structCommPartners[u8I].commPartner);
 
          if(!this->_structCommPartners[u8I].bReadOnlyCommunication)
          {
@@ -861,13 +858,13 @@ namespace FRTT {
          {
             printf("\tComm-Type               \t\t%s\n",FRTTRANSCEIVER_COMMTYPE2);
          }
-         printf("\tTX-LINE                 \t\t%s\n",this->_structCommPartners[u8I].txQueue == NULL ? "OFF":"ON");
+         printf("\tTX-LINE                 \t\t%s\n",this->_structCommPartners[u8I].txQueue == nullptr ? "OFF":"ON");
          printf("\t\tLength                %d\n",this->_structCommPartners[u8I].u8TxQueueLength);
-         printf("\tRX-LINE                 \t\t%s\n",this->_structCommPartners[u8I].rxQueue == NULL ? "OFF":"ON");
+         printf("\tRX-LINE                 \t\t%s\n",this->_structCommPartners[u8I].rxQueue == nullptr ? "OFF":"ON");
          printf("\t\tLength                %d\n",this->_structCommPartners[u8I].u8RxQueueLength);
          printf("\tPackages sent           \t\t%d\n",this->_structCommPartners[u8I].dataPackagesSent);
          printf("\tPackages received       \t\t%d\n",this->_structCommPartners[u8I].dataPackagesReceived);
-         printf("\tHas buffered data       \t\t%s\n",this->_structCommPartners[u8I].hasBufferedData ? "YES":"NO");
+         printf("\tHas buffered data       \t\t%s\n",this->_structCommPartners[u8I].bHasBufferedData ? "YES":"NO");
       }
    }
 }

@@ -46,7 +46,7 @@
 
 void SENDER(void *)
 {
-    while(TASK_SENDER == NULL || TASK_RECEIVER == NULL) vTaskDelay(pdMS_TO_TICKS(1));
+    while(TASK_SENDER == nullptr || TASK_RECEIVER == nullptr) vTaskDelay(pdMS_TO_TICKS(1));
 
     FRTTransceiver comm(TASK_SENDER,1);
     comm.addDataAllocateCallback(dataAllocator);
@@ -74,7 +74,7 @@ void SENDER(void *)
             {
                 const FRTTTempDataContainer * t = comm.getNewestBufferedDataFrom(TASK_RECEIVER,eMultiSenderQueue::eNOMULTIQSELECTED,true);
                 
-                if(t != NULL)
+                if(t != nullptr)
                 {
                     uint8_t u8COMMAND = *((uint8_t *)t->data);
 
@@ -99,12 +99,12 @@ void SENDER(void *)
         vTaskDelay(pdMS_TO_TICKS(750));
     }
     //comm.printCommunicationsSummary();
-    vTaskDelete(NULL);
+    vTaskDelete(nullptr);
 }
 
 void RECEIVER(void *)
 {
-    while(TASK_SENDER == NULL || TASK_RECEIVER == NULL) vTaskDelay(pdMS_TO_TICKS(1));
+    while(TASK_SENDER == nullptr || TASK_RECEIVER == nullptr) vTaskDelay(pdMS_TO_TICKS(1));
 
     vTaskDelay(pdMS_TO_TICKS(50)); /* So that no overlapping occurs if log_i()'s happen */
 
@@ -135,7 +135,7 @@ void RECEIVER(void *)
             {
                 const FRTTTempDataContainer * t = comm.getNewestBufferedDataFrom(TASK_SENDER,eMultiSenderQueue::eNOMULTIQSELECTED,true);
                 
-                if(t != NULL)
+                if(t != nullptr)
                 {
                     log_i("Data received by %p",t->senderAddress);
                     u8COMMAND = *((uint8_t *)t->data);
@@ -172,7 +172,7 @@ void RECEIVER(void *)
     vTaskDelay(pdMS_TO_TICKS(1000));
     comm.printCommunicationsSummary();
     comm.~FRTTransceiver();
-    vTaskDelete(NULL);
+    vTaskDelete(nullptr);
 }
 
 
@@ -187,8 +187,8 @@ void setup() {
     SEMAPHORE1 = FRTTCreateSemaphore();
     SEMAPHORE2 = FRTTCreateSemaphore();
 
-    xTaskCreatePinnedToCore(SENDER,"sender-task",25000,NULL,5,&TASK_SENDER,0);
-    xTaskCreatePinnedToCore(RECEIVER,"receiver-task",25000,NULL,4,&TASK_RECEIVER,1);
+    xTaskCreatePinnedToCore(SENDER,"sender-task",25000,nullptr,5,&TASK_SENDER,0);
+    xTaskCreatePinnedToCore(RECEIVER,"receiver-task",25000,nullptr,4,&TASK_RECEIVER,1);
 }
 
 /* This loop is running when no other task is on */
@@ -196,3 +196,67 @@ void loop() {
     delay(10000);
 }
 
+
+
+void dataAllocator (const FRTTDataContainerOnQueue & origingalContainer_onQueue ,FRTTTempDataContainer & internalBuffer){
+
+    /**
+     *      In order to use the library in its current version you need to supply both a
+     *      data allocator and data destroyer callback function.
+     *      
+     *      To do:
+     *          
+     *          (1): 
+     *               - Copy u8Datatype variable
+     *               - Copy additionalData variable
+     *               - Copy senderAdress variable
+     *          
+     *          (2): 
+     *               - Provide some sort of way to copy the main data over:
+     *                    ---> Just copy the pointer over
+     *                    ---> Use malloc (not recommended)
+     *                    ---> Later implementations might provide some sort of internal memory pool implementation
+     */ 
+
+    internalBuffer.u8DataType = origingalContainer_onQueue.u8DataType;
+    internalBuffer.u32AdditionalData = origingalContainer_onQueue.u32AdditionalData;
+    internalBuffer.senderAddress = origingalContainer_onQueue.senderAddress;
+    internalBuffer.data = origingalContainer_onQueue.data;
+
+    switch (origingalContainer_onQueue.u8DataType)
+    {
+        case eCOMMAND:
+            //  internalBuffer.data = (int *)malloc(sizeof(uint8_t));
+            //  *((uint8_t *)internalBuffer.data) = *((uint8_t *)origingalContainer_onQueue.data);
+            break;
+        default:
+            break;
+    }
+}
+
+void dataDestroyer(FRTTTempDataContainer & internalBuffer) {
+
+    /**
+     *      In order to use the library in its current version you need to supply both a
+     *      data allocator and data destroyer callback function.
+     *      
+     *      To do:
+     *          
+     *          (1): 
+     *               - Reverse the actions made in the allocator callback function (malloc() ---> free()) 
+     */
+
+    internalBuffer.u8DataType = 0;
+    internalBuffer.u32AdditionalData = 0;
+    internalBuffer.senderAddress = nullptr;
+  
+    switch(internalBuffer.u8DataType)
+    {
+        case eCOMMAND:
+            //  free((uint8_t *)internalBuffer.data); 
+            internalBuffer.data = nullptr;
+            break;
+        default:
+            break;
+    }
+}

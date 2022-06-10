@@ -32,13 +32,13 @@ namespace FRTT {
     /*! \brief Structure holding a data package that will be put on a queue */
     struct FRTTDataContainerOnQueue
     {
-        FRTTTaskHandle senderAddress;                         /*!< Address of the task which is the source of the data package */
-        void * data;                                          /*!< Pointer to the original data that is being send over the queue*/
-        uint8_t u8DataType;                                   /*!< Datatype of the data that the void pointer points to*/
+        FRTTTaskHandle senderAddress = (FRTTTaskHandle)FRTTRANSCEIVER_UNKNOWNADDRESS;   /*!< Address of the task which is the source of the data package */
+        void * data = nullptr;                                                          /*!< Pointer to the original data that is being send over the queue*/
+        uint8_t u8DataType = 0;                                                         /*!< Datatype of the data that the void pointer points to*/
         #if defined(FRTTRANSCEIVER_32BITADDITIONALDATA)
-        uint32_t u32AdditionalData;                           /*!< 32 Bit additional data. Can be used for different data (TURN ON/OFF in FRTTransceiverSettings.h)*/
+        uint32_t u32AdditionalData = 0;                                                 /*!< 32 Bit additional data. Can be used for different data (TURN ON/OFF in FRTTransceiverSettings.h)*/
         #elif defined(FRTTRANSCEIVER_64BITADDITIONALDATA)
-        uint64_t u64AdditionalData;                           /*!< 64 Bit additional data. Can be used for different data (TURN ON/OFF in FRTTransceiverSettings.h)*/
+        uint64_t u64AdditionalData = 0;                                                 /*!< 64 Bit additional data. Can be used for different data (TURN ON/OFF in FRTTransceiverSettings.h)*/
         #endif
     };
 
@@ -48,13 +48,13 @@ namespace FRTT {
     /*! \brief Structure holding all important data regarding a communication line*/
     struct FRTTCommunicationPartner
     {
-        FRTTTaskHandle commPartner = NULL;                                                      /*!< Holds the address of the partner task or NULL in the case of a multi-sender-queue*/
+        FRTTTaskHandle commPartner = nullptr;                                                   /*!< Holds the address of the partner task or NULL in the case of a multi-sender-queue*/
         string partnersName;                                                                    /*!< Holds the self set name of the partner task or FRTTRANSCEIVER_DEFAULTPARTNERNAMExxxxxxxx*/
 
         bool bReadOnlyCommunication = false;                                                    /*!< Is set to true if the communication line is meant for a readonly multi-sender-queue. RX*/
 
-        FRTTSemaphoreHandle semaphoreRxQueue = NULL;                                            /*!< Semaphore to get access to the rx queue (partner sets it as the semaphore for the tx queue)*/
-        FRTTSemaphoreHandle semaphoreTxQueue = NULL;                                            /*!< Semaphore to get access to the tx queue (partner sets it as the semaphore for the rx queue)*/
+        FRTTSemaphoreHandle semaphoreRxQueue = nullptr;                                         /*!< Semaphore to get access to the rx queue (partner sets it as the semaphore for the tx queue)*/
+        FRTTSemaphoreHandle semaphoreTxQueue = nullptr;                                         /*!< Semaphore to get access to the tx queue (partner sets it as the semaphore for the rx queue)*/
 
         uint8_t u8TxQueueLength = 0;                                                            /*!< Length of the tx queue (> 0)*/
         uint8_t u8RxQueueLength = 0;                                                            /*!< Length of the rx queue (> 0)*/
@@ -62,8 +62,8 @@ namespace FRTT {
         struct FRTTDataContainerOnQueue txLineContainer[FRTTRANSCEIVER_MAXELEMENTSIZEONQUEUE];  /*!< Array holding data packages that are currently lying / have previously lain on the queue*/
         struct FRTTDataContainerOnQueue rxLineContainer;                                        /*!< Intermediate container between queue and internal buffers */
 
-        FRTTQueueHandle rxQueue = NULL;                                                         /*!< Holds the address of the rx queue*/
-        FRTTQueueHandle txQueue = NULL;                                                         /*!< Holds the address of the tx queue*/
+        FRTTQueueHandle rxQueue = nullptr;                                                      /*!< Holds the address of the rx queue*/
+        FRTTQueueHandle txQueue = nullptr;                                                      /*!< Holds the address of the tx queue*/
 
         FRTTTempDataContainer tempContainer[FRTTRANSCEIVER_MAXELEMENTSIZEONQUEUE];              /*!< Internal buffers. Data read from the queue end up in this buffer */
 
@@ -72,8 +72,8 @@ namespace FRTT {
         int dataPackagesSent = 0;                                                               /*!< Hold the amount of data packages sent. (TURN ON/OFF in FRTTransceiverSettings.h)*/
         #endif
 
-        bool hasBufferedData = false;                                                           /*!< Signals whether we have buffered data for that specific communication line*/
-        bool rxBufferFull = false;                                                              /*!< Signals whether the internal buffer is full. Only for internal use. */
+        bool bHasBufferedData = false;                                                          /*!< Signals whether we have buffered data for that specific communication line*/
+        bool bRxBufferFull = false;                                                             /*!< Signals whether the internal buffer is full. Only for internal use. */
         int8_t i8CurrTempcontainerPos = -1;                                                     /*!< Stores the current position in the internal buffer in which to write next */
     };
 
