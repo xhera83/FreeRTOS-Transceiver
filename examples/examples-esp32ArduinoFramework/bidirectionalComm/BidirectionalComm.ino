@@ -68,17 +68,17 @@ void SENDER(void *)
     {
         if(comm.messagesOnQueue(TASK_RECEIVER,false) > 0)
         {
-            bool retVal = comm.readFromQueue(TASK_RECEIVER,eNOMULTIQSELECTED,true,100,100);
+            bool retVal = comm.readFromQueue(TASK_RECEIVER,eMultiSenderQueue::eNOMULTIQSELECTED,true,100,100);
 
-            if(retVal && comm.hasDataFrom(TASK_RECEIVER,eNOMULTIQSELECTED,true))
+            if(retVal && comm.hasDataFrom(TASK_RECEIVER,eMultiSenderQueue::eNOMULTIQSELECTED,true))
             {
-                const FRTTransceiver_TempDataContainer * t = comm.getNewestBufferedDataFrom(TASK_RECEIVER,eNOMULTIQSELECTED,true);
+                const FRTTransceiver_TempDataContainer * t = comm.getNewestBufferedDataFrom(TASK_RECEIVER,eMultiSenderQueue::eNOMULTIQSELECTED,true);
                 
                 if(t != NULL)
                 {
                     uint8_t u8COMMAND = *((uint8_t *)t->data);
 
-                    comm.manualDeleteAllocatedDatabufferForLine(TASK_RECEIVER,eNOMULTIQSELECTED,true,0);
+                    comm.manualDeleteAllocatedDatabufferForLine(TASK_RECEIVER,eMultiSenderQueue::eNOMULTIQSELECTED,true,0);
 
                     if(u8COMMAND  == COMMAND_SEND)
                     {
@@ -129,11 +129,11 @@ void RECEIVER(void *)
     {
         if(comm.messagesOnQueue(TASK_SENDER,false) > 0)
         {
-            bool retVal = comm.readFromQueue(TASK_SENDER,eNOMULTIQSELECTED,true,100,100);
+            bool retVal = comm.readFromQueue(TASK_SENDER,eMultiSenderQueue::eNOMULTIQSELECTED,true,100,100);
 
-            if(retVal && comm.hasDataFrom(TASK_SENDER,eNOMULTIQSELECTED,true))
+            if(retVal && comm.hasDataFrom(TASK_SENDER,eMultiSenderQueue::eNOMULTIQSELECTED,true))
             {
-                const FRTTransceiver_TempDataContainer * t = comm.getNewestBufferedDataFrom(TASK_SENDER,eNOMULTIQSELECTED,true);
+                const FRTTransceiver_TempDataContainer * t = comm.getNewestBufferedDataFrom(TASK_SENDER,eMultiSenderQueue::eNOMULTIQSELECTED,true);
                 
                 if(t != NULL)
                 {
@@ -150,7 +150,7 @@ void RECEIVER(void *)
                             break;
                     }
                     u8Counter++;
-                    comm.manualDeleteAllAllocatedDatabuffersForLine(TASK_SENDER,eNOMULTIQSELECTED,true);
+                    comm.manualDeleteAllAllocatedDatabuffersForLine(TASK_SENDER,eMultiSenderQueue::eNOMULTIQSELECTED,true);
                     if(u8Counter == 9)
                     {
                         u8COMMAND = COMMAND_STOP;

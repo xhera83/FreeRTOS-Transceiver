@@ -99,15 +99,15 @@ void Master(void *)
 
     for(;;)
     {   
-        if(comm.messagesOnQueue(eMULTISENDERQ0) > 0)
+        if(comm.messagesOnQueue(eMultiSenderQueue::eMULTISENDERQ0) > 0)
         {   
 
-            res = comm.readFromQueue(NULL,eMULTISENDERQ0,false,FRTTRANSCEIVER_WAITMAX,FRTTRANSCEIVER_WAITMAX);
+            res = comm.readFromQueue(NULL,eMultiSenderQueue::eMULTISENDERQ0,false,FRTTRANSCEIVER_WAITMAX,FRTTRANSCEIVER_WAITMAX);
 
             if(res)
             {   
                 u8PackagesReceived++;
-                const FRTTransceiver_TempDataContainer * t = comm.getOldestBufferedDataFrom(NULL,eMULTISENDERQ0,false);
+                const FRTTransceiver_TempDataContainer * t = comm.getOldestBufferedDataFrom(NULL,eMultiSenderQueue::eMULTISENDERQ0,false);
 
                 if(t != NULL)
                 {   
@@ -133,7 +133,7 @@ void Master(void *)
                     String temp = printBuffer((int * )t->data,t->u32AdditionalData);
                     log_i("%s",temp.c_str());
                 }
-                comm.manualDeleteAllAllocatedDatabuffersForLine(NULL,eMULTISENDERQ0,false);
+                comm.manualDeleteAllAllocatedDatabuffersForLine(NULL,eMultiSenderQueue::eMULTISENDERQ0,false);
             }
         }
         else if(u8PackagesReceived == 3 || u8Commands[u8CommandPos-1] == COMMAND_REFRESHDATA || u8Commands[u8CommandPos-1] == COMMAND_SLEEP)
@@ -238,4 +238,114 @@ void setup() {
 /* This loop is running when no other task is on */
 void loop() {
     delay(10000);
+}
+
+
+
+void dataAllocator (const FRTTransceiver_DataContainerOnQueue & origingalContainer_onQueue ,FRTTransceiver_TempDataContainer & internalBuffer){
+
+    /**
+     *      In order to use the library in its current version you need to supply both a
+     *      data allocator and data destroyer callback function.
+     *      
+     *      To do:
+     *          
+     *          (1): 
+     *               - Copy u8Datatype variable
+     *               - Copy additionalData variable
+     *               - Copy senderAdress variable
+     *          
+     *          (2): 
+     *               - Provide some sort of way to copy the main data over:
+     *                    ---> Just copy the pointer over
+     *                    ---> Use malloc (not recommended)
+     *                    ---> Later implementations might provide some sort of internal memory pool implementation
+     */ 
+
+    internalBuffer.u8DataType = origingalContainer_onQueue.u8DataType;
+    internalBuffer.u32AdditionalData = origingalContainer_onQueue.u32AdditionalData;
+    internalBuffer.senderAddress = origingalContainer_onQueue.senderAddress;
+    internalBuffer.data = origingalContainer_onQueue.data;
+}
+
+void dataDestroyer(FRTTransceiver_TempDataContainer & internalBuffer) {
+
+    /**
+     *      In order to use the library in its current version you need to supply both a
+     *      data allocator and data destroyer callback function.
+     *      
+     *      To do:
+     *          
+     *          (1): 
+     *               - Reverse the actions made in the allocator callback function (malloc() ---> free()) 
+     */
+
+    internalBuffer.u8DataType = 0;
+    internalBuffer.u32AdditionalData = 0;
+    internalBuffer.senderAddress = NULL;
+    internalBuffer.data = NULL;
+}
+
+
+String printBuffer(int * u8Buffer, uint8_t u8Length)
+{   
+    String temp("");
+
+    temp += "BUFFER["; temp += u8Length; temp += "] : {";
+
+    for(uint8_t u8J = 0;u8J < u8Length;u8J++)
+    {
+        temp += u8Buffer[u8J];
+        if(u8J == u8Length - 1)
+        {
+            temp += "}";
+        }
+        else
+        {
+            temp += ",";
+        }
+    }
+    return temp;
+}
+
+void handleSlaveWork(FRTTransceiver * comm,int * buffer,uint8_t u8Length,FRTTransceiver_TaskHandle partnertask,eDataTypes datatype)
+{
+    for(;;)
+    {
+        
+        /* Check for command */
+        bool res = comm->readFromQueue(partnertask,eMultiSenderQueue::eNOMULTIQSELECTED,true,FRTTRANSCEIVER_WAITMAX,FRTTRANSCEIVER_WAITMAX);
+        if(res)
+        {   
+            const FRTTransceiver_TempDataContainer * t = comm->getOldestBufferedDataFrom(partnertask,eMultiSenderQueue::eNOMULTIQSELECTED,true);
+
+            if(t != NULL)
+            {
+                if(t->u8DataType == eCOMMAND)
+                {
+                    //log_i("Received an instruction by task %p",t->senderAddress);
+                    switch(*((uint8_t *)t->data))
+                    {
+                        case COMMAND_SEND:
+                            comm->writeToQueue(partnertask,datatype,&buffer[0],FRTTRANSCEIVER_WAITMAX,FRTTRANSCEIVER_WAITMAX,u8Length);
+                            break;
+                        case COMMAND_REFRESHDATA:
+                            /* Changing data */
+                            for(uint8_t u8I = 0; u8I < u8Length;u8I++)buffer[u8I] = buffer[u8I] + 5;
+                            break;
+                        case COMMAND_STOP:
+                            comm->manualDeleteAllAllocatedDatabuffersForLine(partnertask,eMultiSenderQueue::eNOMULTIQSELECTED,true);
+                            comm->~FRTTransceiver();
+                            break;
+                        case COMMAND_SLEEP:
+                            vTaskDelay(SLEEP_MS);
+                            break;
+                        default:
+                            break;
+                    }
+                    comm->manualDeleteAllAllocatedDatabuffersForLine(partnertask,eMultiSenderQueue::eNOMULTIQSELECTED,true);
+                }
+            }
+        }
+    }
 }

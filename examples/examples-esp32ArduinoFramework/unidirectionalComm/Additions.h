@@ -7,6 +7,8 @@
 
 #include "FRTTransceiver.h"
 
+using namespace FRTT;
+
 /* datatypes recognized throughout the example */
 typedef enum
 {
@@ -25,3 +27,6 @@ FRTTransceiver_SemaphoreHandle SEMAPHORE1;
 #define QUEUELENGTH  (1u)
 
 #define STOP_COMM_AT (5u)
+
+void dataDestroyer(FRTTransceiver_TempDataContainer & internalBuffer);
+void dataAllocator (const FRTTransceiver_DataContainerOnQueue & origingalContainer_onQueue ,FRTTransceiver_TempDataContainer & internalBuffer);

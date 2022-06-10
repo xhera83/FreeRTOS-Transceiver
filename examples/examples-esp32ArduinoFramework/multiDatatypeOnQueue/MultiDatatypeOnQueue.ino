@@ -141,29 +141,29 @@ void RECEIVER(void *)
     {
         if(comm.messagesOnQueue(TASK_SENDER,false) == 3)
         {
-            bool res1 = comm.readFromQueue(TASK_SENDER,eNOMULTIQSELECTED,true,FRTTRANSCEIVER_WAITMAX,FRTTRANSCEIVER_WAITMAX);
-            bool res2 = comm.readFromQueue(TASK_SENDER,eNOMULTIQSELECTED,true,FRTTRANSCEIVER_WAITMAX,FRTTRANSCEIVER_WAITMAX);
-            bool res3 = comm.readFromQueue(TASK_SENDER,eNOMULTIQSELECTED,true,FRTTRANSCEIVER_WAITMAX,FRTTRANSCEIVER_WAITMAX);
+            bool res1 = comm.readFromQueue(TASK_SENDER,eMultiSenderQueue::eNOMULTIQSELECTED,true,FRTTRANSCEIVER_WAITMAX,FRTTRANSCEIVER_WAITMAX);
+            bool res2 = comm.readFromQueue(TASK_SENDER,eMultiSenderQueue::eNOMULTIQSELECTED,true,FRTTRANSCEIVER_WAITMAX,FRTTRANSCEIVER_WAITMAX);
+            bool res3 = comm.readFromQueue(TASK_SENDER,eMultiSenderQueue::eNOMULTIQSELECTED,true,FRTTRANSCEIVER_WAITMAX,FRTTRANSCEIVER_WAITMAX);
 
             if(res1 && res2 && res3)
             {
                 log_i("All data read into internal buffers");
-                const FRTTransceiver_TempDataContainer * t1 = comm.getBufferedDataFrom(TASK_SENDER,eNOMULTIQSELECTED,true,0);
-                const FRTTransceiver_TempDataContainer * t2 = comm.getBufferedDataFrom(TASK_SENDER,eNOMULTIQSELECTED,true,1);
-                const FRTTransceiver_TempDataContainer * t3 = comm.getBufferedDataFrom(TASK_SENDER,eNOMULTIQSELECTED,true,2);
+                const FRTTransceiver_TempDataContainer * t1 = comm.getBufferedDataFrom(TASK_SENDER,eMultiSenderQueue::eNOMULTIQSELECTED,true,0);
+                const FRTTransceiver_TempDataContainer * t2 = comm.getBufferedDataFrom(TASK_SENDER,eMultiSenderQueue::eNOMULTIQSELECTED,true,1);
+                const FRTTransceiver_TempDataContainer * t3 = comm.getBufferedDataFrom(TASK_SENDER,eMultiSenderQueue::eNOMULTIQSELECTED,true,2);
                 
                 if(t1 && t2 && t3)
                 {
                     log_i("Package sender addresses (Package[1]:%p, Package[2]:%p, Package[3]:%p)",t1->senderAddress,t2->senderAddress,t3->senderAddress);
                     log_i("Additional data for each received package: Package[1]: %d Package[2]: %d Package[3]: %d",t1->u32AdditionalData,t2->u32AdditionalData,
                                                                                                                                             t3->u32AdditionalData);
-                    log_i("Occurence of eMESSAGE in buffer: %d",comm.checkIfDataTypeInBuffer(TASK_SENDER,eNOMULTIQSELECTED,true,eMESSAGE));
-                    log_i("Occurence of eSTRUCT in buffer: %d",comm.checkIfDataTypeInBuffer(TASK_SENDER,eNOMULTIQSELECTED,true,eSTRUCT));
-                    log_i("Occurence of eINT in buffer: %d",comm.checkIfDataTypeInBuffer(TASK_SENDER,eNOMULTIQSELECTED,true,eINT));
+                    log_i("Occurence of eMESSAGE in buffer: %d",comm.checkIfDataTypeInBuffer(TASK_SENDER,eMultiSenderQueue::eNOMULTIQSELECTED,true,eMESSAGE));
+                    log_i("Occurence of eSTRUCT in buffer: %d",comm.checkIfDataTypeInBuffer(TASK_SENDER,eMultiSenderQueue::eNOMULTIQSELECTED,true,eSTRUCT));
+                    log_i("Occurence of eINT in buffer: %d",comm.checkIfDataTypeInBuffer(TASK_SENDER,eMultiSenderQueue::eNOMULTIQSELECTED,true,eINT));
                     u8I++;
                 }
 
-                comm.manualDeleteAllAllocatedDatabuffersForLine(TASK_SENDER,eNOMULTIQSELECTED,true);
+                comm.manualDeleteAllAllocatedDatabuffersForLine(TASK_SENDER,eMultiSenderQueue::eNOMULTIQSELECTED,true);
             }
         }
         if(u8I == 7)

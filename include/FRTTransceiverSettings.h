@@ -51,22 +51,23 @@
 #define FRTTRANSCEIVER_UNKNOWNADDRESS                       (0x00000000)
 #endif
 
-/*!
- * \brief         Enumeration is used to select a multi-sender-queue for different class methods
- * \details       Normally one would need to select a communication line by supplying a ::FRTTransceiver_TaskHandle.
- *                A multi-sender-queue does not have a unique ::FRTTransceiver_TaskHandle, so that another way of selecting a communication line
- *                had to be introduced.<br>
- * \note          There should be a maximum of #FRTTRANSCEIVER_MAXELEMENTSIZEONQUEUE enumeration keys. <br>
- *                Increasing #FRTTRANSCEIVER_MAXELEMENTSIZEONQUEUE also requires one to adjust the amount of eMultiSenderQueue keys to match #FRTTRANSCEIVER_MAXELEMENTSIZEONQUEUE
- *                
- */
-enum eMultiSenderQueue 
-{
-    eNOMULTIQSELECTED   = -1,           /*!< It is just a filler enum key if one wants to use a FRTTransceiver_TaskHandle for selecting a communication line*/
-    eMULTISENDERQ0 = 0,                 /*!< Select the FIRST multi-sender-queue added with FRTTransceiver::addMultiSenderReadOnlyQueue()*/
-    eMULTISENDERQ1 = 1,                 /*!< Select the SECOND multi-sender-queue added with FRTTransceiver::addMultiSenderReadOnlyQueue()*/
-    eMULTISENDERQ2 = 2,                 /*!< Select the THIRD multi-sender-queue added with FRTTransceiver::addMultiSenderReadOnlyQueue()*/
-    eMULTISENDERQ3 = 3                  /*!< Select the FOURTH multi-sender-queue added with FRTTransceiver::addMultiSenderReadOnlyQueue()*/
-};
-
+namespace FRTT {
+    /*!
+    * \brief         Enumeration is used to select a multi-sender-queue for different class methods
+    * \details       Normally one would need to select a communication line by supplying a ::FRTTransceiver_TaskHandle.
+    *                A multi-sender-queue does not have a unique ::FRTTransceiver_TaskHandle, so that another way of selecting a communication line
+    *                had to be introduced.<br>
+    * \note          There should be a maximum of #FRTTRANSCEIVER_MAXELEMENTSIZEONQUEUE enumerator. <br>
+    *                Increasing #FRTTRANSCEIVER_MAXELEMENTSIZEONQUEUE also requires one to adjust the amount of eMultiSenderQueue enumerator to match #FRTTRANSCEIVER_MAXELEMENTSIZEONQUEUE
+    *                
+    */
+    enum class eMultiSenderQueue : int8_t 
+    {
+        eNOMULTIQSELECTED   = -1,           /*!< It is just a filler enumerator if one wants to use a FRTTransceiver_TaskHandle for selecting a communication line*/
+        eMULTISENDERQ0,                     /*!< Select the FIRST multi-sender-queue added with FRTTransceiver::addMultiSenderReadOnlyQueue()*/
+        eMULTISENDERQ1,                     /*!< Select the SECOND multi-sender-queue added with FRTTransceiver::addMultiSenderReadOnlyQueue()*/
+        eMULTISENDERQ2,                     /*!< Select the THIRD multi-sender-queue added with FRTTransceiver::addMultiSenderReadOnlyQueue()*/
+        eMULTISENDERQ3,                     /*!< Select the FOURTH multi-sender-queue added with FRTTransceiver::addMultiSenderReadOnlyQueue()*/
+    };
+}
 #endif

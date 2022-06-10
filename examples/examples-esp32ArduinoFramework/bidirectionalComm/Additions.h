@@ -7,6 +7,8 @@
 
 #include "FRTTransceiver.h"
 
+using namespace FRTT;
+
 /* datatypes recognized throughout the example */
 typedef enum
 {
