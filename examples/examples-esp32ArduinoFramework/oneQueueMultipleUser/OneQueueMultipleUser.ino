@@ -72,7 +72,7 @@ void Master(void *)
     comm.addDataAllocateCallback(dataAllocator);
     comm.addDataFreeCallback(dataDestroyer);
 
-    bool res = comm.addMultiSenderReadOnlyQueue(MULTISENDERQ,QUEUELENGTH_MULTISENDERQ,SEMAPHORE_MULTIQ,"Master-Slaves Channel");
+    bool res = comm.addMultiSenderPartner(MULTISENDERQ,QUEUELENGTH_MULTISENDERQ,SEMAPHORE_MULTIQ,"Master-Slaves Channel");
     res = res && comm.addCommPartner(TASK_UART_SLAVE,NULL,0,NULL,QUEUE_TO_UART,QUEUELENGTH_GENERAL,SEMAPHORE_UART,"UART TASK");
     res = res && comm.addCommPartner(TASK_SENSOR_SLAVE,NULL,0,NULL,QUEUE_TO_SENSOR,QUEUELENGTH_GENERAL,SEMAPHORE_SENSOR,"SENSOR TASK");
     res = res && comm.addCommPartner(TASK_MOTOR_SLAVE,NULL,0,NULL,QUEUE_TO_MOTOR,QUEUELENGTH_GENERAL,SEMAPHORE_MOTOR,"UART TASK");
@@ -107,7 +107,7 @@ void Master(void *)
             if(res)
             {   
                 u8PackagesReceived++;
-                const FRTTransceiver_TempDataContainer * t = comm.getOldestBufferedDataFrom(NULL,eMultiSenderQueue::eMULTISENDERQ0,false);
+                const FRTTTempDataContainer * t = comm.getOldestBufferedDataFrom(NULL,eMultiSenderQueue::eMULTISENDERQ0,false);
 
                 if(t != NULL)
                 {   
@@ -133,7 +133,7 @@ void Master(void *)
                     String temp = printBuffer((int * )t->data,t->u32AdditionalData);
                     log_i("%s",temp.c_str());
                 }
-                comm.manualDeleteAllAllocatedDatabuffersForLine(NULL,eMultiSenderQueue::eMULTISENDERQ0,false);
+                comm.delAllDatabuffForLine(NULL,eMultiSenderQueue::eMULTISENDERQ0,false);
             }
         }
         else if(u8PackagesReceived == 3 || u8Commands[u8CommandPos-1] == COMMAND_REFRESHDATA || u8Commands[u8CommandPos-1] == COMMAND_SLEEP)
@@ -218,15 +218,15 @@ void setup() {
     log_i("Setup() running.\n\n");
     disableCore0WDT();
     
-    MULTISENDERQ = FRTTransceiver_CreateQueue(QUEUELENGTH_MULTISENDERQ);
-    QUEUE_TO_MOTOR = FRTTransceiver_CreateQueue(QUEUELENGTH_GENERAL);
-    QUEUE_TO_UART = FRTTransceiver_CreateQueue(QUEUELENGTH_GENERAL);
-    QUEUE_TO_SENSOR = FRTTransceiver_CreateQueue(QUEUELENGTH_GENERAL);
+    MULTISENDERQ = FRTTCreateQueue(QUEUELENGTH_MULTISENDERQ);
+    QUEUE_TO_MOTOR = FRTTCreateQueue(QUEUELENGTH_GENERAL);
+    QUEUE_TO_UART = FRTTCreateQueue(QUEUELENGTH_GENERAL);
+    QUEUE_TO_SENSOR = FRTTCreateQueue(QUEUELENGTH_GENERAL);
     
-    SEMAPHORE_MULTIQ = FRTTransceiver_CreateSemaphore();
-    SEMAPHORE_MOTOR = FRTTransceiver_CreateSemaphore();
-    SEMAPHORE_UART = FRTTransceiver_CreateSemaphore();
-    SEMAPHORE_SENSOR = FRTTransceiver_CreateSemaphore();
+    SEMAPHORE_MULTIQ = FRTTCreateSemaphore();
+    SEMAPHORE_MOTOR = FRTTCreateSemaphore();
+    SEMAPHORE_UART = FRTTCreateSemaphore();
+    SEMAPHORE_SENSOR = FRTTCreateSemaphore();
     
     xTaskCreatePinnedToCore(Master,"master",5000,NULL,4,&TASK_MASTER,1);
 
@@ -242,7 +242,7 @@ void loop() {
 
 
 
-void dataAllocator (const FRTTransceiver_DataContainerOnQueue & origingalContainer_onQueue ,FRTTransceiver_TempDataContainer & internalBuffer){
+void dataAllocator (const FRTTDataContainerOnQueue & origingalContainer_onQueue ,FRTTTempDataContainer & internalBuffer){
 
     /**
      *      In order to use the library in its current version you need to supply both a
@@ -268,7 +268,7 @@ void dataAllocator (const FRTTransceiver_DataContainerOnQueue & origingalContain
     internalBuffer.data = origingalContainer_onQueue.data;
 }
 
-void dataDestroyer(FRTTransceiver_TempDataContainer & internalBuffer) {
+void dataDestroyer(FRTTTempDataContainer & internalBuffer) {
 
     /**
      *      In order to use the library in its current version you need to supply both a
@@ -308,7 +308,7 @@ String printBuffer(int * u8Buffer, uint8_t u8Length)
     return temp;
 }
 
-void handleSlaveWork(FRTTransceiver * comm,int * buffer,uint8_t u8Length,FRTTransceiver_TaskHandle partnertask,eDataTypes datatype)
+void handleSlaveWork(FRTTransceiver * comm,int * buffer,uint8_t u8Length,FRTTTaskHandle partnertask,eDataTypes datatype)
 {
     for(;;)
     {
@@ -317,7 +317,7 @@ void handleSlaveWork(FRTTransceiver * comm,int * buffer,uint8_t u8Length,FRTTran
         bool res = comm->readFromQueue(partnertask,eMultiSenderQueue::eNOMULTIQSELECTED,true,FRTTRANSCEIVER_WAITMAX,FRTTRANSCEIVER_WAITMAX);
         if(res)
         {   
-            const FRTTransceiver_TempDataContainer * t = comm->getOldestBufferedDataFrom(partnertask,eMultiSenderQueue::eNOMULTIQSELECTED,true);
+            const FRTTTempDataContainer * t = comm->getOldestBufferedDataFrom(partnertask,eMultiSenderQueue::eNOMULTIQSELECTED,true);
 
             if(t != NULL)
             {
@@ -334,7 +334,7 @@ void handleSlaveWork(FRTTransceiver * comm,int * buffer,uint8_t u8Length,FRTTran
                             for(uint8_t u8I = 0; u8I < u8Length;u8I++)buffer[u8I] = buffer[u8I] + 5;
                             break;
                         case COMMAND_STOP:
-                            comm->manualDeleteAllAllocatedDatabuffersForLine(partnertask,eMultiSenderQueue::eNOMULTIQSELECTED,true);
+                            comm->delAllDatabuffForLine(partnertask,eMultiSenderQueue::eNOMULTIQSELECTED,true);
                             comm->~FRTTransceiver();
                             break;
                         case COMMAND_SLEEP:
@@ -343,7 +343,7 @@ void handleSlaveWork(FRTTransceiver * comm,int * buffer,uint8_t u8Length,FRTTran
                         default:
                             break;
                     }
-                    comm->manualDeleteAllAllocatedDatabuffersForLine(partnertask,eMultiSenderQueue::eNOMULTIQSELECTED,true);
+                    comm->delAllDatabuffForLine(partnertask,eMultiSenderQueue::eNOMULTIQSELECTED,true);
                 }
             }
         }

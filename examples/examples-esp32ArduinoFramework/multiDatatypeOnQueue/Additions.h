@@ -24,12 +24,12 @@ struct TestDType
    int var2;
 };
 
-FRTTransceiver_TaskHandle TASK_SENDER;
-FRTTransceiver_TaskHandle TASK_RECEIVER;
+FRTTTaskHandle TASK_SENDER;
+FRTTTaskHandle TASK_RECEIVER;
 
-FRTTransceiver_QueueHandle QUEUE_TO_RECEIVER;
+FRTTQueueHandle QUEUE_TO_RECEIVER;
 
-FRTTransceiver_SemaphoreHandle SEMAPHORE1;
+FRTTSemaphoreHandle SEMAPHORE1;
 
 
 #define QUEUELENGTH  (3u)

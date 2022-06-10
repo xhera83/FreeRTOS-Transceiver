@@ -19,13 +19,13 @@ namespace FRTT {
     * \param   lengthOfQueue       Holds the desired queuelength
     * \return                      ::FRTTransceiver_QueueHandle or NULL                                      
     */
-    FRTTransceiver_QueueHandle FRTTransceiver_CreateQueue(FRTTransceiver_BaseType lengthOfQueue);
+    FRTTQueueHandle FRTTCreateQueue(FRTTBaseType lengthOfQueue);
     /*! 
     * \brief                       Creates a semaphore
     * \return                      Address to the semaphore or NULL
     * \note                        One needs to create one for the tx-line and one for the rx-line                                   
     */
-    FRTTransceiver_SemaphoreHandle FRTTransceiver_CreateSemaphore();
+    FRTTSemaphoreHandle FRTTCreateSemaphore();
 
     /*!
     * \brief   Class definition
@@ -33,8 +33,8 @@ namespace FRTT {
     class FRTTransceiver
     {
         private:                                                                 
-            FRTTransceiver_TaskHandle _ownerAddress = NULL;                       /*!< Address of the task owning this object */                                           
-            struct FRTTransceiver_CommunicationPartner * _structCommPartners;     /*!< Array of all connections */
+            FRTTTaskHandle _ownerAddress = NULL;                       /*!< Address of the task owning this object */                                           
+            struct FRTTCommunicationPartner * _structCommPartners;     /*!< Array of all connections */
             uint8_t _u8CurrCommPartners = 0;                                      /*!< Amount of communications connected to*/
             uint8_t _u8MaxPartners;                                               /*!< Max amount of possible connections*/
             uint8_t _u8MultiSenderQueues = 0;                                     /*!< Amount of multi-sender-queues (multiple tasks write on the tx line)*/
@@ -82,7 +82,7 @@ namespace FRTT {
             *                               If partner is used, bUseTaskHandleVar is set to true.<br>
             *                               If multiSenderQueue is used, bUseTaskHandleVar is set to false
             */
-            int _getCommStruct(FRTTransceiver_TaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar);
+            int _getCommStruct(FRTTTaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar);
             /*! 
             * \brief                        Checks if a semaphore is available for the selected line (rx/tx)
             * \param partner                Used to select the right entry in FRTTransceiver_CommunicationPartner
@@ -94,19 +94,19 @@ namespace FRTT {
             *                               If partner is used, bUseTaskHandleVar is set to true.<br>
             *                               If multiSenderQueue is used, bUseTaskHandleVar is set to false
             */
-            bool _hasSemaphore(FRTTransceiver_TaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar, bool txLine);
+            bool _hasSemaphore(FRTTTaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar, bool txLine);
             /*! 
             * \brief                        Checks if there are messages on the queue
             * \param queue                  Address of the queue to check
             * \return                       True if at least one message on the queue                         
             */
-            bool _checkForMessages(FRTTransceiver_QueueHandle queue);
+            bool _checkForMessages(FRTTQueueHandle queue);
             /*! 
             * \brief                        Returns the amount of messages on the queue
             * \param queue                  Address of the queue to check
             * \return                       Amount of messages or -1                         
             */
-            int _getAmountOfMessages(FRTTransceiver_QueueHandle queue);
+            int _getAmountOfMessages(FRTTQueueHandle queue);
             /*! 
             * \brief                        Checks if user supplied neccessary callback functions
             * \return                       True if callbacks available                           
@@ -122,7 +122,7 @@ namespace FRTT {
             *                               If partner is used, bUseTaskHandleVar is set to true.<br>
             *                               If multiSenderQueue is used, bUseTaskHandleVar is set to false
             */
-            string _getPartnersName(FRTTransceiver_TaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar);
+            string _getPartnersName(FRTTTaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar);
 
         public:
             /*! 
@@ -131,7 +131,7 @@ namespace FRTT {
             * \param ownerAddress           Address of the task owning this object
             * \param u8MaxPartners          Max possible connections                         
             */
-            FRTTransceiver(FRTTransceiver_TaskHandle ownerAddress = NULL,uint8_t u8MaxPartners = 1);
+            FRTTransceiver(FRTTTaskHandle ownerAddress = NULL,uint8_t u8MaxPartners = 1);
             /*! 
             * \brief                        Destructor
             * \details                      Will free memory previously allocated by the constructor
@@ -149,9 +149,9 @@ namespace FRTT {
             * \param partnersName           Partners name
             * \return                       True if communication was added
             */
-            bool addCommPartner(FRTTransceiver_TaskHandle partner = NULL,FRTTransceiver_QueueHandle queueRX = NULL,
-                        uint8_t u8QueueLengthRx = -1,FRTTransceiver_SemaphoreHandle semaphoreRx = NULL,FRTTransceiver_QueueHandle queueTX = NULL,
-                        uint8_t u8QueueLengthTx = -1,FRTTransceiver_SemaphoreHandle semaphoreTx = NULL,const string partnersName = string());
+            bool addCommPartner(FRTTTaskHandle partner = NULL,FRTTQueueHandle queueRX = NULL,
+                        uint8_t u8QueueLengthRx = -1,FRTTSemaphoreHandle semaphoreRx = NULL,FRTTQueueHandle queueTX = NULL,
+                        uint8_t u8QueueLengthTx = -1,FRTTSemaphoreHandle semaphoreTx = NULL,const string partnersName = string());
         
             /*! 
             * \brief                        Adds a new multi-sender-queue connection (multiple tasks write on the tx line)
@@ -164,7 +164,7 @@ namespace FRTT {
             *                               This communication line will therefore be read-only
             *                               
             */
-            bool addMultiSenderReadOnlyQueue(FRTTransceiver_QueueHandle queueRX,uint8_t u8QueueLengthRx,FRTTransceiver_SemaphoreHandle semaphoreRx,
+            bool addMultiSenderPartner(FRTTQueueHandle queueRX,uint8_t u8QueueLengthRx,FRTTSemaphoreHandle semaphoreRx,
                         const string multiSenderQueueName = string());
 
             #if defined(FRTTRANSCEIVER_32BITADDITIONALDATA)
@@ -181,7 +181,7 @@ namespace FRTT {
             *                               You can have the same functionality but with an additional 64 bit payload instead, by uncommenting FRTTRANSCEIVER_64BITADDITIONALDATA
             *                               in FRTTransceiverSettings.h
             */
-            bool writeToQueue(FRTTransceiver_TaskHandle destination,uint8_t u8Datatype,void * data,
+            bool writeToQueue(FRTTTaskHandle destination,uint8_t u8Datatype,void * data,
                             int blockTimeWrite = 100,int blockTimeTakeSemaphore = 100,uint32_t u32AdditionalInfo = 0);
             #elif defined(FRTTRANSCEIVER_64BITADDITIONALDATA)
             /*! 
@@ -197,7 +197,7 @@ namespace FRTT {
             *                               You can have the same functionality but with an additional 32 bit payload instead, by uncommenting FRTTRANSCEIVER_32BITADDITIONALDATA
             *                               in FRTTransceiverSettings.h
             */
-            bool writeToQueue(FRTTransceiver_TaskHandle destination,uint8_t u8Datatype,void * data,
+            bool writeToQueue(FRTTTaskHandle destination,uint8_t u8Datatype,void * data,
                             int blockTimeWrite = 100,int blockTimeTakeSemaphore = 100,uint64_t u64AdditionalData = 0);
             #endif
 
@@ -256,7 +256,7 @@ namespace FRTT {
             *                               If partner is used, bUseTaskHandleVar is set to true.<br>
             *                               If multiSenderQueue is used, bUseTaskHandleVar is set to false                         
             */
-            bool readFromQueue(FRTTransceiver_TaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar,int blockTimeRead = 100,int blockTimeTakeSemaphore = 100);
+            bool readFromQueue(FRTTTaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar,int blockTimeRead = 100,int blockTimeTakeSemaphore = 100);
             /*! 
             * \brief                        Flushes rx/tx queue                      
             * \param partner                To select the queue to flush (Used to select the right entry in FRTTransceiver_CommunicationPartner)
@@ -269,7 +269,7 @@ namespace FRTT {
             *                               If partner is used, bUseTaskHandleVar is set to true.<br>
             *                               If multiSenderQueue is used, bUseTaskHandleVar is set to false                                                 
             */
-            bool queueFlush(FRTTransceiver_TaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar,int blockTimeTakeSemaphore = 100,bool bTxQueue = true);
+            bool queueFlush(FRTTTaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar,int blockTimeTakeSemaphore = 100,bool bTxQueue = true);
 
             /*! 
             * \brief                        Deletes an entry in the internal rx buffer                      
@@ -282,9 +282,9 @@ namespace FRTT {
             *                               the internal rx buffers if space is needed!
             * \note                         Here either FRTTransceiver_TaskHandle or a eMultiSenderQueue enum is supplied. <br>
             *                               If partner is used, bUseTaskHandleVar is set to true.<br>
-            *                               If multiSenderQueue is used, bUseTaskHandleVar is set to false                                                
+            *                               If multiSenderQueue is used, bUseTaskHandleVar is set to false                                               
             */
-            bool manualDeleteAllocatedDatabufferForLine(FRTTransceiver_TaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar,uint8_t u8PositionInBuffer);
+            bool delDatabuffForLine(FRTTTaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar,uint8_t u8PositionInBuffer);
             /*! 
             * \brief                        Flushes the rx buffer for a specific communication line                    
             * \param partner                To select the specific internal rx buffer (Used to select the right entry in FRTTransceiver_CommunicationPartner)
@@ -295,9 +295,9 @@ namespace FRTT {
             *                               the internal rx buffers if space is needed!
             * \note                         Here either FRTTransceiver_TaskHandle or a eMultiSenderQueue enum is supplied. <br>
             *                               If partner is used, bUseTaskHandleVar is set to true.<br>
-            *                               If multiSenderQueue is used, bUseTaskHandleVar is set to false                                                
+            *                               If multiSenderQueue is used, bUseTaskHandleVar is set to false                                                 
             */
-            bool manualDeleteAllAllocatedDatabuffersForLine(FRTTransceiver_TaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar);
+            bool delAllDatabuffForLine(FRTTTaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar);
 
             /*! 
             * \brief                        Deletes oldest entry in the internal rx buffer (of a normal communication line)
@@ -305,18 +305,18 @@ namespace FRTT {
             * \return                       True if oldest data deleted
             * \note                         Method is name 'manual...' because a call to FRTTransceiver::read() will automatically delete entries and rearrange <br>
             *                               the internal rx buffers if space is needed!
-            * \note                         Rx buffer : {  [[pos 0]oldest data][pos 1][pos 2].....[pos n-1][[pos n]newest data]  }                          
+            * \note                         Rx buffer : {  [[pos 0]oldest data][pos 1][pos 2].....[pos n-1][[pos n]newest data]  }                   
             */                                          
-            bool manualDeleteOldestAllocatedDatabufferForLine(FRTTransceiver_TaskHandle partner);
+            bool delOldestDatabuffForLine(FRTTTaskHandle partner);
             /*! 
             * \brief                        Deletes oldest entry in the internal rx buffer of a multi-sender-queue
             * \param multiSenderQueue       To select the specific internal multi-sender-queue rx buffer (Used to select the right entry in FRTTransceiver_CommunicationPartner)
             * \return                       True if oldest data deleted
             * \note                         Method is name 'manual...' because a call to FRTTransceiver::read() will automatically delete entries and rearrange <br>
             *                               the internal rx buffers if space is needed!
-            * \note                         Rx buffer : {  [[pos 0]oldest data][pos 1][pos 2].....[pos n-1][[pos n]newest data]  }                          
+            * \note                         Rx buffer : {  [[pos 0]oldest data][pos 1][pos 2].....[pos n-1][[pos n]newest data]  }                         
             */ 
-            bool manualDeleteOldestAllocatedDatabufferForLine(eMultiSenderQueue multiSenderQueue);
+            bool delOldestDatabuffForLine(eMultiSenderQueue multiSenderQueue);
             /*! 
             * \brief                        Deletes latest entry in the rx buffer for a specific communication line                  
             * \param partner                To select the specific internal rx buffer (Used to select the right entry in FRTTransceiver_CommunicationPartner)
@@ -327,9 +327,9 @@ namespace FRTT {
             *                               the internal rx buffers if space is needed!
             * \note                         Here either FRTTransceiver_TaskHandle or a eMultiSenderQueue enum is supplied. <br>
             *                               If partner is used, bUseTaskHandleVar is set to true.<br>
-            *                               If multiSenderQueue is used, bUseTaskHandleVar is set to false                                                
+            *                               If multiSenderQueue is used, bUseTaskHandleVar is set to false                                              
             */
-            bool manualDeleteNewestAllocatedDatabufferForLine(FRTTransceiver_TaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar);
+            bool delNewestDatabuffForLine(FRTTTaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar);
         
 
             /*! 
@@ -338,7 +338,7 @@ namespace FRTT {
             * \param bCheckTxQueue          Signals whether to check tx or rx queue
             * \return                       Amount of messages on the selected queue or -1                         
             */
-            int messagesOnQueue(FRTTransceiver_TaskHandle partner, bool bCheckTxQueue);
+            int messagesOnQueue(FRTTTaskHandle partner, bool bCheckTxQueue);
             /*! 
             * \brief                        Returns the amount of messages on a selected multi-sender-queue (multiple tasks write on the tx line)
             * \param multiSenderQueue       To select the specific internal multi-sender-queue to check the amount of messages from (Used to select the right entry in FRTTransceiver_CommunicationPartner)
@@ -356,7 +356,7 @@ namespace FRTT {
             *                               If partner is used, bUseTaskHandleVar is set to true.<br>
             *                               If multiSenderQueue is used, bUseTaskHandleVar is set to false                                                
             */
-            bool hasDataFrom(FRTTransceiver_TaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar);
+            bool hasDataFrom(FRTTTaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar);
             /*! 
             * \brief                        Returns the amount of buffered data for a specific communication line                  
             * \param partner                To select the specific internal rx buffer to check for the amount of buffered data (Used to select the right entry in FRTTransceiver_CommunicationPartner)
@@ -367,12 +367,12 @@ namespace FRTT {
             *                               If partner is used, bUseTaskHandleVar is set to true.<br>
             *                               If multiSenderQueue is used, bUseTaskHandleVar is set to false                                                
             */
-            int amountOfBufferedDataFrom(FRTTransceiver_TaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar);
+            int bufferedDataFrom(FRTTTaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar);
             /*! 
             * \brief                        Returns the amount of buffered data for a all communication lines combined                
             * \return                       Amount of buffered data                                              
             */
-            int amountOfDataInAllBuffers();
+            int bufferedDataInAllBuffers();
         
             /*! 
             * \brief                        Checks if datatype found in rx buffer for a specific communication line
@@ -382,7 +382,7 @@ namespace FRTT {
             * \param u8Datatype             Datatype to look for (Create your own system wide datatypes)
             * \return                       Amount of datatype occurences or -1                        
             */
-            int checkIfDataTypeInBuffer(FRTTransceiver_TaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar,uint8_t u8Datatype);
+            int isDatatypeInBuffer(FRTTTaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar,uint8_t u8Datatype);
 
             /*! 
             * \brief                        Returns the newest buffered data for a specific communication line
@@ -392,7 +392,7 @@ namespace FRTT {
             * \return                       Const pointer to the buffer position or NULL
             * \note                         Rx buffer : {  [[pos 0]oldest data][pos 1][pos 2].....[pos n-1][[pos n]newest data]  }                          
             */
-            const FRTTransceiver_TempDataContainer * getNewestBufferedDataFrom(FRTTransceiver_TaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar);
+            const FRTTTempDataContainer * getNewestBufferedDataFrom(FRTTTaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar);
             /*! 
             * \brief                        Returns the oldest buffered data for a specific communication line
             * \param partner                To select the specific internal rx buffer from which the data should be taken (Used to select the right entry in FRTTransceiver_CommunicationPartner)
@@ -401,7 +401,7 @@ namespace FRTT {
             * \return                       Const pointer to the buffer position or NULL
             * \note                         Rx buffer : {  [[pos 0]oldest data][pos 1][pos 2].....[pos n-1][[pos n]newest data]  }                          
             */
-            const FRTTransceiver_TempDataContainer * getOldestBufferedDataFrom(FRTTransceiver_TaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar);
+            const FRTTTempDataContainer * getOldestBufferedDataFrom(FRTTTaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar);
             /*! 
             * \brief                        Returns a selected part of the buffered data for a specific communication line
             * \param partner                To select the specific internal rx buffer from which the data should be taken (Used to select the right entry in FRTTransceiver_CommunicationPartner)
@@ -411,7 +411,7 @@ namespace FRTT {
             * \return                       Const pointer to the buffer position or NULL
             * \note                         Rx buffer : {  [[pos 0]oldest data][pos 1][pos 2].....[pos n-1][[pos n]newest data]  }                          
             */
-            const FRTTransceiver_TempDataContainer * getBufferedDataFrom(FRTTransceiver_TaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar,uint8_t u8PositionInBuffer);
+            const FRTTTempDataContainer * getBufferedDataFrom(FRTTTaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar,uint8_t u8PositionInBuffer);
         
 
             /*! 
@@ -424,8 +424,8 @@ namespace FRTT {
             * \param fP                     Pointer to a function which takes FRTTransceiver_DataContainerOnQueue and FRTTransceiver_TempDataContainer as an argument.
             * \return                       void
             * \attention                    Later versions of the library will support some sort of memory pool to allocate/free data through the callbacks
-            */
-            void addDataAllocateCallback(void(*fP)(const FRTTransceiver_DataContainerOnQueue &, FRTTransceiver_TempDataContainer &));
+            */ 
+            void addDataAllocateCallback(void(*fP)(const FRTTDataContainerOnQueue &, FRTTTempDataContainer &));
             /*! 
             * \brief                        To to add a de-allocator callback function
             * \details                      This method is used to add a de-allocator callback function to the library.
@@ -434,7 +434,7 @@ namespace FRTT {
             * \return                       void
             * \attention                    Later versions of the library will support some sort of memory pool to allocate/free data through the callbacks
             */
-            void addDataFreeCallback(void (*fP)(FRTTransceiver_TempDataContainer &));
+            void addDataFreeCallback(void (*fP)(FRTTTempDataContainer &));
             
 
             #if defined(FRTTRANSCEIVER_ANALYTICS_ENABLE)

@@ -16,17 +16,17 @@ typedef enum
 }eDataTypes;
 
 
-FRTTransceiver_TaskHandle TASK_SENDER;
-FRTTransceiver_TaskHandle TASK_RECEIVER;
+FRTTTaskHandle TASK_SENDER;
+FRTTTaskHandle TASK_RECEIVER;
 
-FRTTransceiver_QueueHandle QUEUE_TO_RECEIVER;
+FRTTQueueHandle QUEUE_TO_RECEIVER;
 
-FRTTransceiver_SemaphoreHandle SEMAPHORE1;
+FRTTSemaphoreHandle SEMAPHORE1;
 
 
 #define QUEUELENGTH  (1u)
 
 #define STOP_COMM_AT (5u)
 
-void dataDestroyer(FRTTransceiver_TempDataContainer & internalBuffer);
-void dataAllocator (const FRTTransceiver_DataContainerOnQueue & origingalContainer_onQueue ,FRTTransceiver_TempDataContainer & internalBuffer);
+void dataDestroyer(FRTTTempDataContainer & internalBuffer);
+void dataAllocator (const FRTTDataContainerOnQueue & origingalContainer_onQueue ,FRTTTempDataContainer & internalBuffer);

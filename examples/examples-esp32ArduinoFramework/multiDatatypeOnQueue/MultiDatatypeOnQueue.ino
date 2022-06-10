@@ -30,7 +30,7 @@
 #include <Arduino.h>
 #include "Additions.h"
 
-void dataAllocator (const FRTTransceiver_DataContainerOnQueue & origingalContainer_onQueue ,FRTTransceiver_TempDataContainer & internalBuffer){
+void dataAllocator (const FRTTDataContainerOnQueue & origingalContainer_onQueue ,FRTTTempDataContainer & internalBuffer){
 
     /**
      *      In order to use the library in its current version you need to supply both a
@@ -56,7 +56,7 @@ void dataAllocator (const FRTTransceiver_DataContainerOnQueue & origingalContain
     internalBuffer.data = origingalContainer_onQueue.data;
 }
 
-void dataDestroyer(FRTTransceiver_TempDataContainer & internalBuffer) {
+void dataDestroyer(FRTTTempDataContainer & internalBuffer) {
 
     /**
      *      In order to use the library in its current version you need to supply both a
@@ -148,22 +148,22 @@ void RECEIVER(void *)
             if(res1 && res2 && res3)
             {
                 log_i("All data read into internal buffers");
-                const FRTTransceiver_TempDataContainer * t1 = comm.getBufferedDataFrom(TASK_SENDER,eMultiSenderQueue::eNOMULTIQSELECTED,true,0);
-                const FRTTransceiver_TempDataContainer * t2 = comm.getBufferedDataFrom(TASK_SENDER,eMultiSenderQueue::eNOMULTIQSELECTED,true,1);
-                const FRTTransceiver_TempDataContainer * t3 = comm.getBufferedDataFrom(TASK_SENDER,eMultiSenderQueue::eNOMULTIQSELECTED,true,2);
+                const FRTTTempDataContainer * t1 = comm.getBufferedDataFrom(TASK_SENDER,eMultiSenderQueue::eNOMULTIQSELECTED,true,0);
+                const FRTTTempDataContainer * t2 = comm.getBufferedDataFrom(TASK_SENDER,eMultiSenderQueue::eNOMULTIQSELECTED,true,1);
+                const FRTTTempDataContainer * t3 = comm.getBufferedDataFrom(TASK_SENDER,eMultiSenderQueue::eNOMULTIQSELECTED,true,2);
                 
                 if(t1 && t2 && t3)
                 {
                     log_i("Package sender addresses (Package[1]:%p, Package[2]:%p, Package[3]:%p)",t1->senderAddress,t2->senderAddress,t3->senderAddress);
                     log_i("Additional data for each received package: Package[1]: %d Package[2]: %d Package[3]: %d",t1->u32AdditionalData,t2->u32AdditionalData,
                                                                                                                                             t3->u32AdditionalData);
-                    log_i("Occurence of eMESSAGE in buffer: %d",comm.checkIfDataTypeInBuffer(TASK_SENDER,eMultiSenderQueue::eNOMULTIQSELECTED,true,eMESSAGE));
-                    log_i("Occurence of eSTRUCT in buffer: %d",comm.checkIfDataTypeInBuffer(TASK_SENDER,eMultiSenderQueue::eNOMULTIQSELECTED,true,eSTRUCT));
-                    log_i("Occurence of eINT in buffer: %d",comm.checkIfDataTypeInBuffer(TASK_SENDER,eMultiSenderQueue::eNOMULTIQSELECTED,true,eINT));
+                    log_i("Occurence of eMESSAGE in buffer: %d",comm.isDatatypeInBuffer(TASK_SENDER,eMultiSenderQueue::eNOMULTIQSELECTED,true,eMESSAGE));
+                    log_i("Occurence of eSTRUCT in buffer: %d",comm.isDatatypeInBuffer(TASK_SENDER,eMultiSenderQueue::eNOMULTIQSELECTED,true,eSTRUCT));
+                    log_i("Occurence of eINT in buffer: %d",comm.isDatatypeInBuffer(TASK_SENDER,eMultiSenderQueue::eNOMULTIQSELECTED,true,eINT));
                     u8I++;
                 }
 
-                comm.manualDeleteAllAllocatedDatabuffersForLine(TASK_SENDER,eMultiSenderQueue::eNOMULTIQSELECTED,true);
+                comm.delAllDatabuffForLine(TASK_SENDER,eMultiSenderQueue::eNOMULTIQSELECTED,true);
             }
         }
         if(u8I == 7)
@@ -185,9 +185,9 @@ void setup() {
     log_i("Setup() running.\n\n");
     disableCore0WDT();
 
-    QUEUE_TO_RECEIVER = FRTTransceiver_CreateQueue(QUEUELENGTH);
+    QUEUE_TO_RECEIVER = FRTTCreateQueue(QUEUELENGTH);
 
-    SEMAPHORE1 = FRTTransceiver_CreateSemaphore();
+    SEMAPHORE1 = FRTTCreateSemaphore();
 
     xTaskCreatePinnedToCore(SENDER,"sender-task",5000,NULL,5,&TASK_SENDER,0);
     xTaskCreatePinnedToCore(RECEIVER,"receiver-task",5000,NULL,4,&TASK_RECEIVER,1);

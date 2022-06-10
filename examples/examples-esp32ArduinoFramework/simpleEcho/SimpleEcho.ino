@@ -63,7 +63,7 @@ void ECHO(void *)
         if(comm.messagesOnQueue(TASK_ECHO,false) > 0)
         {
             bool res = comm.readFromQueue(TASK_ECHO,eMultiSenderQueue::eNOMULTIQSELECTED,true,0,0);
-            comm.manualDeleteAllAllocatedDatabuffersForLine(TASK_ECHO,eMultiSenderQueue::eNOMULTIQSELECTED,true);
+            comm.delAllDatabuffForLine(TASK_ECHO,eMultiSenderQueue::eNOMULTIQSELECTED,true);
         }
         else
         {
@@ -81,9 +81,9 @@ void setup() {
     log_i("Setup() running.\n\n");
     disableCore0WDT();
 
-    ECHO_QUEUE = FRTTransceiver_CreateQueue(QUEUELENGTH);
+    ECHO_QUEUE = FRTTCreateQueue(QUEUELENGTH);
 
-    SEMAPHORE1 = FRTTransceiver_CreateSemaphore();
+    SEMAPHORE1 = FRTTCreateSemaphore();
 
     xTaskCreatePinnedToCore(ECHO,"receiver-task",5000,NULL,4,&TASK_ECHO,1);
 }
@@ -94,7 +94,7 @@ void loop() {
 }
 
 
-void dataAllocator (const FRTTransceiver_DataContainerOnQueue & origingalContainer_onQueue ,FRTTransceiver_TempDataContainer & internalBuffer){
+void dataAllocator (const FRTTDataContainerOnQueue & origingalContainer_onQueue ,FRTTTempDataContainer & internalBuffer){
 
     /**
      *      In order to use the library in its current version you need to supply both a
@@ -120,7 +120,7 @@ void dataAllocator (const FRTTransceiver_DataContainerOnQueue & origingalContain
     internalBuffer.data = origingalContainer_onQueue.data;
 }
 
-void dataDestroyer(FRTTransceiver_TempDataContainer & internalBuffer) {
+void dataDestroyer(FRTTTempDataContainer & internalBuffer) {
 
     /**
      *      In order to use the library in its current version you need to supply both a

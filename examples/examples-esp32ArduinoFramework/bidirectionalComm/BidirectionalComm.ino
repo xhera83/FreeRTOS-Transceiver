@@ -72,13 +72,13 @@ void SENDER(void *)
 
             if(retVal && comm.hasDataFrom(TASK_RECEIVER,eMultiSenderQueue::eNOMULTIQSELECTED,true))
             {
-                const FRTTransceiver_TempDataContainer * t = comm.getNewestBufferedDataFrom(TASK_RECEIVER,eMultiSenderQueue::eNOMULTIQSELECTED,true);
+                const FRTTTempDataContainer * t = comm.getNewestBufferedDataFrom(TASK_RECEIVER,eMultiSenderQueue::eNOMULTIQSELECTED,true);
                 
                 if(t != NULL)
                 {
                     uint8_t u8COMMAND = *((uint8_t *)t->data);
 
-                    comm.manualDeleteAllocatedDatabufferForLine(TASK_RECEIVER,eMultiSenderQueue::eNOMULTIQSELECTED,true,0);
+                    comm.delDatabuffForLine(TASK_RECEIVER,eMultiSenderQueue::eNOMULTIQSELECTED,true,0);
 
                     if(u8COMMAND  == COMMAND_SEND)
                     {
@@ -133,7 +133,7 @@ void RECEIVER(void *)
 
             if(retVal && comm.hasDataFrom(TASK_SENDER,eMultiSenderQueue::eNOMULTIQSELECTED,true))
             {
-                const FRTTransceiver_TempDataContainer * t = comm.getNewestBufferedDataFrom(TASK_SENDER,eMultiSenderQueue::eNOMULTIQSELECTED,true);
+                const FRTTTempDataContainer * t = comm.getNewestBufferedDataFrom(TASK_SENDER,eMultiSenderQueue::eNOMULTIQSELECTED,true);
                 
                 if(t != NULL)
                 {
@@ -150,7 +150,7 @@ void RECEIVER(void *)
                             break;
                     }
                     u8Counter++;
-                    comm.manualDeleteAllAllocatedDatabuffersForLine(TASK_SENDER,eMultiSenderQueue::eNOMULTIQSELECTED,true);
+                    comm.delAllDatabuffForLine(TASK_SENDER,eMultiSenderQueue::eNOMULTIQSELECTED,true);
                     if(u8Counter == 9)
                     {
                         u8COMMAND = COMMAND_STOP;
@@ -181,11 +181,11 @@ void setup() {
     log_i("Setup() running.\n\n");
     disableCore0WDT();
 
-    QUEUE_TO_RECEIVER = FRTTransceiver_CreateQueue(QUEUELENGTH);
-    QUEUE_FROM_RECEIVER = FRTTransceiver_CreateQueue(QUEUELENGTH);
+    QUEUE_TO_RECEIVER = FRTTCreateQueue(QUEUELENGTH);
+    QUEUE_FROM_RECEIVER = FRTTCreateQueue(QUEUELENGTH);
 
-    SEMAPHORE1 = FRTTransceiver_CreateSemaphore();
-    SEMAPHORE2 = FRTTransceiver_CreateSemaphore();
+    SEMAPHORE1 = FRTTCreateSemaphore();
+    SEMAPHORE2 = FRTTCreateSemaphore();
 
     xTaskCreatePinnedToCore(SENDER,"sender-task",25000,NULL,5,&TASK_SENDER,0);
     xTaskCreatePinnedToCore(RECEIVER,"receiver-task",25000,NULL,4,&TASK_RECEIVER,1);

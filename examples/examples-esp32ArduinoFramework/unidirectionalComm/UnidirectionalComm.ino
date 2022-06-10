@@ -96,7 +96,7 @@ void RECEIVER(void *)
 
             if(res)
             {
-                const FRTTransceiver_TempDataContainer * t = comm.getBufferedDataFrom(TASK_SENDER,eMultiSenderQueue::eNOMULTIQSELECTED,true,0);
+                const FRTTTempDataContainer * t = comm.getBufferedDataFrom(TASK_SENDER,eMultiSenderQueue::eNOMULTIQSELECTED,true,0);
                 
                 if(t != NULL)
                 {
@@ -108,7 +108,7 @@ void RECEIVER(void *)
                         u32AdditionalData = t->u32AdditionalData;
                         log_i("Additional data: %d",u32AdditionalData);
                     }
-                    comm.manualDeleteAllAllocatedDatabuffersForLine(TASK_SENDER,eMultiSenderQueue::eNOMULTIQSELECTED,true);
+                    comm.delAllDatabuffForLine(TASK_SENDER,eMultiSenderQueue::eNOMULTIQSELECTED,true);
                 }
             }
         }
@@ -131,9 +131,9 @@ void setup() {
     log_i("Setup() running.\n\n");
     disableCore0WDT();
 
-    QUEUE_TO_RECEIVER = FRTTransceiver_CreateQueue(QUEUELENGTH);
+    QUEUE_TO_RECEIVER = FRTTCreateQueue(QUEUELENGTH);
 
-    SEMAPHORE1 = FRTTransceiver_CreateSemaphore();
+    SEMAPHORE1 = FRTTCreateSemaphore();
 
     xTaskCreatePinnedToCore(SENDER,"sender-task",5000,NULL,5,&TASK_SENDER,0);
     xTaskCreatePinnedToCore(RECEIVER,"receiver-task",5000,NULL,4,&TASK_RECEIVER,1);
@@ -145,7 +145,7 @@ void loop() {
 }
 
 
-void dataAllocator (const FRTTransceiver_DataContainerOnQueue & origingalContainer_onQueue ,FRTTransceiver_TempDataContainer & internalBuffer){
+void dataAllocator (const FRTTDataContainerOnQueue & origingalContainer_onQueue ,FRTTTempDataContainer & internalBuffer){
 
     /**
      *      In order to use the library in its current version you need to supply both a
@@ -171,7 +171,7 @@ void dataAllocator (const FRTTransceiver_DataContainerOnQueue & origingalContain
     internalBuffer.data = origingalContainer_onQueue.data;
 }
 
-void dataDestroyer(FRTTransceiver_TempDataContainer & internalBuffer) {
+void dataDestroyer(FRTTTempDataContainer & internalBuffer) {
 
     /**
      *      In order to use the library in its current version you need to supply both a

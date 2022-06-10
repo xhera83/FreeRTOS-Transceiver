@@ -16,14 +16,14 @@ typedef enum
 }eDataTypes;
 
 
-FRTTransceiver_TaskHandle TASK_SENDER;
-FRTTransceiver_TaskHandle TASK_RECEIVER;
+FRTTTaskHandle TASK_SENDER;
+FRTTTaskHandle TASK_RECEIVER;
 
-FRTTransceiver_QueueHandle QUEUE_TO_RECEIVER;
-FRTTransceiver_QueueHandle QUEUE_FROM_RECEIVER;
+FRTTQueueHandle QUEUE_TO_RECEIVER;
+FRTTQueueHandle QUEUE_FROM_RECEIVER;
 
-FRTTransceiver_SemaphoreHandle SEMAPHORE1;
-FRTTransceiver_SemaphoreHandle SEMAPHORE2;
+FRTTSemaphoreHandle SEMAPHORE1;
+FRTTSemaphoreHandle SEMAPHORE2;
 
 #define QUEUELENGTH 1
 
@@ -34,7 +34,7 @@ FRTTransceiver_SemaphoreHandle SEMAPHORE2;
 #define COMMAND_TURNLEDOFF       (3u)
 
 
-void dataAllocator (const FRTTransceiver_DataContainerOnQueue & origingalContainer_onQueue ,FRTTransceiver_TempDataContainer & internalBuffer){
+void dataAllocator (const FRTTDataContainerOnQueue & origingalContainer_onQueue ,FRTTTempDataContainer & internalBuffer){
 
     /**
      *      In order to use the library in its current version you need to supply both a
@@ -70,7 +70,7 @@ void dataAllocator (const FRTTransceiver_DataContainerOnQueue & origingalContain
     }
 }
 
-void dataDestroyer(FRTTransceiver_TempDataContainer & internalBuffer) {
+void dataDestroyer(FRTTTempDataContainer & internalBuffer) {
 
     /**
      *      In order to use the library in its current version you need to supply both a

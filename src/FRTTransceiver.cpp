@@ -10,7 +10,7 @@
 
 //#define LOG_INFO
 namespace FRTT {
-   FRTTransceiver_QueueHandle FRTTransceiver_CreateQueue(FRTTransceiver_BaseType lengthOfQueue)
+   FRTTQueueHandle FRTTCreateQueue(FRTTBaseType lengthOfQueue)
    {
 
       if(lengthOfQueue <= 0 || lengthOfQueue > FRTTRANSCEIVER_MAXELEMENTSIZEONQUEUE)
@@ -21,7 +21,7 @@ namespace FRTT {
          return NULL;
       }
 
-      FRTTransceiver_QueueHandle queue = xQueueCreate(lengthOfQueue,sizeof(struct FRTTransceiver_DataContainerOnQueue));
+      FRTTQueueHandle queue = xQueueCreate(lengthOfQueue,sizeof(struct FRTTDataContainerOnQueue));
 
       if(!queue)
       {
@@ -39,9 +39,9 @@ namespace FRTT {
    }
 
 
-   FRTTransceiver_SemaphoreHandle FRTTransceiver_CreateSemaphore()
+   FRTTSemaphoreHandle FRTTCreateSemaphore()
    {
-      FRTTransceiver_SemaphoreHandle semaphore = xSemaphoreCreateMutex();
+      FRTTSemaphoreHandle semaphore = xSemaphoreCreateMutex();
 
       if(!semaphore)
       {
@@ -58,7 +58,7 @@ namespace FRTT {
       return semaphore;
    }
 
-   bool FRTTransceiver::_checkForMessages(FRTTransceiver_QueueHandle txQueue)
+   bool FRTTransceiver::_checkForMessages(FRTTQueueHandle txQueue)
    {
       if(txQueue)
       {
@@ -69,7 +69,7 @@ namespace FRTT {
    }
 
 
-   int FRTTransceiver::_getAmountOfMessages(FRTTransceiver_QueueHandle queue)
+   int FRTTransceiver::_getAmountOfMessages(FRTTQueueHandle queue)
    {
       if(queue)
       {
@@ -83,7 +83,7 @@ namespace FRTT {
       return (this->_dataAllocator && this->_dataDestroyer) ? true:false;
    }
 
-   bool FRTTransceiver::_hasSemaphore(FRTTransceiver_TaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar, bool txLine)
+   bool FRTTransceiver::_hasSemaphore(FRTTTaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar, bool txLine)
    {
       int pos = this->_getCommStruct(partner,multiSenderQueue,bUseTaskHandleVar);
       if(pos == -1)
@@ -108,7 +108,7 @@ namespace FRTT {
       }
    }
 
-   FRTTransceiver::FRTTransceiver(FRTTransceiver_TaskHandle ownerAddress, uint8_t u8MaxPartners)
+   FRTTransceiver::FRTTransceiver(FRTTTaskHandle ownerAddress, uint8_t u8MaxPartners)
    {  
       /* Can be null. Receivers wont know who you are then....*/
       this->_ownerAddress = ownerAddress;
@@ -116,7 +116,7 @@ namespace FRTT {
       u8MaxPartners = (u8MaxPartners == 0 ? 1:u8MaxPartners);
 
       this->_u8MaxPartners = u8MaxPartners;
-      this->_structCommPartners = new struct FRTTransceiver_CommunicationPartner[u8MaxPartners];
+      this->_structCommPartners = new struct FRTTCommunicationPartner[u8MaxPartners];
    }
 
    FRTTransceiver::~FRTTransceiver()
@@ -125,9 +125,9 @@ namespace FRTT {
    }
 
 
-   bool FRTTransceiver::addCommPartner(FRTTransceiver_TaskHandle partner,FRTTransceiver_QueueHandle queueRX,
-                  uint8_t u8QueueLengthRx,FRTTransceiver_SemaphoreHandle semaphoreRx,
-                  FRTTransceiver_QueueHandle queueTX,uint8_t u8QueueLengthTx,FRTTransceiver_SemaphoreHandle semaphoreTx,const string partnersName)
+   bool FRTTransceiver::addCommPartner(FRTTTaskHandle partner,FRTTQueueHandle queueRX,
+                  uint8_t u8QueueLengthRx,FRTTSemaphoreHandle semaphoreRx,
+                  FRTTQueueHandle queueTX,uint8_t u8QueueLengthTx,FRTTSemaphoreHandle semaphoreTx,const string partnersName)
    {
 
       if(this->_u8CurrCommPartners + 1 > this->_u8MaxPartners)
@@ -181,7 +181,7 @@ namespace FRTT {
       return true;
    }
 
-   bool FRTTransceiver::addMultiSenderReadOnlyQueue(FRTTransceiver_QueueHandle queueRX,uint8_t u8QueueLengthRx,FRTTransceiver_SemaphoreHandle semaphoreRx,
+   bool FRTTransceiver::addMultiSenderPartner(FRTTQueueHandle queueRX,uint8_t u8QueueLengthRx,FRTTSemaphoreHandle semaphoreRx,
                                                    const string multiSenderQueueName)
    {
       if(this->_u8CurrCommPartners + 1 > this->_u8MaxPartners)
@@ -221,9 +221,9 @@ namespace FRTT {
    }
 
    #if defined(FRTTRANSCEIVER_32BITADDITIONALDATA)
-   bool FRTTransceiver::writeToQueue(FRTTransceiver_TaskHandle destination,uint8_t u8DataType,void * data,int blockTimeWrite,int blockTimeTakeSemaphore,uint32_t u32AdditionalData)
+   bool FRTTransceiver::writeToQueue(FRTTTaskHandle destination,uint8_t u8DataType,void * data,int blockTimeWrite,int blockTimeTakeSemaphore,uint32_t u32AdditionalData)
    #elif defined(FRTTRANSCEIVER_64BITADDITIONALDATA)
-   bool FRTTransceiver::writeToQueue(FRTTransceiver_TaskHandle destination,uint8_t u8DataType,void * data,int blockTimeWrite,int blockTimeTakeSemaphore,uint64_t u64AdditionalData)
+   bool FRTTransceiver::writeToQueue(FRTTTaskHandle destination,uint8_t u8DataType,void * data,int blockTimeWrite,int blockTimeTakeSemaphore,uint64_t u64AdditionalData)
    #endif
    {
       int pos = this->_getCommStruct(destination,eMultiSenderQueue::eNOMULTIQSELECTED,true);
@@ -270,7 +270,7 @@ namespace FRTT {
       {
          /* does not end when data arrives, so if timeToWaitWrite == MAXWAIT -----> doesnt go further than below code */
 
-         FRTTransceiver_DataContainerOnQueue tempDataContainerOnQueue = 
+         FRTTDataContainerOnQueue tempDataContainerOnQueue = 
          {
             .senderAddress = this->_ownerAddress,
             .data = data,
@@ -282,7 +282,7 @@ namespace FRTT {
             #endif
          };
          
-         FRTTransceiver_BaseType returnVal = xQueueSendToBack(this->_structCommPartners[pos].txQueue,(const void *)&tempDataContainerOnQueue,timeToWaitWrite);
+         FRTTBaseType returnVal = xQueueSendToBack(this->_structCommPartners[pos].txQueue,(const void *)&tempDataContainerOnQueue,timeToWaitWrite);
 
          if(returnVal == pdPASS)
          {
@@ -342,7 +342,7 @@ namespace FRTT {
       };
 
       /* At this point we should just be able to put data on the queue without waiting. */
-      FRTTransceiver_BaseType returnVal = xQueueSendToBack(this->_structCommPartners[pos].txQueue,(const void *)&this->_structCommPartners[pos].txLineContainer[u8MessagesOnQueue],
+      FRTTBaseType returnVal = xQueueSendToBack(this->_structCommPartners[pos].txQueue,(const void *)&this->_structCommPartners[pos].txLineContainer[u8MessagesOnQueue],
                                                                                                                                                                   timeToWaitWrite);
 
       if(returnVal == pdPASS)
@@ -393,7 +393,7 @@ namespace FRTT {
    }
 
 
-   bool FRTTransceiver::readFromQueue(FRTTransceiver_TaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar,int blockTimeRead,int blockTimeTakeSemaphore)
+   bool FRTTransceiver::readFromQueue(FRTTTaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar,int blockTimeRead,int blockTimeTakeSemaphore)
    {
       if(!this->_hasDataInterpreters() || !this->_hasSemaphore(partner,multiSenderQueue,bUseTaskHandleVar,false))
       {
@@ -421,7 +421,7 @@ namespace FRTT {
       
       
 
-      FRTTransceiver_BaseType returnVal = xQueueReceive(this->_structCommPartners[pos].rxQueue,(void *)&this->_structCommPartners[pos].rxLineContainer,(TickType_t)timeToWaitRead);
+      FRTTBaseType returnVal = xQueueReceive(this->_structCommPartners[pos].rxQueue,(void *)&this->_structCommPartners[pos].rxLineContainer,(TickType_t)timeToWaitRead);
 
 
       /* errQUEUE_EMPTY returned if expression true*/
@@ -465,7 +465,7 @@ namespace FRTT {
       return true;
    }
 
-   bool FRTTransceiver::queueFlush(FRTTransceiver_TaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandle,int blockTimeTakeSemaphore,bool bTxQueue)
+   bool FRTTransceiver::queueFlush(FRTTTaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandle,int blockTimeTakeSemaphore,bool bTxQueue)
    {  
       int pos = this->_getCommStruct(partner,multiSenderQueue,bUseTaskHandle);
 
@@ -497,16 +497,16 @@ namespace FRTT {
 
 
 
-   bool FRTTransceiver::manualDeleteOldestAllocatedDatabufferForLine(FRTTransceiver_TaskHandle partner)
+   bool FRTTransceiver::delOldestDatabuffForLine(FRTTTaskHandle partner)
    {
-      return this->manualDeleteAllocatedDatabufferForLine(partner,eMultiSenderQueue::eMULTISENDERQ0,true,0);
+      return this->delDatabuffForLine(partner,eMultiSenderQueue::eMULTISENDERQ0,true,0);
    }
-   bool FRTTransceiver::manualDeleteOldestAllocatedDatabufferForLine(eMultiSenderQueue multiSenderQueue)
+   bool FRTTransceiver::delOldestDatabuffForLine(eMultiSenderQueue multiSenderQueue)
    {
-      return this->manualDeleteAllocatedDatabufferForLine(NULL,multiSenderQueue,false,0);
+      return this->delDatabuffForLine(NULL,multiSenderQueue,false,0);
    }
 
-   bool FRTTransceiver::manualDeleteNewestAllocatedDatabufferForLine(FRTTransceiver_TaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar)
+   bool FRTTransceiver::delNewestDatabuffForLine(FRTTTaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar)
    {
       int pos = this->_getCommStruct(partner,multiSenderQueue,bUseTaskHandleVar);
 
@@ -514,10 +514,10 @@ namespace FRTT {
       {
          return false;
       }
-      return this->manualDeleteAllocatedDatabufferForLine(partner,multiSenderQueue,bUseTaskHandleVar,this->_structCommPartners[pos].i8CurrTempcontainerPos);
+      return this->delDatabuffForLine(partner,multiSenderQueue,bUseTaskHandleVar,this->_structCommPartners[pos].i8CurrTempcontainerPos);
    }
 
-   bool FRTTransceiver::manualDeleteAllocatedDatabufferForLine(FRTTransceiver_TaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar,uint8_t u8PositionInBuffer)
+   bool FRTTransceiver::delDatabuffForLine(FRTTTaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar,uint8_t u8PositionInBuffer)
    {
       int pos = this->_getCommStruct(partner,multiSenderQueue,bUseTaskHandleVar);
       if(!this->_hasDataInterpreters() || pos == -1)
@@ -546,7 +546,7 @@ namespace FRTT {
    }
 
 
-   bool FRTTransceiver::manualDeleteAllAllocatedDatabuffersForLine(FRTTransceiver_TaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar)
+   bool FRTTransceiver::delAllDatabuffForLine(FRTTTaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar)
    {  
       int pos = this->_getCommStruct(partner,multiSenderQueue,bUseTaskHandleVar);
       if(!this->_hasDataInterpreters() || pos == -1)
@@ -569,7 +569,7 @@ namespace FRTT {
    }
 
 
-   int FRTTransceiver::messagesOnQueue(FRTTransceiver_TaskHandle partner,bool bCheckTxQueue)
+   int FRTTransceiver::messagesOnQueue(FRTTTaskHandle partner,bool bCheckTxQueue)
    {
       int pos = this->_getCommStruct(partner,eMultiSenderQueue::eNOMULTIQSELECTED,true);
 
@@ -578,7 +578,7 @@ namespace FRTT {
          return -1;
       }
 
-      FRTTransceiver_QueueHandle temp = (bCheckTxQueue ? this->_structCommPartners[pos].txQueue:this->_structCommPartners[pos].rxQueue);
+      FRTTQueueHandle temp = (bCheckTxQueue ? this->_structCommPartners[pos].txQueue:this->_structCommPartners[pos].rxQueue);
       if(temp == NULL)
       {
          return -1;
@@ -604,7 +604,7 @@ namespace FRTT {
       return this->_getAmountOfMessages(this->_structCommPartners[pos].rxQueue);
    }
 
-   bool FRTTransceiver::hasDataFrom(FRTTransceiver_TaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar)
+   bool FRTTransceiver::hasDataFrom(FRTTTaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar)
    {
       int pos = this->_getCommStruct(partner,multiSenderQueue,bUseTaskHandleVar);
 
@@ -617,7 +617,7 @@ namespace FRTT {
    }
 
 
-   int FRTTransceiver::amountOfBufferedDataFrom(FRTTransceiver_TaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar)
+   int FRTTransceiver::bufferedDataFrom(FRTTTaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar)
    {
       int pos = this->_getCommStruct(partner,multiSenderQueue,bUseTaskHandleVar);
 
@@ -629,7 +629,7 @@ namespace FRTT {
       return (this->_structCommPartners[pos].hasBufferedData ? this->_structCommPartners[pos].i8CurrTempcontainerPos + 1:0);
    }
 
-   int FRTTransceiver::amountOfDataInAllBuffers()
+   int FRTTransceiver::bufferedDataInAllBuffers()
    {
       int amountOfDataAvail = 0;
       for(uint8_t u8I = 0;u8I < this->_u8CurrCommPartners;u8I++)
@@ -642,7 +642,7 @@ namespace FRTT {
    }
 
 
-   int FRTTransceiver::_getCommStruct(FRTTransceiver_TaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar)
+   int FRTTransceiver::_getCommStruct(FRTTTaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar)
    {
       if(bUseTaskHandleVar)
       {
@@ -688,7 +688,7 @@ namespace FRTT {
    }
 
 
-   int FRTTransceiver::checkIfDataTypeInBuffer(FRTTransceiver_TaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar,uint8_t u8Datatype)
+   int FRTTransceiver::isDatatypeInBuffer(FRTTTaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar,uint8_t u8Datatype)
    {
       int pos = this->_getCommStruct(partner,multiSenderQueue,bUseTaskHandleVar);
 
@@ -712,7 +712,7 @@ namespace FRTT {
       return counter;
    }
 
-   const FRTTransceiver_TempDataContainer * FRTTransceiver::getNewestBufferedDataFrom(FRTTransceiver_TaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar)
+   const FRTTTempDataContainer * FRTTransceiver::getNewestBufferedDataFrom(FRTTTaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar)
    {
       int pos = this->_getCommStruct(partner,multiSenderQueue,bUseTaskHandleVar);
 
@@ -723,13 +723,13 @@ namespace FRTT {
 
       if(this->_structCommPartners[pos].hasBufferedData)
       {
-         return (const FRTTransceiver_TempDataContainer *)&this->_structCommPartners[pos].tempContainer[this->_structCommPartners[pos].i8CurrTempcontainerPos];
+         return (const FRTTTempDataContainer *)&this->_structCommPartners[pos].tempContainer[this->_structCommPartners[pos].i8CurrTempcontainerPos];
       }
       return NULL;
    }
 
 
-   const FRTTransceiver_TempDataContainer * FRTTransceiver::getOldestBufferedDataFrom(FRTTransceiver_TaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar)
+   const FRTTTempDataContainer * FRTTransceiver::getOldestBufferedDataFrom(FRTTTaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar)
    {
       int pos = this->_getCommStruct(partner,multiSenderQueue,bUseTaskHandleVar);
 
@@ -740,12 +740,12 @@ namespace FRTT {
 
       if(this->_structCommPartners[pos].hasBufferedData)
       {
-         return (const FRTTransceiver_TempDataContainer *)&this->_structCommPartners[pos].tempContainer[0];
+         return (const FRTTTempDataContainer *)&this->_structCommPartners[pos].tempContainer[0];
       }
       return NULL;
    }
 
-   const FRTTransceiver_TempDataContainer * FRTTransceiver::getBufferedDataFrom(FRTTransceiver_TaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar, 
+   const FRTTTempDataContainer * FRTTransceiver::getBufferedDataFrom(FRTTTaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar, 
                                                                                                                                     uint8_t u8PositionInBuffer)
    {
       int pos = this->_getCommStruct(partner,multiSenderQueue,bUseTaskHandleVar);
@@ -757,25 +757,25 @@ namespace FRTT {
 
       if(this->_structCommPartners[pos].hasBufferedData && u8PositionInBuffer <= this->_structCommPartners[pos].i8CurrTempcontainerPos)
       {
-         return (const FRTTransceiver_TempDataContainer *)&this->_structCommPartners[pos].tempContainer[u8PositionInBuffer];
+         return (const FRTTTempDataContainer *)&this->_structCommPartners[pos].tempContainer[u8PositionInBuffer];
       }
       
       return NULL;
    }
 
-   void FRTTransceiver::addDataAllocateCallback(void(*fP)(const FRTTransceiver_DataContainerOnQueue &,FRTTransceiver_TempDataContainer &))
+   void FRTTransceiver::addDataAllocateCallback(void(*fP)(const FRTTDataContainerOnQueue &,FRTTTempDataContainer &))
    {
       this->_dataAllocator = fP;
    }
 
 
-   void FRTTransceiver::addDataFreeCallback(void (*fP)(FRTTransceiver_TempDataContainer &))
+   void FRTTransceiver::addDataFreeCallback(void (*fP)(FRTTTempDataContainer &))
    {
       this->_dataDestroyer = fP;
    }
 
 
-   string FRTTransceiver::_getPartnersName(FRTTransceiver_TaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar)
+   string FRTTransceiver::_getPartnersName(FRTTTaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar)
    {
       int pos = this->_getCommStruct(partner,multiSenderQueue,bUseTaskHandleVar);
 

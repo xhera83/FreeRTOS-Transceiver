@@ -6,6 +6,7 @@
 
 
 #include "FRTTransceiver.h"
+#include "WString.h"
 
 using namespace FRTT;
 
@@ -18,20 +19,20 @@ typedef enum
    eCOMMAND = 4,
 }eDataTypes;
 
-FRTTransceiver_TaskHandle TASK_MASTER;
-FRTTransceiver_TaskHandle TASK_UART_SLAVE;
-FRTTransceiver_TaskHandle TASK_MOTOR_SLAVE;
-FRTTransceiver_TaskHandle TASK_SENSOR_SLAVE;
+FRTTTaskHandle TASK_MASTER;
+FRTTTaskHandle TASK_UART_SLAVE;
+FRTTTaskHandle TASK_MOTOR_SLAVE;
+FRTTTaskHandle TASK_SENSOR_SLAVE;
 
-FRTTransceiver_QueueHandle MULTISENDERQ;
-FRTTransceiver_QueueHandle QUEUE_TO_MOTOR;
-FRTTransceiver_QueueHandle QUEUE_TO_SENSOR;
-FRTTransceiver_QueueHandle QUEUE_TO_UART;
+FRTTQueueHandle MULTISENDERQ;
+FRTTQueueHandle QUEUE_TO_MOTOR;
+FRTTQueueHandle QUEUE_TO_SENSOR;
+FRTTQueueHandle QUEUE_TO_UART;
 
-FRTTransceiver_SemaphoreHandle SEMAPHORE_MULTIQ;
-FRTTransceiver_SemaphoreHandle SEMAPHORE_MOTOR;
-FRTTransceiver_SemaphoreHandle SEMAPHORE_UART;
-FRTTransceiver_SemaphoreHandle SEMAPHORE_SENSOR;
+FRTTSemaphoreHandle SEMAPHORE_MULTIQ;
+FRTTSemaphoreHandle SEMAPHORE_MOTOR;
+FRTTSemaphoreHandle SEMAPHORE_UART;
+FRTTSemaphoreHandle SEMAPHORE_SENSOR;
 
 #define QUEUELENGTH_MULTISENDERQ        (2u)    // multi-sender queuelength
 #define QUEUELENGTH_GENERAL             (1u)    // queuelength of all other queues
@@ -44,7 +45,7 @@ FRTTransceiver_SemaphoreHandle SEMAPHORE_SENSOR;
 #define SLEEP_MS                        (1200u)
 #define COMMANDS                        (15u)
 
-void handleSlaveWork(FRTTransceiver * comm,int * buffer,uint8_t u8Length,FRTTransceiver_TaskHandle partnertask,eDataTypes datatype);
+void handleSlaveWork(FRTTransceiver * comm,int * buffer,uint8_t u8Length,FRTTTaskHandle partnertask,eDataTypes datatype);
 String printBuffer(int * u8Buffer, uint8_t u8Length);
-void dataDestroyer(FRTTransceiver_TempDataContainer & internalBuffer);
-void dataAllocator (const FRTTransceiver_DataContainerOnQueue & origingalContainer_onQueue ,FRTTransceiver_TempDataContainer & internalBuffer);
+void dataDestroyer(FRTTTempDataContainer & internalBuffer);
+void dataAllocator (const FRTTDataContainerOnQueue & origingalContainer_onQueue ,FRTTTempDataContainer & internalBuffer);
