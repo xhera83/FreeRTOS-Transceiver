@@ -61,10 +61,6 @@ $(function() {
 </iframe>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="dir_58b17a3607642edb61a2bb1a7e92c200.html">dev_FreeRTOS-Transceiver</a></li>  </ul>
-</div>
 </div><!-- top -->
 <div class="header">
   <div class="summary">
@@ -98,7 +94,7 @@ Macros</h2></td></tr>
 <tr class="separator:a8b78b0cc0d204d1db3ff682c11637b29"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5d648be000727e8ecf36aa26a9d3d991"><td class="memItemLeft" align="right" valign="top"><a id="a5d648be000727e8ecf36aa26a9d3d991" name="a5d648be000727e8ecf36aa26a9d3d991"></a>
 #define&#160;</td><td class="memItemRight" valign="bottom"><b>FRTTRANSCEIVER_ANALYTICS_ENABLE</b></td></tr>
-<tr class="memdesc:a5d648be000727e8ecf36aa26a9d3d991"><td class="mdescLeft">&#160;</td><td class="mdescRight">TURN ON (uncomment) if you want to use <a class="el" href="class_f_r_t_transceiver.html#ab1c934f07565b31f262cd9e22cb9107a" title="Prints a good summary of all communication lines (TURN ON by uncommenting FRTTRANSCEIVER_ANALYTICS_EN...">FRTTransceiver::printCommunicationsSummary()</a> and let the library track packages received/sent. <br /></td></tr>
+<tr class="memdesc:a5d648be000727e8ecf36aa26a9d3d991"><td class="mdescLeft">&#160;</td><td class="mdescRight">TURN ON (uncomment) if you want to use FRTTransceiver::printCommunicationsSummary() and let the library track packages received/sent. <br /></td></tr>
 <tr class="separator:a5d648be000727e8ecf36aa26a9d3d991"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa1236535b0c0fc9345b93af3cf11d065"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_f_r_t_transceiver_settings_8h.html#aa1236535b0c0fc9345b93af3cf11d065">FRTTRANSCEIVER_COMMTYPE1</a>&#160;&#160;&#160;(&quot;NORMAL COMMUNICATION (READ &amp; WRITE)&quot;)</td></tr>
 <tr class="memdesc:aa1236535b0c0fc9345b93af3cf11d065"><td class="mdescLeft">&#160;</td><td class="mdescRight">Describes a normal communication line with another task.  <a href="_f_r_t_transceiver_settings_8h.html#aa1236535b0c0fc9345b93af3cf11d065">More...</a><br /></td></tr>
@@ -115,21 +111,22 @@ Macros</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="enum-members" name="enum-members"></a>
 Enumerations</h2></td></tr>
-<tr class="memitem:ac50c5f45eb6c12a27733a3a2d318004a"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_f_r_t_transceiver_settings_8h.html#ac50c5f45eb6c12a27733a3a2d318004a">eMultiSenderQueue</a> { <br />
-&#160;&#160;<a class="el" href="_f_r_t_transceiver_settings_8h.html#ac50c5f45eb6c12a27733a3a2d318004aaf3a2f8884f7a50cd92337ad77e240792">eNOMULTIQSELECTED</a> = -1
-, <a class="el" href="_f_r_t_transceiver_settings_8h.html#ac50c5f45eb6c12a27733a3a2d318004aa9b0f180dc39d0b5aee43484728c8a626">eMULTISENDERQ0</a> = 0
-, <a class="el" href="_f_r_t_transceiver_settings_8h.html#ac50c5f45eb6c12a27733a3a2d318004aace78cdb0a0b908f5d478da34a44d1107">eMULTISENDERQ1</a> = 1
-, <a class="el" href="_f_r_t_transceiver_settings_8h.html#ac50c5f45eb6c12a27733a3a2d318004aaec745f77a1d90b43b1380b22d481241e">eMULTISENDERQ2</a> = 2
+<tr class="memitem:a0f682d75272fcbb48a88f24ea7287c10"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_f_r_t_transceiver_settings_8h.html#a0f682d75272fcbb48a88f24ea7287c10">FRTT::eMultiSenderQueue</a> : int8_t { <br />
+&#160;&#160;<a class="el" href="_f_r_t_transceiver_settings_8h.html#a0f682d75272fcbb48a88f24ea7287c10a5e20eabb7dbc4b1def4f16a1bdf7fc43">eNOMULTIQSELECTED</a> = -1
+, <a class="el" href="_f_r_t_transceiver_settings_8h.html#a0f682d75272fcbb48a88f24ea7287c10aeac05e651a832b9e48c20a043eedbce9">eMULTISENDERQ0</a>
+, <a class="el" href="_f_r_t_transceiver_settings_8h.html#a0f682d75272fcbb48a88f24ea7287c10a7282342431c67c748f6756a761cd4824">eMULTISENDERQ1</a>
+, <a class="el" href="_f_r_t_transceiver_settings_8h.html#a0f682d75272fcbb48a88f24ea7287c10aefccf3c107ad79c64fa644f9c030bd3d">eMULTISENDERQ2</a>
 , <br />
-&#160;&#160;<a class="el" href="_f_r_t_transceiver_settings_8h.html#ac50c5f45eb6c12a27733a3a2d318004aa90407f47aa29bb100acb03aafafc67ce">eMULTISENDERQ3</a> = 3
+&#160;&#160;<a class="el" href="_f_r_t_transceiver_settings_8h.html#a0f682d75272fcbb48a88f24ea7287c10a127f2a6056ac61fe03f4cc8755bc6671">eMULTISENDERQ3</a>
 <br />
  }</td></tr>
-<tr class="memdesc:ac50c5f45eb6c12a27733a3a2d318004a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enumeration is used to select a multi-sender-queue for different class methods.  <a href="_f_r_t_transceiver_settings_8h.html#ac50c5f45eb6c12a27733a3a2d318004a">More...</a><br /></td></tr>
-<tr class="separator:ac50c5f45eb6c12a27733a3a2d318004a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memdesc:a0f682d75272fcbb48a88f24ea7287c10"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enumeration is used to select a multi-sender-queue for different class methods.  <a href="_f_r_t_transceiver_settings_8h.html#a0f682d75272fcbb48a88f24ea7287c10">More...</a><br /></td></tr>
+<tr class="separator:a0f682d75272fcbb48a88f24ea7287c10"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Configuration file for the FreeRTOS-Transceiver library. </p>
 <dl class="section author"><dt>Author</dt><dd>Xhemail Ramabaja (<a href="#" onclick="location.href='mai'+'lto:'+'x.r'+'am'+'aba'+'ja'+'@ou'+'tl'+'ook'+'.d'+'e'; return false;">x.ram<span class="obfuscator">.nosp@m.</span>abaj<span class="obfuscator">.nosp@m.</span>a@out<span class="obfuscator">.nosp@m.</span>look<span class="obfuscator">.nosp@m.</span>.de</a>) </dd></dl>
+<dl class="section version"><dt>Version</dt><dd>v1.1.0 </dd></dl>
 <dl class="section copyright"><dt>Copyright</dt><dd>Copyright 2022 Xhemail Ramabaja </dd></dl>
 </div><h2 class="groupheader">Macro Definition Documentation</h2>
 <a id="aa1236535b0c0fc9345b93af3cf11d065" name="aa1236535b0c0fc9345b93af3cf11d065"></a>
@@ -145,7 +142,7 @@ Enumerations</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Describes a normal communication line with another task. </p>
-<dl class="section note"><dt>Note</dt><dd>Used for <a class="el" href="class_f_r_t_transceiver.html#ab1c934f07565b31f262cd9e22cb9107a" title="Prints a good summary of all communication lines (TURN ON by uncommenting FRTTRANSCEIVER_ANALYTICS_EN...">FRTTransceiver::printCommunicationsSummary</a> </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Used for FRTTransceiver::printCommunicationsSummary </dd></dl>
 
 </div>
 </div>
@@ -162,7 +159,7 @@ Enumerations</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Describes a read-only communication line, where the tx queue is a multi-sender-queue (multiple tasks write on the tx line) </p>
-<dl class="section note"><dt>Note</dt><dd>Used for <a class="el" href="class_f_r_t_transceiver.html#ab1c934f07565b31f262cd9e22cb9107a" title="Prints a good summary of all communication lines (TURN ON by uncommenting FRTTRANSCEIVER_ANALYTICS_EN...">FRTTransceiver::printCommunicationsSummary</a> </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Used for FRTTransceiver::printCommunicationsSummary </dd></dl>
 
 </div>
 </div>
@@ -179,7 +176,7 @@ Enumerations</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Describes an echo communicatation line, where a task set him self as his communication partner. </p>
-<dl class="section note"><dt>Note</dt><dd>Used for <a class="el" href="class_f_r_t_transceiver.html#ab1c934f07565b31f262cd9e22cb9107a" title="Prints a good summary of all communication lines (TURN ON by uncommenting FRTTRANSCEIVER_ANALYTICS_EN...">FRTTransceiver::printCommunicationsSummary</a> </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Used for FRTTransceiver::printCommunicationsSummary </dd></dl>
 
 </div>
 </div>
@@ -213,37 +210,45 @@ Enumerations</h2></td></tr>
 </div><div class="memdoc">
 
 <p>When the address of the partner was not supplied. </p>
-<dl class="section note"><dt>Note</dt><dd>Used by <a class="el" href="class_f_r_t_transceiver.html#ab1c934f07565b31f262cd9e22cb9107a" title="Prints a good summary of all communication lines (TURN ON by uncommenting FRTTRANSCEIVER_ANALYTICS_EN...">FRTTransceiver::printCommunicationsSummary</a> </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Used by FRTTransceiver::printCommunicationsSummary </dd></dl>
 
 </div>
 </div>
 <h2 class="groupheader">Enumeration Type Documentation</h2>
-<a id="ac50c5f45eb6c12a27733a3a2d318004a" name="ac50c5f45eb6c12a27733a3a2d318004a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac50c5f45eb6c12a27733a3a2d318004a">&#9670;&nbsp;</a></span>eMultiSenderQueue</h2>
+<a id="a0f682d75272fcbb48a88f24ea7287c10" name="a0f682d75272fcbb48a88f24ea7287c10"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0f682d75272fcbb48a88f24ea7287c10">&#9670;&nbsp;</a></span>eMultiSenderQueue</h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">enum <a class="el" href="_f_r_t_transceiver_settings_8h.html#ac50c5f45eb6c12a27733a3a2d318004a">eMultiSenderQueue</a></td>
+          <td class="memname">enum class <a class="el" href="_f_r_t_transceiver_settings_8h.html#a0f682d75272fcbb48a88f24ea7287c10">FRTT::eMultiSenderQueue</a> : int8_t</td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">strong</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Enumeration is used to select a multi-sender-queue for different class methods. </p>
-<p >Normally one would need to select a communication line by supplying a <a class="el" href="_f_r_t_transceiver_extension_8h.html#aaa87aeb988005c38857805dc39f7144c" title="Holds the address to a task.">FRTTransceiver_TaskHandle</a>. A multi-sender-queue does not have a unique <a class="el" href="_f_r_t_transceiver_extension_8h.html#aaa87aeb988005c38857805dc39f7144c" title="Holds the address to a task.">FRTTransceiver_TaskHandle</a>, so that another way of selecting a communication line had to be introduced.<br  />
- </p><dl class="section note"><dt>Note</dt><dd>There should be a maximum of <a class="el" href="_f_r_t_transceiver_settings_8h.html#a9b338f7147604087df0d1e07598ceb20" title="Defines the maximum length a queue can have.">FRTTRANSCEIVER_MAXELEMENTSIZEONQUEUE</a> enumeration keys. <br  />
- Increasing <a class="el" href="_f_r_t_transceiver_settings_8h.html#a9b338f7147604087df0d1e07598ceb20" title="Defines the maximum length a queue can have.">FRTTRANSCEIVER_MAXELEMENTSIZEONQUEUE</a> also requires one to adjust the amount of eMultiSenderQueue keys to match <a class="el" href="_f_r_t_transceiver_settings_8h.html#a9b338f7147604087df0d1e07598ceb20" title="Defines the maximum length a queue can have.">FRTTRANSCEIVER_MAXELEMENTSIZEONQUEUE</a> </dd></dl>
+<p >Normally one would need to select a communication line by supplying a ::FRTTTaskHandle. A multi-sender-queue does not have a unique ::FRTTTaskHandle, so that another way of selecting a communication line had to be introduced.<br  />
+ </p><dl class="section note"><dt>Note</dt><dd>There should be a maximum of <a class="el" href="_f_r_t_transceiver_settings_8h.html#a9b338f7147604087df0d1e07598ceb20" title="Defines the maximum length a queue can have.">FRTTRANSCEIVER_MAXELEMENTSIZEONQUEUE</a> enumerators. <br  />
+ Increasing <a class="el" href="_f_r_t_transceiver_settings_8h.html#a9b338f7147604087df0d1e07598ceb20" title="Defines the maximum length a queue can have.">FRTTRANSCEIVER_MAXELEMENTSIZEONQUEUE</a> also requires one to adjust the amount of eMultiSenderQueue enumerators to match <a class="el" href="_f_r_t_transceiver_settings_8h.html#a9b338f7147604087df0d1e07598ceb20" title="Defines the maximum length a queue can have.">FRTTRANSCEIVER_MAXELEMENTSIZEONQUEUE</a> </dd></dl>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ac50c5f45eb6c12a27733a3a2d318004aaf3a2f8884f7a50cd92337ad77e240792" name="ac50c5f45eb6c12a27733a3a2d318004aaf3a2f8884f7a50cd92337ad77e240792"></a>eNOMULTIQSELECTED&#160;</td><td class="fielddoc"><p >It is just a filler enum key if one wants to use a FRTTransceiver_TaskHandle for selecting a communication line </p>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a0f682d75272fcbb48a88f24ea7287c10a5e20eabb7dbc4b1def4f16a1bdf7fc43" name="a0f682d75272fcbb48a88f24ea7287c10a5e20eabb7dbc4b1def4f16a1bdf7fc43"></a>eNOMULTIQSELECTED&#160;</td><td class="fielddoc"><p >It is just a filler enumerator if one wants to use a FRTTTaskHandle for selecting a communication line </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ac50c5f45eb6c12a27733a3a2d318004aa9b0f180dc39d0b5aee43484728c8a626" name="ac50c5f45eb6c12a27733a3a2d318004aa9b0f180dc39d0b5aee43484728c8a626"></a>eMULTISENDERQ0&#160;</td><td class="fielddoc"><p >Select the FIRST multi-sender-queue added with <a class="el" href="class_f_r_t_transceiver.html#aceee70f6aaf198f1f185ff51d32239d8" title="Adds a new multi-sender-queue connection (multiple tasks write on the tx line)">FRTTransceiver::addMultiSenderReadOnlyQueue()</a> </p>
+<tr><td class="fieldname"><a id="a0f682d75272fcbb48a88f24ea7287c10aeac05e651a832b9e48c20a043eedbce9" name="a0f682d75272fcbb48a88f24ea7287c10aeac05e651a832b9e48c20a043eedbce9"></a>eMULTISENDERQ0&#160;</td><td class="fielddoc"><p >Select the FIRST multi-sender-queue added with <a class="el" href="class_f_r_t_t_1_1_f_r_t_transceiver.html#a185cbd2236c71aa9915d52338ac65781" title="Adds a new multi-sender-queue connection (multiple tasks write on the tx line)">FRTTransceiver::addMultiSenderPartner()</a> </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ac50c5f45eb6c12a27733a3a2d318004aace78cdb0a0b908f5d478da34a44d1107" name="ac50c5f45eb6c12a27733a3a2d318004aace78cdb0a0b908f5d478da34a44d1107"></a>eMULTISENDERQ1&#160;</td><td class="fielddoc"><p >Select the SECOND multi-sender-queue added with <a class="el" href="class_f_r_t_transceiver.html#aceee70f6aaf198f1f185ff51d32239d8" title="Adds a new multi-sender-queue connection (multiple tasks write on the tx line)">FRTTransceiver::addMultiSenderReadOnlyQueue()</a> </p>
+<tr><td class="fieldname"><a id="a0f682d75272fcbb48a88f24ea7287c10a7282342431c67c748f6756a761cd4824" name="a0f682d75272fcbb48a88f24ea7287c10a7282342431c67c748f6756a761cd4824"></a>eMULTISENDERQ1&#160;</td><td class="fielddoc"><p >Select the SECOND multi-sender-queue added with <a class="el" href="class_f_r_t_t_1_1_f_r_t_transceiver.html#a185cbd2236c71aa9915d52338ac65781" title="Adds a new multi-sender-queue connection (multiple tasks write on the tx line)">FRTTransceiver::addMultiSenderPartner()</a> </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ac50c5f45eb6c12a27733a3a2d318004aaec745f77a1d90b43b1380b22d481241e" name="ac50c5f45eb6c12a27733a3a2d318004aaec745f77a1d90b43b1380b22d481241e"></a>eMULTISENDERQ2&#160;</td><td class="fielddoc"><p >Select the THIRD multi-sender-queue added with <a class="el" href="class_f_r_t_transceiver.html#aceee70f6aaf198f1f185ff51d32239d8" title="Adds a new multi-sender-queue connection (multiple tasks write on the tx line)">FRTTransceiver::addMultiSenderReadOnlyQueue()</a> </p>
+<tr><td class="fieldname"><a id="a0f682d75272fcbb48a88f24ea7287c10aefccf3c107ad79c64fa644f9c030bd3d" name="a0f682d75272fcbb48a88f24ea7287c10aefccf3c107ad79c64fa644f9c030bd3d"></a>eMULTISENDERQ2&#160;</td><td class="fielddoc"><p >Select the THIRD multi-sender-queue added with <a class="el" href="class_f_r_t_t_1_1_f_r_t_transceiver.html#a185cbd2236c71aa9915d52338ac65781" title="Adds a new multi-sender-queue connection (multiple tasks write on the tx line)">FRTTransceiver::addMultiSenderPartner()</a> </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ac50c5f45eb6c12a27733a3a2d318004aa90407f47aa29bb100acb03aafafc67ce" name="ac50c5f45eb6c12a27733a3a2d318004aa90407f47aa29bb100acb03aafafc67ce"></a>eMULTISENDERQ3&#160;</td><td class="fielddoc"><p >Select the FOURTH multi-sender-queue added with <a class="el" href="class_f_r_t_transceiver.html#aceee70f6aaf198f1f185ff51d32239d8" title="Adds a new multi-sender-queue connection (multiple tasks write on the tx line)">FRTTransceiver::addMultiSenderReadOnlyQueue()</a> </p>
+<tr><td class="fieldname"><a id="a0f682d75272fcbb48a88f24ea7287c10a127f2a6056ac61fe03f4cc8755bc6671" name="a0f682d75272fcbb48a88f24ea7287c10a127f2a6056ac61fe03f4cc8755bc6671"></a>eMULTISENDERQ3&#160;</td><td class="fielddoc"><p >Select the FOURTH multi-sender-queue added with <a class="el" href="class_f_r_t_t_1_1_f_r_t_transceiver.html#a185cbd2236c71aa9915d52338ac65781" title="Adds a new multi-sender-queue connection (multiple tasks write on the tx line)">FRTTransceiver::addMultiSenderPartner()</a> </p>
 </td></tr>
 </table>
 

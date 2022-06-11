@@ -66,7 +66,7 @@ void Master(void *)
           TASK_SENSOR_SLAVE  == nullptr || TASK_UART_SLAVE == nullptr) vTaskDelay(pdMS_TO_TICKS(1));
 
     vTaskDelay(pdMS_TO_TICKS(1000));
-
+    
     FRTTransceiver comm(TASK_MASTER,4);
 
     comm.addDataAllocateCallback(dataAllocator);

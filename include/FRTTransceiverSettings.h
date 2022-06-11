@@ -2,10 +2,11 @@
 #define FRTTRANSCEIVERSETTINGS_H
 
 /*!
- * \file       FRTTransceiverSettings.h
- * \brief      Configuration file for the FreeRTOS-Transceiver library
- * \author     Xhemail Ramabaja (x.ramabaja@outlook.de)
- * \copyright  Copyright 2022 Xhemail Ramabaja
+ * \file        FRTTransceiverSettings.h
+ * \brief       Configuration file for the FreeRTOS-Transceiver library
+ * \author      Xhemail Ramabaja (x.ramabaja@outlook.de)
+ * \version     v1.1.0
+ * \copyright   Copyright 2022 Xhemail Ramabaja
  *
  */
 
@@ -54,20 +55,20 @@
 namespace FRTT {
     /*!
     * \brief         Enumeration is used to select a multi-sender-queue for different class methods
-    * \details       Normally one would need to select a communication line by supplying a ::FRTTransceiver_TaskHandle.
-    *                A multi-sender-queue does not have a unique ::FRTTransceiver_TaskHandle, so that another way of selecting a communication line
+    * \details       Normally one would need to select a communication line by supplying a ::FRTTTaskHandle.
+    *                A multi-sender-queue does not have a unique ::FRTTTaskHandle, so that another way of selecting a communication line
     *                had to be introduced.<br>
-    * \note          There should be a maximum of #FRTTRANSCEIVER_MAXELEMENTSIZEONQUEUE enumerator. <br>
-    *                Increasing #FRTTRANSCEIVER_MAXELEMENTSIZEONQUEUE also requires one to adjust the amount of eMultiSenderQueue enumerator to match #FRTTRANSCEIVER_MAXELEMENTSIZEONQUEUE
+    * \note          There should be a maximum of #FRTTRANSCEIVER_MAXELEMENTSIZEONQUEUE enumerators. <br>
+    *                Increasing #FRTTRANSCEIVER_MAXELEMENTSIZEONQUEUE also requires one to adjust the amount of eMultiSenderQueue enumerators to match #FRTTRANSCEIVER_MAXELEMENTSIZEONQUEUE
     *                
     */
     enum class eMultiSenderQueue : int8_t 
     {
-        eNOMULTIQSELECTED   = -1,           /*!< It is just a filler enumerator if one wants to use a FRTTransceiver_TaskHandle for selecting a communication line*/
-        eMULTISENDERQ0,                     /*!< Select the FIRST multi-sender-queue added with FRTTransceiver::addMultiSenderReadOnlyQueue()*/
-        eMULTISENDERQ1,                     /*!< Select the SECOND multi-sender-queue added with FRTTransceiver::addMultiSenderReadOnlyQueue()*/
-        eMULTISENDERQ2,                     /*!< Select the THIRD multi-sender-queue added with FRTTransceiver::addMultiSenderReadOnlyQueue()*/
-        eMULTISENDERQ3,                     /*!< Select the FOURTH multi-sender-queue added with FRTTransceiver::addMultiSenderReadOnlyQueue()*/
+        eNOMULTIQSELECTED   = -1,           /*!< It is just a filler enumerator if one wants to use a FRTTTaskHandle for selecting a communication line*/
+        eMULTISENDERQ0,                     /*!< Select the FIRST multi-sender-queue added with FRTTransceiver::addMultiSenderPartner()*/
+        eMULTISENDERQ1,                     /*!< Select the SECOND multi-sender-queue added with FRTTransceiver::addMultiSenderPartner()*/
+        eMULTISENDERQ2,                     /*!< Select the THIRD multi-sender-queue added with FRTTransceiver::addMultiSenderPartner()*/
+        eMULTISENDERQ3,                     /*!< Select the FOURTH multi-sender-queue added with FRTTransceiver::addMultiSenderPartner()*/
     };
 }
 #endif

@@ -83,7 +83,7 @@ namespace FRTT {
       return (this->_dataAllocator && this->_dataDestroyer) ? true:false;
    }
 
-   bool FRTTransceiver::_hasSemaphore(FRTTTaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar, bool txLine)
+   bool FRTTransceiver::_hasSemaphore(FRTTTaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar, bool bTxLine)
    {  
       /* _getCommStruct checks if a valid communication struct is available */
       int pos = this->_getCommStruct(partner,multiSenderQueue,bUseTaskHandleVar);
@@ -95,7 +95,7 @@ namespace FRTT {
       
       if(bUseTaskHandleVar)
       {
-         if(txLine)
+         if(bTxLine)
          {
             return this->_structCommPartners[pos].semaphoreTxQueue == nullptr ? false:true;
          }
@@ -206,9 +206,9 @@ namespace FRTT {
    }
 
    #if defined(FRTTRANSCEIVER_32BITADDITIONALDATA)
-   bool FRTTransceiver::writeToQueue(FRTTTaskHandle destination,uint8_t u8DataType,void * data,int blockTimeWrite,int blockTimeTakeSemaphore,uint32_t u32AdditionalData)
+   bool FRTTransceiver::writeToQueue(FRTTTaskHandle destination,uint8_t u8DataType,void * data,int blockTimeWrite_Ms,int blockTimeTakeSemaphore_Ms,uint32_t u32AdditionalData)
    #elif defined(FRTTRANSCEIVER_64BITADDITIONALDATA)
-   bool FRTTransceiver::writeToQueue(FRTTTaskHandle destination,uint8_t u8DataType,void * data,int blockTimeWrite,int blockTimeTakeSemaphore,uint64_t u64AdditionalData)
+   bool FRTTransceiver::writeToQueue(FRTTTaskHandle destination,uint8_t u8DataType,void * data,int blockTimeWrite_Ms,int blockTimeTakeSemaphore_Ms,uint64_t u64AdditionalData)
    #endif
    {  
       /* _getCommStruct checks if a valid communication struct is available */
@@ -238,8 +238,8 @@ namespace FRTT {
       }
 
 
-      unsigned long timeToWaitSemaphore = _checkWaitTime(blockTimeTakeSemaphore);
-      unsigned long timeToWaitWrite = _checkWaitTime(blockTimeWrite);
+      unsigned long timeToWaitSemaphore = _checkWaitTime(blockTimeTakeSemaphore_Ms);
+      unsigned long timeToWaitWrite = _checkWaitTime(blockTimeWrite_Ms);
 
       if(timeToWaitSemaphore == -2 || timeToWaitWrite == -2)
       {  
@@ -342,9 +342,9 @@ namespace FRTT {
 
 
    #if defined(FRTTRANSCEIVER_32BITADDITIONALDATA)
-   bool FRTTransceiver::databroadcast(uint8_t u8DataType,void * data,int blockTimeWrite,int blockTimeTakeSemaphore,uint32_t u32AdditionalData)
+   bool FRTTransceiver::databroadcast(uint8_t u8DataType,void * data,int blockTimeWrite_Ms,int blockTimeTakeSemaphore_Ms,uint32_t u32AdditionalData)
    #elif defined(FRTTRANSCEIVER_64BITADDITIONALDATA)
-   bool FRTTransceiver::databroadcast(uint8_t u8DataType,void * data,int blockTimeWrite,int blockTimeTakeSemaphore,uint64_t u64AdditionalData)
+   bool FRTTransceiver::databroadcast(uint8_t u8DataType,void * data,int blockTimeWrite_Ms,int blockTimeTakeSemaphore_Ms,uint64_t u64AdditionalData)
    #endif
    {  
       
@@ -357,11 +357,11 @@ namespace FRTT {
          if(this->_structCommPartners[u8I].bReadOnlyCommunication == false || this->_structCommPartners[u8I].txQueue != nullptr)
          {
             #ifdef FRTTRANSCEIVER_32BITADDITIONALDATA
-            if(this->writeToQueue(this->_structCommPartners[u8I].commPartner,u8DataType,data,blockTimeWrite,blockTimeTakeSemaphore,u32AdditionalData)){
+            if(this->writeToQueue(this->_structCommPartners[u8I].commPartner,u8DataType,data,blockTimeWrite_Ms,blockTimeTakeSemaphore_Ms,u32AdditionalData)){
                u8SuccessCounter++;
             }
             #elif defined(FRTTRANSCEIVER_64BITADDITIONALDATA)
-            if(this->writeToQueue(this->_structCommPartners[u8I].commPartner,u8DataType,data,blockTimeWrite,blockTimeTakeSemaphore,u64AdditionalData)){
+            if(this->writeToQueue(this->_structCommPartners[u8I].commPartner,u8DataType,data,blockTimeWrite_Ms,blockTimeTakeSemaphore_Ms,u64AdditionalData)){
                u8SuccessCounter++;
             }
             #endif
@@ -378,7 +378,7 @@ namespace FRTT {
    }
 
 
-   bool FRTTransceiver::readFromQueue(FRTTTaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar,int blockTimeRead,int blockTimeTakeSemaphore)
+   bool FRTTransceiver::readFromQueue(FRTTTaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar,int blockTimeRead_Ms,int blockTimeTakeSemaphore_Ms)
    {
       if(!this->_bHasValidStruct || !this->_hasDataInterpreters() || !this->_hasSemaphore(partner,multiSenderQueue,bUseTaskHandleVar,false))
       {
@@ -393,8 +393,8 @@ namespace FRTT {
 
       }
 
-      unsigned long timeToWaitRead = this->_checkWaitTime(blockTimeRead);
-      unsigned long timeToWaitSemaphore = this->_checkWaitTime(blockTimeTakeSemaphore);
+      unsigned long timeToWaitRead = this->_checkWaitTime(blockTimeRead_Ms);
+      unsigned long timeToWaitSemaphore = this->_checkWaitTime(blockTimeTakeSemaphore_Ms);
 
       if(timeToWaitRead == -2 || timeToWaitSemaphore == -2)
       {
@@ -450,12 +450,12 @@ namespace FRTT {
       return true;
    }
 
-   bool FRTTransceiver::queueFlush(FRTTTaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandle,int blockTimeTakeSemaphore,bool bTxQueue)
+   bool FRTTransceiver::queueFlush(FRTTTaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandle,int blockTimeTakeSemaphore_Ms,bool bTxQueue)
    {  
       /* _getCommStruct checks if a valid communication struct is available */
       int pos = this->_getCommStruct(partner,multiSenderQueue,bUseTaskHandle);
 
-      unsigned long timeToWaitSemaphore = this->_checkWaitTime(blockTimeTakeSemaphore);
+      unsigned long timeToWaitSemaphore = this->_checkWaitTime(blockTimeTakeSemaphore_Ms);
 
       if(pos == -1 || timeToWaitSemaphore == -2)
       {
