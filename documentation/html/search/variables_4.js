@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['hasbuffereddata_0',['hasBufferedData',['../struct_f_r_t_transceiver___communication_partner.html#a3c5e8b152d244ddfd9b2cc31431c8afd',1,'FRTTransceiver_CommunicationPartner']]]
+  ['i8currtempcontainerpos_0',['i8CurrTempcontainerPos',['../struct_f_r_t_t_1_1_f_r_t_t_communication_partner.html#af73e67ceb79831fc97182c56e9643555',1,'FRTT::FRTTCommunicationPartner']]]
 ];

@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['rxbufferfull_0',['rxBufferFull',['../struct_f_r_t_transceiver___communication_partner.html#a05638b194b9370fd1160c966c1684049',1,'FRTTransceiver_CommunicationPartner']]],
-  ['rxlinecontainer_1',['rxLineContainer',['../struct_f_r_t_transceiver___communication_partner.html#a2ee5ce9b40cdd7f0e040331d2fede3aa',1,'FRTTransceiver_CommunicationPartner']]],
-  ['rxqueue_2',['rxQueue',['../struct_f_r_t_transceiver___communication_partner.html#a20d4340776d5676f76b51311583723cd',1,'FRTTransceiver_CommunicationPartner']]]
+  ['semaphorerxqueue_0',['semaphoreRxQueue',['../struct_f_r_t_t_1_1_f_r_t_t_communication_partner.html#a0ab3827178a14081fa79f5d11f443961',1,'FRTT::FRTTCommunicationPartner']]],
+  ['semaphoretxqueue_1',['semaphoreTxQueue',['../struct_f_r_t_t_1_1_f_r_t_t_communication_partner.html#a341b1432fd0be7d5f9a68fbe3f6355d5',1,'FRTT::FRTTCommunicationPartner']]],
+  ['senderaddress_2',['senderAddress',['../struct_f_r_t_t_1_1_f_r_t_t_data_container_on_queue.html#aa78d3deb9370fdae6cb6c4b07b968f50',1,'FRTT::FRTTDataContainerOnQueue']]]
 ];

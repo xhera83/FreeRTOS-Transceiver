@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['getbuffereddatafrom_0',['getBufferedDataFrom',['../class_f_r_t_transceiver.html#a5b96d41d87c3aaff1881d0be2f66cc94',1,'FRTTransceiver']]],
-  ['getnewestbuffereddatafrom_1',['getNewestBufferedDataFrom',['../class_f_r_t_transceiver.html#a6e71240647487e6c5a51cce8b1a0e038',1,'FRTTransceiver']]],
-  ['getoldestbuffereddatafrom_2',['getOldestBufferedDataFrom',['../class_f_r_t_transceiver.html#a19e26f3c10a0869c32350e8346abdbc2',1,'FRTTransceiver']]]
+  ['getbuffereddatafrom_0',['getBufferedDataFrom',['../class_f_r_t_t_1_1_f_r_t_transceiver.html#aff1b96bd0d92f9c60f3b4e1f353c8d9a',1,'FRTT::FRTTransceiver']]],
+  ['getnewestbuffereddatafrom_1',['getNewestBufferedDataFrom',['../class_f_r_t_t_1_1_f_r_t_transceiver.html#a8164c671488b9692bf09e28248c1b28c',1,'FRTT::FRTTransceiver']]],
+  ['getoldestbuffereddatafrom_2',['getOldestBufferedDataFrom',['../class_f_r_t_t_1_1_f_r_t_transceiver.html#aab538414aab5e13b1e6bed0bcd0132d7',1,'FRTT::FRTTransceiver']]]
 ];

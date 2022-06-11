@@ -36,56 +36,19 @@
 
 /* ######################################################################## EXAMPLE START ######################################################################## */
 
-
-
-void ECHO(void *)
-{
-    while(TASK_ECHO == NULL) vTaskDelay(pdMS_TO_TICKS(1));
-
-    vTaskDelay(pdMS_TO_TICKS(50)); /* So that no overlapping occurs if log_i()'s happen */
-
-    FRTTransceiver comm(TASK_ECHO,1);
-    comm.addDataAllocateCallback(dataAllocator);
-    comm.addDataFreeCallback(dataDestroyer);
-
-    bool retVal = comm.addCommPartner(TASK_ECHO,ECHO_QUEUE,QUEUELENGTH,SEMAPHORE1,ECHO_QUEUE,QUEUELENGTH,SEMAPHORE1,"ECHO");
-
-    if(retVal)
-    {
-        log_i("Connected to myself...Echo without delay incoming...(Communication summary afterwards)");
-        vTaskDelay(pdMS_TO_TICKS(2500));
-    }
-    
-    int a = 0;
-
-    for(int i = 0;i < 1000;i++)
-    {
-        if(comm.messagesOnQueue(TASK_ECHO,false) > 0)
-        {
-            bool res = comm.readFromQueue(TASK_ECHO,eNOMULTIQSELECTED,true,0,0);
-            comm.manualDeleteAllAllocatedDatabuffersForLine(TASK_ECHO,eNOMULTIQSELECTED,true);
-        }
-        else
-        {
-            bool res = comm.writeToQueue(TASK_ECHO,eINT,&a,0,0,1000);
-        }
-    }
-    comm.printCommunicationsSummary();
-    comm.~FRTTransceiver();
-    vTaskDelete(NULL);
-}
-
-
+FRTTTaskHandle TASK_ECHO;
+FRTTQueueHandle ECHO_QUEUE;
+FRTTSemaphoreHandle SEMAPHORE1; 
 
 void setup() {
     log_i("Setup() running.\n\n");
     disableCore0WDT();
 
-    ECHO_QUEUE = FRTTransceiver_CreateQueue(QUEUELENGTH);
+    ECHO_QUEUE = FRTTCreateQueue(QUEUELENGTH);
 
-    SEMAPHORE1 = FRTTransceiver_CreateSemaphore();
+    SEMAPHORE1 = FRTTCreateSemaphore();
 
-    xTaskCreatePinnedToCore(ECHO,"receiver-task",5000,NULL,4,&TASK_ECHO,1);
+    xTaskCreatePinnedToCore(ECHO,"receiver-task",5000,nullptr,4,&TASK_ECHO,1);
 }
 
 /* This loop is running when no other task is on */

@@ -4,8 +4,15 @@
  * \author      Xhemail Ramabaja (x.ramabaja@outlook.de)
  */
 
+#ifndef ADDITIONS_H
+#define ADDITIONS_H
 
 #include "FRTTransceiver.h"
+
+using namespace FRTT;
+
+
+#define DYNAMIC_STRUCTARRAY 0
 
 /* datatypes recognized throughout the example */
 typedef enum
@@ -14,14 +21,21 @@ typedef enum
 }eDataTypes;
 
 
-FRTTransceiver_TaskHandle TASK_SENDER;
-FRTTransceiver_TaskHandle TASK_RECEIVER;
+extern FRTTTaskHandle TASK_SENDER;
+extern FRTTTaskHandle TASK_RECEIVER;
 
-FRTTransceiver_QueueHandle QUEUE_TO_RECEIVER;
+extern FRTTQueueHandle QUEUE_TO_RECEIVER;
 
-FRTTransceiver_SemaphoreHandle SEMAPHORE1;
+extern FRTTSemaphoreHandle SEMAPHORE1;
 
 
 #define QUEUELENGTH  (1u)
 
 #define STOP_COMM_AT (5u)
+
+void dataDestroyer(FRTTTempDataContainer & internalBuffer);
+void dataAllocator (const FRTTDataContainerOnQueue & origingalContainer_onQueue ,FRTTTempDataContainer & internalBuffer);
+void SENDER(void *);
+void RECEIVER(void *);
+
+#endif

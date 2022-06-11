@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['queueflush_0',['queueFlush',['../class_f_r_t_transceiver.html#ac9b11d2a17e61a0cd3c3ad133f81b00e',1,'FRTTransceiver']]]
+  ['printcommunicationssummary_0',['printCommunicationsSummary',['../class_f_r_t_t_1_1_f_r_t_transceiver.html#aceff4e2ec904f0e9b13f7c04baaa078f',1,'FRTT::FRTTransceiver']]]
 ];
