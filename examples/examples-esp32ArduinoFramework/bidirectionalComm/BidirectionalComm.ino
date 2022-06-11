@@ -48,7 +48,11 @@ void SENDER(void *)
 {
     while(TASK_SENDER == nullptr || TASK_RECEIVER == nullptr) vTaskDelay(pdMS_TO_TICKS(1));
 
-    FRTTransceiver comm(TASK_SENDER,1);
+
+    FRTTCommunicationPartner commStruct[1];
+
+    FRTTransceiver comm(TASK_SENDER,&commStruct[0],1);
+
     comm.addDataAllocateCallback(dataAllocator);
     comm.addDataFreeCallback(dataDestroyer);
 
@@ -108,7 +112,9 @@ void RECEIVER(void *)
 
     vTaskDelay(pdMS_TO_TICKS(50)); /* So that no overlapping occurs if log_i()'s happen */
 
-    FRTTransceiver comm(TASK_RECEIVER,1);
+    FRTTCommunicationPartner commStruct[1];
+    FRTTransceiver comm(TASK_RECEIVER,&commStruct[0],1);
+
     comm.addDataAllocateCallback(dataAllocator);
     comm.addDataFreeCallback(dataDestroyer);
 
@@ -171,7 +177,6 @@ void RECEIVER(void *)
     
     vTaskDelay(pdMS_TO_TICKS(1000));
     comm.printCommunicationsSummary();
-    comm.~FRTTransceiver();
     vTaskDelete(nullptr);
 }
 

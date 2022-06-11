@@ -38,6 +38,8 @@ namespace FRTT {
             uint8_t _u8CurrCommPartners = 0;                                        /*!< Amount of communications connected to*/
             uint8_t _u8MaxPartners = 0;                                             /*!< Max amount of possible connections*/
             uint8_t _u8MultiSenderQueues = 0;                                       /*!< Amount of multi-sender-queues (multiple tasks write on the tx line)*/
+            bool _bDelete = false;                                                  /*!< Signals whether delete [] is needed in the destructor */
+            bool _bHasValidStruct = false;                                          /*!< Signals whether _structCommPartners is NOT nullptr || _u8MaxPartners != 0*/
 
             #ifdef FRTTRANSCEIVER_ANALYTICS_ENABLE
             int _broadcastCount = 0;                                                /*!< Amount of broadcasts made. Important for FRTTransceiver::printCommunicationsSummary() */
@@ -49,7 +51,7 @@ namespace FRTT {
             /*! 
             * \brief                        Returns the amount of queues (rx or tx)
             * \param bTxQueue               Signals whether to calculate the amount of rx or tx queues          
-            * \return                       The amount of queues (rx or tx)                           
+            * \return                       The amount of queues (rx or tx) or -1 if no communication struct available                          
             */
             int _getAmountOfQueues(bool bTxQueue);
 
@@ -126,15 +128,35 @@ namespace FRTT {
 
         public:
             /*! 
-            * \brief                        FRTTransceiver Constructor
+            * \brief                        FRTTransceiver Constructor (Deleted)
+            * \note                         Will be removed since there are currently no options to add crucial data with class-methods<br>
+            *                               So the user is promted to use the other constructors instead.                      
+            */
+            FRTTransceiver() = delete;
+            /*! 
+            * \brief                        FRTTransceiver Constructor1
             * \details                      Allocates memory for FRTTransceiver_CommunicationPartner structure
             * \param ownerAddress           Address of the task owning this object
             * \param u8MaxPartners          Max possible connections                         
             */
-            FRTTransceiver(FRTTTaskHandle ownerAddress = NULL,uint8_t u8MaxPartners = 1);
+            FRTTransceiver(FRTTTaskHandle ownerAddress,uint8_t u8MaxPartners);
+            /*! 
+            * \brief                        FRTTransceiver Constructor2
+            * \details                      Receives a predefined array of communication structs
+            * \param ownerAddress           Address of the task owning this object (can be null)
+            * \param u8MaxPartners          Max possible connections  
+            * \note                         If commStruct is a nullptr OR u8MaxPartners is 0, then all class methods wont work<br>
+            *                               Supplying the wrong u8MaxPartners to the commStruct will result in undefined library behaviour                     
+            */
+            FRTTransceiver(FRTTTaskHandle ownerAddress,FRTTCommunicationPartner * commStruct,uint8_t u8MaxPartners):    _bDelete(false),
+                                                                                                                        _ownerAddress(ownerAddress),
+                                                                                                                        _structCommPartners(commStruct),
+                                                                                                                        _u8MaxPartners(u8MaxPartners),
+                                                                                                                        _bHasValidStruct(commStruct && u8MaxPartners ? true:false)
+                                                                                                                        {};
             /*! 
             * \brief                        Destructor
-            * \details                      Will free memory previously allocated by the constructor
+            * \details                      Will free memory previously allocated by the constructor (if needed)
             */
             ~FRTTransceiver();
             /*! 
@@ -365,7 +387,7 @@ namespace FRTT {
             int bufferedDataFrom(FRTTTaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar);
             /*! 
             * \brief                        Returns the amount of buffered data for a all communication lines combined                
-            * \return                       Amount of buffered data                                              
+            * \return                       Amount of buffered data or -1 if _bHasValidStruct is true                                             
             */
             int bufferedDataInAllBuffers();
         
