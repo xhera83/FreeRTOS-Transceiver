@@ -3,12 +3,15 @@
  * \brief       Additional data for the examples
  * \author      Xhemail Ramabaja (x.ramabaja@outlook.de)
  */
-
+#ifndef ADDITIONS_H
+#define ADDITIONS_H
 
 #include "FRTTransceiver.h"
 #include "WString.h"
 
 using namespace FRTT;
+
+#define DYNAMIC_STRUCTARRAY 0
 
 /* datatypes recognized throughout the example */
 typedef enum
@@ -19,20 +22,20 @@ typedef enum
    eCOMMAND = 4,
 }eDataTypes;
 
-FRTTTaskHandle TASK_MASTER;
-FRTTTaskHandle TASK_UART_SLAVE;
-FRTTTaskHandle TASK_MOTOR_SLAVE;
-FRTTTaskHandle TASK_SENSOR_SLAVE;
+extern FRTTTaskHandle TASK_MASTER;
+extern FRTTTaskHandle TASK_UART_SLAVE;
+extern FRTTTaskHandle TASK_MOTOR_SLAVE;
+extern FRTTTaskHandle TASK_SENSOR_SLAVE;
 
-FRTTQueueHandle MULTISENDERQ;
-FRTTQueueHandle QUEUE_TO_MOTOR;
-FRTTQueueHandle QUEUE_TO_SENSOR;
-FRTTQueueHandle QUEUE_TO_UART;
+extern FRTTQueueHandle MULTISENDERQ;
+extern FRTTQueueHandle QUEUE_TO_MOTOR;
+extern FRTTQueueHandle QUEUE_TO_SENSOR;
+extern FRTTQueueHandle QUEUE_TO_UART;
 
-FRTTSemaphoreHandle SEMAPHORE_MULTIQ;
-FRTTSemaphoreHandle SEMAPHORE_MOTOR;
-FRTTSemaphoreHandle SEMAPHORE_UART;
-FRTTSemaphoreHandle SEMAPHORE_SENSOR;
+extern FRTTSemaphoreHandle SEMAPHORE_MULTIQ;
+extern FRTTSemaphoreHandle SEMAPHORE_MOTOR;
+extern FRTTSemaphoreHandle SEMAPHORE_UART;
+extern FRTTSemaphoreHandle SEMAPHORE_SENSOR;
 
 #define QUEUELENGTH_MULTISENDERQ        (2u)    // multi-sender queuelength
 #define QUEUELENGTH_GENERAL             (1u)    // queuelength of all other queues
@@ -45,7 +48,14 @@ FRTTSemaphoreHandle SEMAPHORE_SENSOR;
 #define SLEEP_MS                        (1200u)
 #define COMMANDS                        (15u)
 
-void handleSlaveWork(FRTTransceiver * comm,int * buffer,uint8_t u8Length,FRTTTaskHandle partnertask,eDataTypes datatype);
+void handleSlaveWork(FRTTransceiver & comm,int * buffer,uint8_t u8Length,FRTTTaskHandle partnertask,eDataTypes datatype);
 String printBuffer(int * u8Buffer, uint8_t u8Length);
 void dataDestroyer(FRTTTempDataContainer & internalBuffer);
 void dataAllocator (const FRTTDataContainerOnQueue & origingalContainer_onQueue ,FRTTTempDataContainer & internalBuffer);
+
+void Master(void *);
+void UART_SLAVE(void *);
+void SENSOR_SLAVE(void *);
+void MOTOR_SLAVE(void *);
+
+#endif

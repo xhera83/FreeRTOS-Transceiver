@@ -3,11 +3,15 @@
  * \brief       Additional data for the examples
  * \author      Xhemail Ramabaja (x.ramabaja@outlook.de)
  */
-
+#ifndef ADDITIONS_H
+#define ADDITIONS_H
 
 #include "FRTTransceiver.h"
 
 using namespace FRTT;
+
+#define DYNAMIC_STRUCTARRAY 0
+
 
 /* datatypes recognized throughout the example */
 typedef enum
@@ -24,12 +28,21 @@ struct TestDType
    int var2;
 };
 
-FRTTTaskHandle TASK_SENDER;
-FRTTTaskHandle TASK_RECEIVER;
+extern FRTTTaskHandle TASK_SENDER;
+extern FRTTTaskHandle TASK_RECEIVER;
 
-FRTTQueueHandle QUEUE_TO_RECEIVER;
+extern FRTTQueueHandle QUEUE_TO_RECEIVER;
 
-FRTTSemaphoreHandle SEMAPHORE1;
+extern FRTTSemaphoreHandle SEMAPHORE1;
 
 
 #define QUEUELENGTH  (3u)
+
+
+void RECEIVER(void *);
+void SENDER(void *);
+void dataAllocator (const FRTTDataContainerOnQueue & origingalContainer_onQueue ,FRTTTempDataContainer & internalBuffer);
+void dataDestroyer(FRTTTempDataContainer & internalBuffer);
+
+
+#endif
