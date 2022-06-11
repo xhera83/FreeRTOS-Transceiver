@@ -148,10 +148,10 @@ namespace FRTT {
             * \note                         If commStruct is a nullptr OR u8MaxPartners is 0, then all class methods wont work<br>
             *                               Supplying the wrong u8MaxPartners to the commStruct will result in undefined library behaviour                     
             */
-            FRTTransceiver(FRTTTaskHandle ownerAddress,FRTTCommunicationPartner * commStruct,uint8_t u8MaxPartners):    _bDelete(false),
-                                                                                                                        _ownerAddress(ownerAddress),
+            FRTTransceiver(FRTTTaskHandle ownerAddress,FRTTCommunicationPartner * commStruct,uint8_t u8MaxPartners):    _ownerAddress(ownerAddress),
                                                                                                                         _structCommPartners(commStruct),
                                                                                                                         _u8MaxPartners(u8MaxPartners),
+                                                                                                                        _bDelete(false),
                                                                                                                         _bHasValidStruct(commStruct && u8MaxPartners ? true:false)
                                                                                                                         {};
             /*! 
