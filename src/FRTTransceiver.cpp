@@ -1,8 +1,9 @@
 /*!
- * \file       FRTTransceiver.cpp
- * \brief      Transceiver class methods implementation
- * \author     Xhemail Ramabaja (x.ramabaja@outlook.de)
- * \copyright  Copyright 2022 Xhemail Ramabaja
+ * \file       	FRTTransceiver.cpp
+ * \brief      	Transceiver class methods implementation
+ * \author     	Xhemail Ramabaja (x.ramabaja@outlook.de)
+ * \version 	   v1.1.0
+ * \copyright  	Copyright 2022 Xhemail Ramabaja
  */
 
 #include "../include/FRTTransceiver.h"
