@@ -11,6 +11,45 @@
 
 //#define LOG_INFO
 namespace FRTT {
+   #if defined(ESP32) || defined (CONFIG_IDF_TARGET_ESP32)
+         void FRTTCreateTask(FRTTTaskFunction taskCode,
+                           const char * const taskName,
+                           const uint32_t stackbytes,
+                           void * const taskParameter,
+                           FRTTBaseType taskPriority,
+                           FRTTTaskHandle * taskHandle,
+                           const FRTTBaseType core)
+         {
+            if(taskCode == nullptr) return;
+
+            if(xTaskCreatePinnedToCore(taskCode,string(taskName).size() == 0 ? "def-task-name" : taskName,stackbytes,taskParameter,taskPriority,taskHandle,core) != pdPASS)
+            {
+               #ifdef LOG_INFO
+               printf("Task creation failed.\n");
+               #endif
+            }
+         }
+	#elif defined(ESP8266) || defined(CONFIG_IDF_TARGET_ESP8266)
+         void FRTTCreateTask(FRTTTaskFunction taskCode,
+                           const char * const taskName,
+                           const uint16_t stackbytes,
+                           void * const taskParameter,
+                           FRTTBaseType taskPriority,
+                           FRTTTaskHandle * taskHandle)
+         {
+            if(taskCode == nullptr) return;
+            
+            if(xTaskCreate(taskCode,string(taskName).size() == 0 ? "def-task-name" : taskName,stackbytes,taskParameter,taskPriority,taskHandle) != pdPASS)
+            {
+               #ifdef LOG_INFO
+               printf("Task creation failed.\n");
+               #endif
+            }
+		   }               
+      
+    #endif
+
+
    FRTTQueueHandle FRTTCreateQueue(FRTTBaseType lengthOfQueue)
    {
 

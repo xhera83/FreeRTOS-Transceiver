@@ -8,7 +8,6 @@
  * \copyright   Copyright 2022 Xhemail Ramabaja
  *
  */
-
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
 #include "freertos/semphr.h"
@@ -30,6 +29,8 @@ namespace FRTT {
     using FRTTTaskHandle = TaskHandle_t;
     /*! \brief  Holds the address to a semaphore */
     using FRTTSemaphoreHandle = SemaphoreHandle_t;
+    /*! \brief Describes a function which returns void and takes a void pointer */
+    using FRTTTaskFunction = TaskFunction_t;
 
     /*! \brief Structure holding a data package that will be put on a queue */
     struct FRTTDataContainerOnQueue

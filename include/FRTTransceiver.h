@@ -9,12 +9,54 @@
  * \copyright   Copyright 2022 Xhemail Ramabaja
  */
 
+#include "sdkconfig.h"
+
+#if !(ESP32 || ESP8266 || CONFIG_IDF_TARGET_ESP32 || CONFIG_IDF_TARGET_ESP8266)
+#error "FreeRTOS-Transceiver is not usable with this MCU."
+#endif 
+
 #include "FRTTransceiverExtension.h"
 #include <string>
 
 using namespace std;
 
 namespace FRTT {
+    #if defined(ESP32) || defined (CONFIG_IDF_TARGET_ESP32)
+        /*! 
+        * \brief                         Function for task-creation (ESP32)
+        * \param    taskName             Name of the task
+        * \param    stackbytes           Stack size in BYTES
+        * \param    taskParameter        Pointer to data that is being passed to the task
+        * \param    taskPriority         Priority of the task (Max priority for the ESP32 == configMAX_PRIORITIES)
+        * \param    taskHandle           Address to the task control block
+		* \param 	core				 CPU CORE (possible values: 0 and 1)
+        * \return   void                                      
+        */
+        void FRTTCreateTask(FRTTTaskFunction taskCode,
+                            const char * const taskName,
+                            const uint32_t stackbytes,
+                            void * const taskParameter,
+                            FRTTBaseType taskPriority,
+                            FRTTTaskHandle * taskHandle,
+                            const FRTTBaseType core);
+    #elif defined(ESP8266) || defined(CONFIG_IDF_TARGET_ESP8266)
+        /*! 
+        * \brief                         Function for task-creation (ESP8266)
+        * \param    taskName             Name of the task
+        * \param    stackbytes           Stack size in BYTES
+        * \param    taskParameter        Pointer to data that is being passed to the task
+        * \param    taskPriority         Priority of the task (Max priority for the ESP8266 == configMAX_PRIORITIES)
+        * \param    taskHandle           Address to the task control block
+        * \return   void                                      
+        */
+        void FRTTCreateTask(FRTTTaskFunction taskCode,
+                            const char * const taskName,
+                            const uint16_t stackbytes,
+                            void * const taskParameter,
+                            FRTTBaseType taskPriority,
+                            FRTTTaskHandle * taskHandle);
+    #endif
+
     /*! 
     * \brief                       Creates a queue
     * \param   lengthOfQueue       Holds the desired queuelength
