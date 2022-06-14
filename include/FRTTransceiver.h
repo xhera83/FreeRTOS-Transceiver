@@ -15,6 +15,7 @@
 #error "FreeRTOS-Transceiver is not usable with this MCU."
 #endif 
 
+#include "FRTTransceiverNotify.h"
 #include "FRTTransceiverExtension.h"
 #include <string>
 
@@ -28,7 +29,7 @@ namespace FRTT {
         * \param    stackbytes           Stack size in BYTES
         * \param    taskParameter        Pointer to data that is being passed to the task
         * \param    taskPriority         Priority of the task (Max priority for the ESP32 == configMAX_PRIORITIES)
-        * \param    taskHandle           Address to the task control block
+        * \param    taskHandle           Address of the FRTTTaskhandle, which is holding the address to the task control block
 		* \param 	core				 CPU CORE (possible values: 0 and 1)
         * \return   void                                      
         */
@@ -81,6 +82,7 @@ namespace FRTT {
             uint8_t _u8CurrCommPartners = 0;                                        /*!< Amount of communications connected to      */
             uint8_t _u8MaxPartners = 0;                                             /*!< Max amount of possible connections         */
             uint8_t _u8MultiSenderQueues = 0;                                       /*!< Amount of multi-sender-queues (multiple tasks write on the tx line)            */
+			uint32_t _u32NotificationValue = 0;										/*!< Holds future notification values of the owner task 							*/
             bool _bDelete = false;                                                  /*!< Signals whether delete [] is needed in the destructor                          */
             bool _bHasValidStruct = false;                                          /*!< Signals whether ::_structCommPartners is NOT nullptr || _u8MaxPartners != 0    */
 
@@ -179,8 +181,9 @@ namespace FRTT {
             * \brief                        FRTTransceiver Constructor (1)
             * \details                      Allocates memory for FRTTCommunicationPartner structure (memory will be automatically released when instance<br> 
             *                               goes out of scope or implicit FRTTransceiver::~FRTTransceiver() called)
-            * \param ownerAddress           Address of the task owning this object (can be null, other tasks wont know who the source of messages is)
-            * \param u8MaxPartners          Max possible connections            
+            * \param ownerAddress           Address of the task owning this object (can be nullptr, other tasks wont know who the source of messages is)
+            * \param u8MaxPartners          Max possible connections
+			* \note      				    Owner address will only be used to decorate tx packages with a source address (Task notification will know the address of this object)
             * \attention                    If u8MaxPartners is 0, then the constructor will internally increment it to 1 (min 1 partner)!             
             */
             FRTTransceiver(FRTTTaskHandle ownerAddress,uint8_t u8MaxPartners);
@@ -190,10 +193,11 @@ namespace FRTT {
             * \param ownerAddress           Address of the task owning this object (can be null, other tasks wont know who the source of messages is)
             * \param u8MaxPartners          Max possible connections
             * \param commStructs            Pointer to the pre-declared array of FRTTCommunicationPartner.
+			* \note      				    Owner address will only be used to decorate tx packages with a source address (Task notification will know the address of this object)   
             * \attention                    If commStructs is a nullptr OR u8MaxPartners is 0, then all class methods wont work<br>
             *                               Supplying the wrong u8MaxPartners to the commStruct will result in undefined library behaviour (so make sure array size and u8MaxPartners match!)                  
             */
-            FRTTransceiver(FRTTTaskHandle ownerAddress,FRTTCommunicationPartner * commStructs,uint8_t u8MaxPartners):    _ownerAddress(ownerAddress),
+            FRTTransceiver(FRTTTaskHandle ownerAddress,FRTTCommunicationPartner * commStructs,uint8_t u8MaxPartners):   _ownerAddress(ownerAddress),
                                                                                                                         _structCommPartners(commStructs),
                                                                                                                         _u8MaxPartners(u8MaxPartners),
                                                                                                                         _bDelete(false),
@@ -214,6 +218,10 @@ namespace FRTT {
             * \param u8QueueLengthTx        Tx queue length
             * \param semaphoreTx            Tx semaphore
             * \param partnersName           Partners name
+			* \attention 					If you choose to provide an some random invalid address as the partner task, please make sure not to call for any task-notification 'notify task' methods!<br>
+            *                               There is currently no solution available to check if a FRTTTaskhandle is valid so the correct execution of this method is in your hands<br>
+            *                               An invalid FRTTTaskhandle will result in a FreeRTOS crash!
+            *                                 
             * \return                       True if communication was added
             */
             bool addCommPartner(FRTTTaskHandle partner,FRTTQueueHandle queueRX,uint8_t u8QueueLengthRx,FRTTSemaphoreHandle semaphoreRx,FRTTQueueHandle queueTX,
@@ -462,7 +470,66 @@ namespace FRTT {
             * \note                         Rx buffer : {  [[pos 0]oldest data][pos 1][pos 2].....[pos n-1][[pos n]newest data]  }                          
             */
             const FRTTTempDataContainer * getBufferedDataFrom(FRTTTaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar,uint8_t u8PositionInBuffer);
-        
+			/*! 
+            * \brief                            Sets the partner tasks notification state to pending and increments its notification value (adds 1 to the value).
+            * \param partner                    Partner task to notify
+            * \return						    Will return true if notification sent (does not neccessarily mean the notification got through, because it only works if the partner task has no notification pending)<br>
+            *                                   Will return false if any of the situations mentioned in 'note' below happened                     
+            * \note                             Internally the library only checks: - Partner has been added to the list of communications<br>
+            *                                                                       - Partner is not a multiSenderQueue || partner is not nullptr<br>
+            *                                   There is currently no solution available to check if a FRTTTaskhandle is valid so the correct execution of this method is in your hands<br>
+            *                                   An invalid FRTTTaskhandle will result in a FreeRTOS crash!
+            */
+            bool NotifyBasic(FRTTTaskHandle partner);
+            /*! 
+            * \brief                            Extended version of FRTT:FRTTransceiver::NotifyBasic()
+            * \details                          In this version of the notify funcionality you can do: 
+            *                                       - Increment partner tasks notification value by 1 (equivalent to FRTT:FRTTransceiver::NotifyBasic())
+            *                                       - Set single bits in the partner tasks notification value (---> lightweight eventgroup possible)
+            *                                       - Update partner tasks notification value (only if partner task has no notification pending) (similar to a queue with length 1)
+            *                                       - Update parnter tasks notification value (even if partner task has notification pending) (similar to queueOverwrite())
+            * \param partner                    Partner task to notify         
+            * \param action                     Ways to update the notification value : [e_NoAction, e_SetBits, e_Increment,e_SetValueWithOverwrite,e_SetValueWithoutOverwrite]<br>
+            *                                   Check their description in FRTTransceiverNotify.h
+            * \param u32NotificationMask        Notification value/mask. If its gonna be used depends on the action provided.           
+            * \return						    Almost always true, except when action == eFRTTNotifyActions::eSetValueWithoutOverwrite and the partner task had a notification pending
+            * \note                                                 
+            */
+            bool NotifyExtended(FRTTTaskHandle partner,eFRTTNotifyActions action,uint32_t u32NotificationMask);
+			/*! 
+            * \brief                        	Checks if the owner of this object has a notification pending
+            * \param 	action                	Set to FRTT:eNotifyAction::eCLEARCOUNTONEXIT to tell FreeRTOS to set the notification value to zero at the end
+            *                                   Set to FRTT:eNotifyAction::eCLEARCOUNTONEXITNOT to tell FreeRTOS to simply decrement the notification value at the end
+            * \return							*This object. Immediately call FRTTransceiver::getNotificationVal() to get the notifcation value         
+            * \note                                                 
+            */
+            FRTTransceiver & NotifyReceiveBasic(eFRTTNotifyActions action,int blockTimeReceive_Ms);
+            /*! 
+            * \brief                        	Extended version of FRTT::FRTTransceiver::NofityReceiveBasic()
+            * \details                          In this version of the notify-receive functionality you can do:
+            *                                       - Clear bits (RIGHT ONENTRY) of the notification value of the owner task of this object (will only be cleared if no notification pending)
+            *                                       - Clear bits (AFTER xTaskNotifyWait()) of the notification value of the owner task of this object <br>
+            *                                         (will only be cleared if notification received / notification was already pending)
+            * \param    u32ClearOnEntryMask     Same bits as in this mask will be cleared (ONENTRY, before 'receive') in the notification value of the owner of this task (will only be cleared if no notification pending)<br>
+            *                                   Example: u32ClearOnEntryMask == 0x03, notificationBefore == 0x0011 ---> notificationValUpdated == 0x0000
+            * \param    u32ClearOnExitMask      Same bits as in this mask will be cleared (ONEXIT, after 'receive') in the notification value of the owner of this task (only if notification was received)
+            *                                   Example: u32ClearOnEntryMask == 0x03, notificationBefore == 0x0011 ---> notificationValUpdated == 0x0000                                    
+            * \return							*This object. Immediately call FRTTransceiver::getNotificationVal() to get the notifcation value         
+            * \note                                                 
+            */
+            FRTTransceiver & NotifyReceiveExtended(uint32_t u32ClearOnEntryMask,uint32_t u32ClearOnExitMask,int blockTimeReceive_Ms);
+            /*! 
+            * \brief                            Returns the last notification value received	           
+            * \return					        32 Bit notification value                             
+            * \note                             A call to FRTTransceiver::NotifyReceiveBasic() or FRTTransceiver::NotifiyReceiveExtended() will update this value
+            * \note                             Return value -> Greater than zero: notification received. Zero:  Nothing received. 
+            */
+            uint32_t getNotificationVal();
+            /*! 
+            * \brief                            Sets the internal notification variable to zero	           
+            * \return					        void                            
+            */
+            void clearNotificationVal();
 
             /*! 
             * \brief                        To to add an allocator callback function

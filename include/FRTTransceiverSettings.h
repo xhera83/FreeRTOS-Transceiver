@@ -9,6 +9,9 @@
  * \copyright   Copyright 2022 Xhemail Ramabaja
  *
  */
+
+#include <stdint.h>
+
 //*! \brief TURN ON (uncomment) to use up to 64 bit as additional data for a data package on queue (turn off 32 bit)*/
 //#define FRTTRANSCEIVER_64BITADDITIONALDATA
 /*! \brief TURN ON (uncomment) to use up to 32 bit as additional data for a data package on queue (turn off 64 bit)*/
