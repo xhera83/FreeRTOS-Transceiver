@@ -39,7 +39,7 @@ void SENDER(void *)
     uint32_t u32Notification = 0;
     for(;;)
     {
-        if((u32Notification = comm.NotifyReceiveBasic(eFRTTNotifyActions::e_CLEARCOUNTONEXIT,0).getNotificationVal()) != 0)
+        if((u32Notification = comm.NotifyReceiveBasic(eFRTTNotifyActions::e_CLEARCOUNTONEXIT,200).getNotificationVal()) != 0)
         {   
             void * data;
             eDataTypes datatype;
@@ -86,7 +86,6 @@ void SENDER(void *)
         }
 
         comm.clearNotificationVal();
-        vTaskDelay(pdMS_TO_TICKS(100));
     }
     vTaskDelay(pdMS_TO_TICKS(2000));
     printf("\n\n");
@@ -117,7 +116,7 @@ void RECEIVER(void *)
 
     for(uint8_t u8I = 0; u8I < 67;u8I++)
     {
-        comm.NotifyExtended(TASK_SENDER,eFRTTNotifyActions::e_SetValueWithOverwrite,(unsigned long)(1 << u8Shift++));
+        comm.NotifyExtended(TASK_SENDER,eFRTTNotifyActions::e_SetValueWithoutOverwrite,(unsigned long)(1 << u8Shift++));
 
         if (u8Shift == 3) u8Shift = 0;
 
@@ -126,6 +125,7 @@ void RECEIVER(void *)
             /* Here check data etc*/
             comm.delAllDatabuffForLine(TASK_SENDER,eMultiSenderQueue::eNOMULTIQSELECTED,true);
         }
+        vTaskDelay(pdMS_TO_TICKS(100));
     }
     comm.NotifyExtended(TASK_SENDER,eFRTTNotifyActions::e_SetValueWithOverwrite,(unsigned long)(1 << 3)); /* Is stop sequence */
     comm.printCommunicationsSummary();

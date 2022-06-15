@@ -1,3 +1,6 @@
+#ifndef FRTTRANSCEIVER_CPP
+#define FRTTRANSCEIVER_CPP
+
 /*!
  * \file       	FRTTransceiver.cpp
  * \brief      	Transceiver class methods implementation
@@ -902,6 +905,11 @@ namespace FRTT {
 		 */
 		
 		xTaskNotifyGive(this->_structCommPartners[pos].commPartner);	/* WILL ALWAYS RETURN pdPASS*/
+
+		#ifdef FRTTRANSCEIVER_ANALYTICS_ENABLE
+		this->_tasksNotified++;
+		#endif
+		
 		return true;
 	}
 
@@ -977,8 +985,13 @@ namespace FRTT {
 				freeRtosAction = eNoAction; /* randomly chosen */
 				break;
 		}
+		FRTTBaseType retVal =  xTaskNotify(partner,u32NotificationMask,freeRtosAction);
 
-		return xTaskNotify(partner,u32NotificationMask,freeRtosAction) == pdFAIL ? false:true;
+		#ifdef FRTTRANSCEIVER_ANALYTICS_ENABLE
+		if(retVal == pdTRUE) this->_tasksNotified++;
+		#endif
+
+		return (retVal == pdFAIL) ? false:true;
 	}
 
 	FRTTransceiver &  FRTTransceiver::NotifyReceiveBasic(eFRTTNotifyActions action,int blockTimeReceive_Ms)
@@ -1006,7 +1019,11 @@ namespace FRTT {
 		if(!u32TempNotificationVal) printf("NotifyReceiveBasic: Nothing received!\n");
 		#endif
 
-		this->_bHasNotification = (u32TempNotificationVal ? true:false);
+		#ifdef FRTTRANSCEIVER_ANALYTICS_ENABLE
+		if(u32TempNotificationVal != 0) this->_notificationsReceived++;
+		#endif
+
+		this->_bHasNotification = (u32TempNotificationVal != 0 ? true:false);
 
 		this->_u32NotificationValue = u32TempNotificationVal;
 		return *this;
@@ -1030,6 +1047,10 @@ namespace FRTT {
 			this->_bHasNotification = true;
 			#ifdef LOG_INFO
 			printf("Notfication received\n");
+			#endif
+
+			#ifdef FRTTRANSCEIVER_ANALYTICS_ENABLE
+			this->_notificationsReceived++;
 			#endif
 		}
 		else
@@ -1135,16 +1156,31 @@ namespace FRTT {
 		if(!this->_bHasValidStruct) return;
 
 		/* General Infos */
+
+		auto runtime = std::chrono::high_resolution_clock::now() - this->_runtimeStart;
+		std::chrono::minutes min = std::chrono::duration_cast<std::chrono::minutes>(runtime);
+
 		printf("General Infos\n\n");
-		printf("\tOwner address           \t\t%p\n",this->_ownerAddress == nullptr ? FRTTRANSCEIVER_UNKNOWNADDRESS : this->_ownerAddress);
-		printf("\tCommunicationpartner    \t\t(%d out of %d)\n",this->_u8CurrCommPartners,this->_u8MaxPartners);
+		printf("\tOwner address            \t\t%p\n",this->_ownerAddress == nullptr ? FRTTRANSCEIVER_UNKNOWNADDRESS : this->_ownerAddress);
+		printf("\tCommunicationpartner     \t\t(%d out of %d)\n",this->_u8CurrCommPartners,this->_u8MaxPartners);
 		printf("\t\t- - - > (%d of those read only)\n",this->_u8MultiSenderQueues);
-		printf("\tMax partners            \t\t%d\n",this->_u8MaxPartners);
-		printf("\tTX-QUEUE CONNECTIONS	 \t\t%d\n",this->_getAmountOfQueues(true));
-		printf("\tRX-QUEUES CONNECTIONS	 \t\t%d\n",this->_getAmountOfQueues(false));
-		printf("\tData callbacks available\t\t%s\n",this->_hasDataInterpreters() ? "yes":"no");
-		printf("\tBroadcasts made         \t\t%d\n\n",this->_broadcastCount);
-		
+		printf("\tMax partners             \t\t%d\n",this->_u8MaxPartners);
+		printf("\tTX-QUEUE CONNECTIONS	   \t\t%d\n",this->_getAmountOfQueues(true));
+		printf("\tRX-QUEUES CONNECTIONS	   \t\t%d\n",this->_getAmountOfQueues(false));
+		printf("\tData callbacks available \t\t%s\n",this->_hasDataInterpreters() ? "yes":"no");
+		printf("\tBroadcasts made          \t\t%d\n",this->_broadcastCount);
+		printf("\tNotifications received   \t\t%d\n",this->_notificationsReceived);
+		printf("\tNotifications sent   	   \t\t%d\n",this->_tasksNotified);
+		printf("\tLast notification value  \t\t%ld\n\n",(long int)this->getNotificationVal());
+		if(min.count() > 0)
+		{
+			printf("\tRunning for [%ld min]\n\n",(long int)min.count());
+		}
+		else
+		{	
+			std::chrono::seconds sec = std::chrono::duration_cast<std::chrono::seconds>(runtime);
+			printf("\tRunning for [%ld sec]\n\n",(long int)sec.count());
+		}
 		/* Communication partners */
 		
 		for(uint8_t u8I = 0; u8I < this->_u8CurrCommPartners;u8I++)
@@ -1169,8 +1205,9 @@ namespace FRTT {
 			printf("\tPackages received       \t\t%d\n",this->_structCommPartners[u8I].dataPackagesReceived);
 			printf("\tHas buffered data       \t\t%s\n",this->_structCommPartners[u8I].bHasBufferedData ? "YES":"NO");
 		}
+		printf("\n\n");
 	}
-
+	#endif
 
 	FRTTransceiver::FRTTransceiver(FRTTTaskHandle ownerAddress, uint8_t u8MaxPartners)//: _bDelete(true), _bHasValidStruct(true)
 	{  
@@ -1186,6 +1223,10 @@ namespace FRTT {
 		{
 			this->_bDelete = true;
 			this->_bHasValidStruct = true;
+
+			#ifdef FRTTRANSCEIVER_ANALYTICS_ENABLE
+			this->_runtimeStart = std::chrono::high_resolution_clock::now();
+			#endif
 		}
 	}
 

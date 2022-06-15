@@ -18,6 +18,7 @@
 #include "FRTTransceiverNotify.h"
 #include "FRTTransceiverExtension.h"
 #include <string>
+#include <chrono>
 
 using namespace std;
 
@@ -89,6 +90,9 @@ namespace FRTT {
 
             #ifdef FRTTRANSCEIVER_ANALYTICS_ENABLE
             int _broadcastCount = 0;                                                /*!< Amount of broadcasts made. Important for FRTTransceiver::printCommunicationsSummary() */
+            int _notificationsReceived = 0;                                         /*!< Amount of notifications received. Important for FRTTransceiver::printCommunicationsSummary() */
+            int _tasksNotified = 0;                                                 /*!< Amount of tasks notified. Important for FRTTransceiver::printCommunicationsSummary() */
+            std::chrono::high_resolution_clock::time_point _runtimeStart;
             #endif
 
             fP_dataAllocateCallback _dataAllocator = nullptr;                       /*!< Function pointer to the data allocator callback supplied by the user       */
