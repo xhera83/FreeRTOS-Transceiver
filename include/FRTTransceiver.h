@@ -83,6 +83,7 @@ namespace FRTT {
             uint8_t _u8MaxPartners = 0;                                             /*!< Max amount of possible connections         */
             uint8_t _u8MultiSenderQueues = 0;                                       /*!< Amount of multi-sender-queues (multiple tasks write on the tx line)            */
 			uint32_t _u32NotificationValue = 0;										/*!< Holds future notification values of the owner task 							*/
+            bool _bHasNotification = false;                                         /*!< Signals whether a notfication was received or not                              */
             bool _bDelete = false;                                                  /*!< Signals whether delete [] is needed in the destructor                          */
             bool _bHasValidStruct = false;                                          /*!< Signals whether ::_structCommPartners is NOT nullptr || _u8MaxPartners != 0    */
 
@@ -148,6 +149,24 @@ namespace FRTT {
             * \return                       True if at least one message on the queue                         
             */
             bool _checkForMessages(FRTTQueueHandle queue);
+            /*! 
+            * \brief                        Checks if 'queue' has already been added to a communication line
+            * \param queue                  Address of the queue to look for
+            * \param bTxQueue               Signals what type of queue 'queue' is (rx|tx)
+            * \return                       Returns 1 if queue has already been added<br>
+            *                               Returns 0 if queue has not been added yet<br>
+            *                               Returns -1 if 'queue' is nullptr                        
+            */
+            int _queueExists(FRTTQueueHandle queue,bool bTxQueue);
+            /*! 
+            * \brief                        Checks if 'smph' has already been added to a communication line
+            * \param queue                  Address of the semaphore to find
+            * \param bTxQueue               Signals what type of semaphore 'smph' is (semaphore of a rx|tx queue)
+            * \return                       Returns 1 if semaphore has already been added<br>
+            *                               Returns 0 if semaphore has not been added yet<br>
+            *                               Returns -1 if 'smph' is nullptr                        
+            */
+            int _semaphoreExists(FRTTSemaphoreHandle smph,bool bTxSemaphore);
             /*! 
             * \brief                        Returns the amount of messages on the queue
             * \param queue                  Address of the queue to check
@@ -471,10 +490,11 @@ namespace FRTT {
             */
             const FRTTTempDataContainer * getBufferedDataFrom(FRTTTaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar,uint8_t u8PositionInBuffer);
 			/*! 
-            * \brief                            Sets the partner tasks notification state to pending and increments its notification value (adds 1 to the value).
+            * \brief                            Sets the partner tasks notification state to pending (if not already pending!!) and increments its notification value (adds 1 to the value).
             * \param partner                    Partner task to notify
-            * \return						    Will return true if notification sent (does not neccessarily mean the notification got through, because it only works if the partner task has no notification pending)<br>
-            *                                   Will return false if any of the situations mentioned in 'note' below happened                     
+            * \return						    Will always return true unless you provided wrong parameters 
+            *                                   Will return false if any of the situations mentioned in 'note' below happened 
+            * \note                             Even if the receving task has a notification pending, this method will always increment the partner tasks notification value!                    
             * \note                             Internally the library only checks: - Partner has been added to the list of communications<br>
             *                                                                       - Partner is not a multiSenderQueue || partner is not nullptr<br>
             *                                   There is currently no solution available to check if a FRTTTaskhandle is valid so the correct execution of this method is in your hands<br>
@@ -500,8 +520,10 @@ namespace FRTT {
             * \brief                        	Checks if the owner of this object has a notification pending
             * \param 	action                	Set to FRTT:eNotifyAction::eCLEARCOUNTONEXIT to tell FreeRTOS to set the notification value to zero at the end
             *                                   Set to FRTT:eNotifyAction::eCLEARCOUNTONEXITNOT to tell FreeRTOS to simply decrement the notification value at the end
-            * \return							*This object. Immediately call FRTTransceiver::getNotificationVal() to get the notifcation value         
-            * \note                                                 
+            * \return							*This object. Immediately call FRTTransceiver::getNotificationVal() or FRTTransceiveR:hasNotification() to infos.        
+            * \attention                        The final notificaiton value put into the internal buffer can be 0. That would mean that no task notified us and FRTTransceiveR:hasNotification() will therefore return false<br>
+            *                                   The internal FreeRTOS method used in this basic version only checks for a notification value > 0
+            *                                                        
             */
             FRTTransceiver & NotifyReceiveBasic(eFRTTNotifyActions action,int blockTimeReceive_Ms);
             /*! 
@@ -514,8 +536,8 @@ namespace FRTT {
             *                                   Example: u32ClearOnEntryMask == 0x03, notificationBefore == 0x0011 ---> notificationValUpdated == 0x0000
             * \param    u32ClearOnExitMask      Same bits as in this mask will be cleared (ONEXIT, after 'receive') in the notification value of the owner of this task (only if notification was received)
             *                                   Example: u32ClearOnEntryMask == 0x03, notificationBefore == 0x0011 ---> notificationValUpdated == 0x0000                                    
-            * \return							*This object. Immediately call FRTTransceiver::getNotificationVal() to get the notifcation value         
-            * \note                                                 
+            * \return							*This object. Immediately call FRTTransceiver::getNotificationVal() or FRTTranceiver::hasNotification() to get infos      
+            * \note                             This method will also signal that a notification was received when the notification value == 0!                     
             */
             FRTTransceiver & NotifyReceiveExtended(uint32_t u32ClearOnEntryMask,uint32_t u32ClearOnExitMask,int blockTimeReceive_Ms);
             /*! 
@@ -530,7 +552,11 @@ namespace FRTT {
             * \return					        void                            
             */
             void clearNotificationVal();
-
+            /*! 
+            * \brief                            Returns whether we had receveid a notification with the last call to any of the 'NotifyReceive' methods.      
+            * \return                           True or false                            
+            */
+            bool hasNotification();
             /*! 
             * \brief                        To to add an allocator callback function
             * \details                      This method is used to add an allocator callback function to the library.

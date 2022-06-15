@@ -21,7 +21,7 @@ namespace FRTT {
     enum class eFRTTNotifyActions : uint8_t
     {
         e_CLEARCOUNTONEXIT = 0,                 /*!< Used for FRTT::FRTTransceiver::NotifyReceiveBasic(). Tells FreeRTOS to clear the tasks notification value to zero      */
-        e_CLEARCOUNTONEXITNOT,                  /*!< Used for FRTT::FRTTransceiver::NotifyReceiveBasic(). Tells FreeRTOS to decrement the tasks notification value          */
+        e_DECREMENTCOUNTONEXIT,                 /*!< Used for FRTT::FRTTransceiver::NotifyReceiveBasic(). Tells FreeRTOS to decrement the tasks notification value          */
         e_NoAction,                             /*!< Used for FRTT::FRTTransceiver::NotifyExtended(). Tells FreeRTOS to set the partner tasks notification state to pending. u32 bit notification mask not used*/
         e_SetBits,                              /*!< Used for FRTT::FRTTransceiver::NotifyExtended(). Tells FreeRTOS to do a bitwise OR between the current notfication value of the task and the u32 notification mask*/
         e_Increment,                            /*!< Used for FRTT::FRTTransceiver::NotifyExtended(). Tells FreeRTOS to increment the partner tasks notification value. u32 bit notification mask not used.*/

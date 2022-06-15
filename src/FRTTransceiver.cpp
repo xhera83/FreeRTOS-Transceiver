@@ -160,7 +160,8 @@ namespace FRTT {
 			return false;
 		}
 
-		if(partner != nullptr)
+		/* Handle should not be nullptr AND no communication structure should be linked to the new partner */
+		if(partner != nullptr && this->_getCommStruct(partner,eMultiSenderQueue::eNOMULTIQSELECTED,true) == -1)
 		{
 			this->_structCommPartners[_u8CurrCommPartners].commPartner = partner;
 		}
@@ -169,28 +170,64 @@ namespace FRTT {
 			return false;
 		}
 
-		if(queueRX != nullptr)
-		{
-			this->_structCommPartners[_u8CurrCommPartners].rxQueue = queueRX;
-			this->_structCommPartners[_u8CurrCommPartners].u8RxQueueLength = u8QueueLengthRx;
 
-			if(semaphoreRx == nullptr || (this->_checkValidQueueLength(u8QueueLengthRx) == false))
-			{
+		if(queueRX != nullptr)
+		{	
+			if(this->_queueExists(queueRX,false) != 1 && this->_queueExists(queueRX,true) != 1)
+			{	
+				if(semaphoreRx == nullptr || this->_semaphoreExists(semaphoreRx,true) == 1 	|| this->_semaphoreExists(semaphoreRx,false) == 1
+																							|| (this->_checkValidQueueLength(u8QueueLengthRx) == false))
+				{	
+					/* It is possible to establish a connection without a queue (task-notification), 
+					but since the queue was valid, we shouldnt procceed further because the user clearly wanted to add a queue */
+					#ifdef LOG_INFO
+					printf("Queue is valid but the semaphore OR queuelength is invalid!\n");
+					#endif
+					return false;
+				}
+				this->_structCommPartners[_u8CurrCommPartners].rxQueue = queueRX;
+				this->_structCommPartners[_u8CurrCommPartners].u8RxQueueLength = u8QueueLengthRx;
+				this->_structCommPartners[_u8CurrCommPartners].semaphoreRxQueue = semaphoreRx;
+			}
+			else
+			{	
+				/* It is possible to establish a connection without a queue (task-notification), 
+					but since the queue was already added to a comm-line, we shouldnt procceed further because the user clearly wanted to add a queue */
+				#ifdef LOG_INFO
+				printf("Queue already exists\n");
+				#endif
 				return false;
 			}
-			this->_structCommPartners[_u8CurrCommPartners].semaphoreRxQueue = semaphoreRx;
 		}
 
-		if(queueTX != nullptr)
-		{
-			this->_structCommPartners[_u8CurrCommPartners].txQueue = queueTX;
-			this->_structCommPartners[_u8CurrCommPartners].u8TxQueueLength = u8QueueLengthTx;
 
-			if(semaphoreTx == nullptr || (this->_checkValidQueueLength(u8QueueLengthTx) == false))
+		if(queueTX != nullptr)
+		{	
+			if(this->_queueExists(queueTX,true) != 1 && this->_queueExists(queueTX,false) != 1)
 			{
+				if(semaphoreTx == nullptr || this->_semaphoreExists(semaphoreTx,true) == 1 	|| this->_semaphoreExists(semaphoreTx,false) == 1
+																							|| (this->_checkValidQueueLength(u8QueueLengthTx) == false))
+				{	
+					/* It is possible to establish a connection without a queue (task-notification), 
+					but since the queue was valid, we shouldnt procceed further because the user clearly wanted to add a queue */
+					#ifdef LOG_INFO
+					printf("Queue is valid but the semaphore OR queuelength is invalid!\n");
+					#endif
+					return false;
+				}
+				this->_structCommPartners[_u8CurrCommPartners].txQueue = queueTX;
+				this->_structCommPartners[_u8CurrCommPartners].u8TxQueueLength = u8QueueLengthTx;
+				this->_structCommPartners[_u8CurrCommPartners].semaphoreTxQueue = semaphoreTx;
+			}
+			else
+			{	
+				/* It is possible to establish a connection without a queue (task-notification), 
+					but since the queue was already added to a comm-line, we shouldnt procceed further because the user clearly wanted to add a queue */
+				#ifdef LOG_INFO
+				printf("Queue already exists\n");
+				#endif
 				return false;
 			}
-			this->_structCommPartners[_u8CurrCommPartners].semaphoreTxQueue = semaphoreTx;
 		}
 		
 		if(partnersName.length() == 0)
@@ -215,15 +252,32 @@ namespace FRTT {
 		}
 
 		if(queueRX != nullptr)
-		{
-			this->_structCommPartners[_u8CurrCommPartners].rxQueue = queueRX;
-			this->_structCommPartners[_u8CurrCommPartners].u8RxQueueLength = u8QueueLengthRx;
-
-			if(semaphoreRx == nullptr || (this->_checkValidQueueLength(u8QueueLengthRx) == false))
+		{	
+			if(this->_queueExists(queueRX,false) != 1 && this->_queueExists(queueRX,true) != 1)
 			{
+				if(semaphoreRx == nullptr || this->_semaphoreExists(semaphoreRx,true) == 1 	|| this->_semaphoreExists(semaphoreRx,false) == 1
+																							||(this->_checkValidQueueLength(u8QueueLengthRx) == false))
+				{	
+					/* It is possible to establish a connection without a queue (task-notification), 
+					but since the queue was valid, we shouldnt procceed further because the user clearly wanted to add a queue */
+					#ifdef LOG_INFO
+					printf("Queue is valid but the semaphore OR queuelength is invalid!\n");
+					#endif
+					return false;
+				}
+				this->_structCommPartners[_u8CurrCommPartners].rxQueue = queueRX;
+				this->_structCommPartners[_u8CurrCommPartners].u8RxQueueLength = u8QueueLengthRx;
+				this->_structCommPartners[_u8CurrCommPartners].semaphoreRxQueue = semaphoreRx;
+			}
+			else
+			{	
+				/* It is possible to establish a connection without a queue (task-notification), 
+					but since the queue was already added to a comm-line, we shouldnt procceed further because the user clearly wanted to add a queue */
+				#ifdef LOG_INFO
+				printf("Queue already exists\n");
+				#endif
 				return false;
 			}
-			this->_structCommPartners[_u8CurrCommPartners].semaphoreRxQueue = semaphoreRx;
 		}
 		else
 		{
@@ -707,20 +761,46 @@ namespace FRTT {
 			{
 				if(this->_structCommPartners[u8I].bReadOnlyCommunication)
 				{
-				if(static_cast<int8_t>(multiSenderQueue) == counter)
-				{
-					return u8I;
-				}
-				else
-				{
-					counter++;
-				}
+					if(static_cast<int8_t>(multiSenderQueue) == counter)
+					{
+						return u8I;
+					}
+					else
+					{
+						counter++;
+					}
 				}
 			}
 			return -1;
 		}
 	}
+	int FRTTransceiver::_queueExists(FRTTQueueHandle queue,bool bTxQueue)
+	{
+		if(!queue) return -1;
 
+		for(uint8_t u8I = 0;u8I < this->_u8CurrCommPartners;u8I++)
+		{
+			FRTTQueueHandle toCheck = (bTxQueue ? this->_structCommPartners[u8I].txQueue:this->_structCommPartners[u8I].rxQueue);
+			
+			if(toCheck == queue) return 1;
+		}
+
+		return 0;
+	}
+
+	int FRTTransceiver::_semaphoreExists(FRTTSemaphoreHandle smph,bool bTxSemaphore)
+	{
+		if(!smph) return -1;
+
+		for(uint8_t u8I = 0;u8I < this->_u8CurrCommPartners;u8I++)
+		{
+			SemaphoreHandle_t toCheck = (bTxSemaphore ? this->_structCommPartners[u8I].semaphoreTxQueue:this->_structCommPartners[u8I].semaphoreRxQueue);
+			
+			if(toCheck == smph) return 1;
+		}
+
+		return 0;
+	}
 
 	int FRTTransceiver::isDatatypeInBuffer(FRTTTaskHandle partner,eMultiSenderQueue multiSenderQueue,bool bUseTaskHandleVar,uint8_t u8Datatype)
 	{  
@@ -739,7 +819,7 @@ namespace FRTT {
 			{
 				if(this->_structCommPartners[pos].tempContainer[u8I].u8DataType == u8Datatype)
 				{
-				counter++;
+					counter++;
 				}
 			}
 		}
@@ -890,7 +970,7 @@ namespace FRTT {
 				freeRtosAction = eSetValueWithoutOverwrite;
 				break;
 			case eFRTTNotifyActions::e_CLEARCOUNTONEXIT:
-			case eFRTTNotifyActions::e_CLEARCOUNTONEXITNOT:
+			case eFRTTNotifyActions::e_DECREMENTCOUNTONEXIT:
 			default:
 				/* Wont ever come to this situation because we check it in the if() above (e_CLEARCOUNTON***** not allowed here). 
 														Just so that the c++ compiler for the esp8266 doesnt throw -Werror=switch since we define more enumerators than freertos..!*/
@@ -904,22 +984,29 @@ namespace FRTT {
 	FRTTransceiver &  FRTTransceiver::NotifyReceiveBasic(eFRTTNotifyActions action,int blockTimeReceive_Ms)
 	{
 
-		int timeToWaitReceive = this->_checkWaitTime(blockTimeReceive_Ms);
-
-		if(timeToWaitReceive == -2 || this->_ownerAddress == nullptr || !(action == eFRTTNotifyActions::e_CLEARCOUNTONEXIT || action == eFRTTNotifyActions::e_CLEARCOUNTONEXITNOT))
+		blockTimeReceive_Ms = this->_checkWaitTime(blockTimeReceive_Ms);
+		
+		if(blockTimeReceive_Ms == -2 || !(action == eFRTTNotifyActions::e_CLEARCOUNTONEXIT || action == eFRTTNotifyActions::e_DECREMENTCOUNTONEXIT))
 		{  
 			return *this;
 		}
 
-		timeToWaitReceive = (timeToWaitReceive == FRTTRANSCEIVER_WAITMAX ? portMAX_DELAY : pdMS_TO_TICKS(timeToWaitReceive));
+		unsigned long timeToWaitReceive = (blockTimeReceive_Ms == FRTTRANSCEIVER_WAITMAX ? portMAX_DELAY : pdMS_TO_TICKS(blockTimeReceive_Ms));
 		
 		FRTTBaseType clearCount = (action == eFRTTNotifyActions::e_CLEARCOUNTONEXIT ? pdTRUE:pdFALSE);
 
-		uint32_t u32TempNotificationVal = ulTaskNotifyTake(clearCount,timeToWaitReceive);
+		uint32_t u32TempNotificationVal = ulTaskNotifyTake(clearCount,(TickType_t)timeToWaitReceive);
+		
+		/* 
+		   FreeRTOS lets the task wait in the blocked state until the notification value != 0 
+		   So value > 0 == notfication received.
+		*/
 
 		#ifdef LOG_INFO
 		if(!u32TempNotificationVal) printf("NotifyReceiveBasic: Nothing received!\n");
 		#endif
+
+		this->_bHasNotification = (u32TempNotificationVal ? true:false);
 
 		this->_u32NotificationValue = u32TempNotificationVal;
 		return *this;
@@ -939,13 +1026,15 @@ namespace FRTT {
 		FRTTBaseType retVal = xTaskNotifyWait(u32ClearOnEntryMask,u32ClearOnExitMask,&this->_u32NotificationValue,timeToWaitReceive);
 
 		if(retVal == pdTRUE)
-		{
+		{	
+			this->_bHasNotification = true;
 			#ifdef LOG_INFO
 			printf("Notfication received\n");
 			#endif
 		}
 		else
-		{
+		{	
+			this->_bHasNotification = false;
 			#ifdef LOG_INFO
 			printf("Nothing received\n");
 			#endif
@@ -962,6 +1051,11 @@ namespace FRTT {
 	void FRTTransceiver::clearNotificationVal()
 	{
 		this->_u32NotificationValue = 0;
+	}
+
+	bool FRTTransceiver::hasNotification()
+	{
+		return this->_bHasNotification;
 	}
 
 	void FRTTransceiver::addDataAllocateCallback(void(*fP)(const FRTTDataContainerOnQueue &,FRTTTempDataContainer &))
