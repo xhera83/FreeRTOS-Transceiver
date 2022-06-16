@@ -28,7 +28,7 @@
 /*! \brief Default name of a multi-sender-queue (multiple tasks write on the tx line), when no name is supplied */
 #define FRTTRANSCEIVER_DEFAULTPARTNERNAMEMULTISENDERQUEUE   ("MULTISENDER-QUEUE")
 /*! \brief TURN ON (uncomment) if you want to use FRTTransceiver::printCommunicationsSummary() and let the library track packages received/sent etc. (SHOULD ONLY BE USED FOR DEBUGGING) */
-#define FRTTRANSCEIVER_ANALYTICS_ENABLE
+//#define FRTTRANSCEIVER_ANALYTICS_ENABLE
 
 #if defined(FRTTRANSCEIVER_ANALYTICS_ENABLE)
 /*!

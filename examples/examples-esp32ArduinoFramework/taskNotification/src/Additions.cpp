@@ -89,7 +89,10 @@ void SENDER(void *)
     }
     vTaskDelay(pdMS_TO_TICKS(2000));
     printf("\n\n");
-    comm.printCommunicationsSummary();
+    #ifdef FRTTRANSCEIVER_ANALYTICS_ENABLE
+    //comm.printCommunicationsSummary();
+    #endif
+
     vTaskDelete(nullptr);
 }
 
@@ -128,7 +131,10 @@ void RECEIVER(void *)
         vTaskDelay(pdMS_TO_TICKS(100));
     }
     comm.NotifyExtended(TASK_SENDER,eFRTTNotifyActions::e_SetValueWithOverwrite,(unsigned long)(1 << 3)); /* Is stop sequence */
-    comm.printCommunicationsSummary();
+    #ifdef FRTTRANSCEIVER_ANALYTICS_ENABLE
+    //comm.printCommunicationsSummary();
+    #endif
+    
     vTaskDelete(nullptr);
 }
 
@@ -148,7 +154,7 @@ void dataAllocator (const FRTTDataContainerOnQueue & origingalContainer_onQueue 
      *          (2): 
      *               - Provide some sort of way to copy the main data over:
      *                    ---> Just copy the pointer over
-     *                    ---> Use malloc (not recommended)
+     *                    ---> Use malloc/new (not recommended)
      *                    ---> Later implementations might provide some sort of internal memory pool implementation
      */ 
 
@@ -167,7 +173,7 @@ void dataDestroyer(FRTTTempDataContainer & internalBuffer) {
      *      To do:
      *          
      *          (1): 
-     *               - Reverse the actions made in the allocator callback function (if malloc() was used then ---> free()) 
+     *               - Reverse the actions made in the allocator callback function (if malloc()/new was used then ---> free()/delete) 
      */
 
     internalBuffer.u8DataType = 0;

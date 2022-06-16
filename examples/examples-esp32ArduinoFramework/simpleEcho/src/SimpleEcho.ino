@@ -1,14 +1,8 @@
 /*!
  * \file        SimpleEcho.ino
- * \brief       Task talks to himself
+ * \brief       Echo communication
  * 
- * \details     This example covers following topics:
- *                  - Setting up the communication
- *                  - Reading/Writing to/from a queue
- *                  - Checking how many messages on queue or in the buffer
- *                  - Reading/deleting buffered data
- *                  - "Bidirectional" communication / Echo communication
- *                  - Flush buffer
+ * \details
  * 
  * 
  *              "WIRING":
@@ -34,7 +28,7 @@
 #include <Arduino.h>
 #include "Additions.h"
 
-/* ######################################################################## EXAMPLE START ######################################################################## */
+
 
 FRTTTaskHandle TASK_ECHO;
 FRTTQueueHandle ECHO_QUEUE;

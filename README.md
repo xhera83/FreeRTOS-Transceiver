@@ -85,7 +85,7 @@ In the de-allocator callback a user must do:
 An additional call to ```writeToQueue()``` could act as a signal (to the sender) that data has been copied (Tasknotification feature in v1.2.0).
 
 To further understand how the library works, please take a look at the documented source code (/documentation/html/index.html) and also the examples that are provided in this repo (/examples).
-# Quickstart <a name="quickStart"></a>
+# Quickstart (ESP32 only) <a name="quickStart"></a>
 Lets begin with an empty arduino sketch (**Reminder: loop() is running on core 1**)
 
 ```
@@ -207,6 +207,10 @@ Now with this setup you can proceed to write to the receiver (TASK2) and read fr
   - Amount of current multi-sender-queue connections
   - Info, whether neccessary callbacks are supplied by the user or not
   - Amount of databroadcasts carried out
+  - Amount of notifications sent
+  - Amount of notifactions received
+  - Latest notification value
+  - FRTTransceiver object runtime in either seconds or minutes (if minutes at least 1)
   - Informations for each connection
     - Name of the communication partner
     - Address of the communication partner
@@ -232,7 +236,16 @@ Now with this setup you can proceed to write to the receiver (TASK2) and read fr
   - Queue Flush
 
 - Task notification functionality  
-  - Is planned for the next bigger release (v1.2.0)
+  - Basic Notify/Receive Notification functionality added
+    - Notifier can simply 'increment' the receving tasks notification value
+    - Receiver can check for a notification value > 0 (with additional block-time in ms)
+  - Extended Notify/Receive Notification functionality added
+    - Multiple ways to notify the partner task (bit-mask to set in receivers notif. value, increment, only setting notif. state to pending etc.)
+    - Receiver can clear his notifcation value onEntry/onExit with a u32 bit mask (with additional block-time in ms)
+  - Internal 32 bit variable holding the last notification value
+    - Accessible via get-method
+  - Internal boolean variable holding the information whether the last call to 'NotifyReceivexXx' resulted in a notification or not
+    - Accessible via get-method
 
 - Secure access to data
   - Maximum of 2 semaphores per connection. One for the tx queue, one for the rx queue
@@ -243,46 +256,11 @@ Now with this setup you can proceed to write to the receiver (TASK2) and read fr
 # Installation <a name="installation"></a>
 
 This library has been developed and tested on an **ESP32-WROOM-32** microcontroller inside a PlatformIO environment.
-- Install the PlatformIO VSCODE extension
-    - Create a new project
-        - Name of the project
-        - ESP32 board in use
-        - Select Arduino Framework 
-        - Then follow the section "Installation" here: https://registry.platformio.org/libraries/xhera83/FreeRTOS-TransceiverV1/installation
-
-    - Create your project, then build and flash
+ - Example code and also an installation guide is located in [examples-esp32](/examples/examples-esp32ArduinoFramework)
 
 FRTTransceiver library also works for the **ESP8266**
-- Projects can be set up in a ESP-IDF style: https://docs.espressif.com/projects/esp8266-rtos-sdk/en/latest/get-started/index.html
-    - A linux-installation guide (+docker file,+ESP8266 example) in "/examples" will be provided with (v1.2.0)
-    - FRTTransceiver library must be included as a "component". Infos regarding the folder structure of a project here: https://docs.espressif.com/projects/esp8266-rtos-sdk/en/latest/api-guides/build-system.html
-    - FRTTransceiver library uses C++, so all Files should be with an .cpp extension. 
-    - Main.cpp's app_main() (entry point for your projects software) function must be treated as a C function. Enclose as follows:
-            
-```  
-#ifdef __cplusplus
-extern "C"{
-#endif
-
-void app_main()
-{   
-
-    // Very first code of your project. Here you can use the library as you would do for the ESP32 but there is only 1 CORE
+- Besides developing and testing on the ES32, Ive also tried to adjust parts for the ESP8266. An example along with an installation guide can be found in [examples-esp8266](/examples/examples-esp8266-rtos-sdk)            
     
-    QUEUE_TO_TASK2 = FRTTCreateQueue(2);                                                // Create queue with length 2
-    SMPH = FRTTCreateSemaphore();                                                       // Create semaphore
-    xTaskCreatePinnedToCore(TASK1,"task-1",STACKSIZE,NULL,8,&TASK1_HANDLE);             // Creates TASK1
-    xTaskCreatePinnedToCore(TASK2,"task-2",STACKSIZE,NULL,8,&TASK2_HANDLE);             // Creates TASK2
-}
-
-#ifdef __cplusplus
-}
-#endif
-
-```
-            
-    
-
 # Supported Devices <a name= "supportedDevices"></a>
 
 - Mainly in development for the ESP32 microcontroller

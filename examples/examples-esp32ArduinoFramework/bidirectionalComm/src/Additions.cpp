@@ -61,7 +61,11 @@ void SENDER(void *)
 
         vTaskDelay(pdMS_TO_TICKS(750));
     }
+
+    #ifdef FRTTRANSCEIVER_ANALYTICS_ENABLE
     //comm.printCommunicationsSummary();
+    #endif
+
     vTaskDelete(nullptr);
 }
 
@@ -140,7 +144,11 @@ void RECEIVER(void *)
 
     
     vTaskDelay(pdMS_TO_TICKS(1000));
-    comm.printCommunicationsSummary();
+    
+    #ifdef FRTTRANSCEIVER_ANALYTICS_ENABLE
+    //comm.printCommunicationsSummary();
+    #endif 
+
     vTaskDelete(nullptr);
 }
 

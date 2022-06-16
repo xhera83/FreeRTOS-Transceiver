@@ -2,22 +2,7 @@
  * \file        OneQueueMultipleUser.ino
  * \brief       Three tasks using the same queue (multi-sender-queue)
  * 
- * \details     This example covers following topics:
- *                  - Setting up the communication
- *                  - Reading/Writing to/from a queue
- *                  - databroadcasting
- *                  - Checking how many messages on queue or in the buffer
- *                  - Reading/deleting buffered data
- *                  - Unidirectional communication & usage of a multi-sender-queue
- *                  - Muliple datatypes on one queue at the same time
- *                  - Flush buffer
- *              
- *              Short code explanation:
- *                  - TASK_MASTER has a pre defined set of COMMANDS (defined in Additions.h) which he broadcasts to the other tasks (slaves)
- *                    TASK_MASTER then receives databuffers with some random values
- *                    The last COMMAND is COMMAND_STOP which stops all the communication and prints a summary of the communication(s) afterwards
- * 
- * 
+ * \details     
  * 
  *              "WIRING":
  *                                            → COMMANDS
@@ -54,7 +39,6 @@
 #include "Additions.h"
 
 
-/* ######################################################################## EXAMPLE START ######################################################################## */
 
 FRTTTaskHandle TASK_MASTER;
 FRTTTaskHandle TASK_UART_SLAVE;

@@ -35,7 +35,7 @@ namespace FRTT {
     /*! \brief Structure holding a data package that will be put on a queue */
     struct FRTTDataContainerOnQueue
     {
-        FRTTTaskHandle senderAddress = (FRTTTaskHandle)FRTTRANSCEIVER_UNKNOWNADDRESS;   /*!< Address of the task which is the source of the data package        */
+        FRTTTaskHandle senderAddress = (FRTTTaskHandle)0x0;                             /*!< Address of the task which is the source of the data package        */
         void * data = nullptr;                                                          /*!< Pointer to the original data that is being send over the queue     */
         uint8_t u8DataType = 0;                                                         /*!< Datatype of the data that the void pointer points to               */
         #if defined(FRTTRANSCEIVER_32BITADDITIONALDATA)

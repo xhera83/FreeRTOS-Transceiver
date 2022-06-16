@@ -1,0 +1,41 @@
+FROM ubuntu:latest
+
+#---------prebuild toolchain
+#setting workdir to root
+
+WORKDIR /
+
+# Dependencies
+RUN apt-get update && apt-get install -y software-properties-common
+RUN apt update && add-apt-repository universe
+RUN apt-get -y install gcc wget git make libncurses-dev flex bison gperf python3 python3-serial python3-pip
+
+# Creates downloads and esp8266 directory
+RUN mkdir -p downloads esp8266
+
+# Downloads toolchain into downloads directory
+ADD https://dl.espressif.com/dl/xtensa-lx106-elf-gcc8_4_0-esp-2020r3-linux-amd64.tar.gz downloads
+
+# Extracts toolchain into esp8266 directory
+RUN cd esp8266;tar -xzf /downloads/xtensa-lx106-elf-gcc8_4_0-esp-2020r3-linux-amd64.tar.gz;
+
+# Adds toolchain to path
+ENV PATH=/esp8266/xtensa-lx106-elf/bin:$PATH
+
+# Makes project folder directory, clones ESP8266 repository into esp8266 directory
+RUN mkdir -p projects;cd esp8266;git clone https://github.com/espressif/ESP8266_RTOS_SDK.git;
+
+# Adds ESP8266 to path
+ENV IDF_PATH="/esp8266/ESP8266_RTOS_SDK" 
+
+# The only way I could make 'make menuconfig' to work was those commands below
+RUN ln -s /usr/bin/python3 /usr/bin/python
+ENV TERM xterm
+RUN python3 -m pip install --user -r $IDF_PATH/requirements.txt
+
+
+
+
+
+
+

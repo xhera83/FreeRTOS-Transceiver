@@ -2,18 +2,7 @@
  * \file        MultiDatatypeOnQueue.ino
  * \brief       Multiple datatypes simultanously on the same queue
  * 
- * \details     This example covers following topics:
- *                  - Setting up the communication
- *                  - Reading/Writing to/from a queue
- *                  - Checking how many messages on queue or in the buffer
- *                  - Reading/deleting buffered data
- *                  - Unidirectional communication
- *                  - Muliple datatypes the same time on one queue
- *                  - Check if datatype in buffer
- *                  - Flush buffer
- * 
- * 
- * 
+ * \details     
  *              "WIRING":
  * 
  * 
@@ -30,7 +19,6 @@
 #include <Arduino.h>
 #include "Additions.h"
 
-/* ######################################################################## EXAMPLE START ######################################################################## */
 
 FRTTTaskHandle TASK_SENDER;
 FRTTTaskHandle TASK_RECEIVER;

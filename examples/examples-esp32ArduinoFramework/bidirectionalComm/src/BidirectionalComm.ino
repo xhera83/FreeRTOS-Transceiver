@@ -2,24 +2,7 @@
  * \file        BidirectionalComm.ino
  * \brief       Bidirectional communication between receiver and sender
  * 
- * \details     This example covers following topics:
- *                  - Setting up the communication
- *                  - Reading/Writing to/from a queue
- *                  - Checking how many messages on queue or in the buffer
- *                  - Reading/deleting buffered data
- *                  - Exchange of data between two tasks (one type of datatype)
- *                  - Both Queues have length 1
- *                  - TASK_SENDER will print its communication summary to console if set in FRTTransceiverSettings.h
- *                  
- *              Short code explanation:
- *                  - TASK_RECEIVER sends 9 times COMMAND "COMMAND_SEND". 
- *                    TASK_RECEIVER sends the COMMAND "COMMAND_STOP" after the 10th time 
- *                    After sending COMMAND_SEND, TASK_RECEIVER will read a command received by TASK_SENDER
- * 
- *                  - TASK_SENDER waits for COMMAND "COMMAND_SEND" and sends back a command defined in the uin8_t array
- *                    TASK_SENDER stops after receiving the COMMAND "COMMAND_STOP"
- * 
- * 
+ * \details     
  *              "WIRING":
  * 
  * 
@@ -42,7 +25,6 @@
 #include "Additions.h"
 
 
-/* ######################################################################## EXAMPLE START ######################################################################## */
 
 FRTTTaskHandle TASK_SENDER;
 FRTTTaskHandle TASK_RECEIVER;
@@ -54,6 +36,7 @@ FRTTSemaphoreHandle SEMAPHORE1;
 FRTTSemaphoreHandle SEMAPHORE2;
 
 void setup() {
+
     printf("Setup() running.\n\n");
     disableCore0WDT();
 

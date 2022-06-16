@@ -2,11 +2,7 @@
  * \file        TaskNotification.ino
  * \brief       TaskNotification + data exchange between receiver and sender
  * 
- * \details     This example covers following topics:
- *                  - Extended notification funcitonality
- *                  - Queue stuff
- * 
- *  
+ * \details     
  *              "WIRING":
  * 
  * 
@@ -24,7 +20,7 @@
 #include <Arduino.h>
 #include "Additions.h"
 
-/* ######################################################################## EXAMPLE START ######################################################################## */
+
 
 FRTTTaskHandle TASK_SENDER;
 FRTTTaskHandle TASK_RECEIVER;

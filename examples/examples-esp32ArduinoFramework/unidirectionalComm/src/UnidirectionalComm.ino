@@ -2,16 +2,7 @@
  * \file        UnidirectionalComm.ino
  * \brief       Unidrectional communication between receiver and sender
  * 
- * \details     This example covers following topics:
- *                  - Setting up the communication
- *                  - Reading/Writing to/from a queue
- *                  - Checking how many messages on queue or in the buffer
- *                  - Reading/deleting buffered data
- *                  - Unidirectional communication
- *                  - RECEIVER_TASK also reads u32AdditionalData to check when to stop itself
- *                  - Both Queues have length 1
- * 
- *  
+ * \details     
  *              "WIRING":
  * 
  * 
@@ -29,7 +20,7 @@
 #include <Arduino.h>
 #include "Additions.h"
 
-/* ######################################################################## EXAMPLE START ######################################################################## */
+
 
 FRTTTaskHandle TASK_SENDER;
 FRTTTaskHandle TASK_RECEIVER;
