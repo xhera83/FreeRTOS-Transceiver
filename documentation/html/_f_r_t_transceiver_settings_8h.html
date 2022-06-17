@@ -72,7 +72,8 @@ $(function() {
 
 <p>Configuration file for the FreeRTOS-Transceiver library.  
 <a href="#details">More...</a></p>
-
+<div class="textblock"><code>#include &lt;stdint.h&gt;</code><br />
+</div>
 <p><a href="_f_r_t_transceiver_settings_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
@@ -92,12 +93,8 @@ Macros</h2></td></tr>
 #define&#160;</td><td class="memItemRight" valign="bottom"><b>FRTTRANSCEIVER_DEFAULTPARTNERNAMEMULTISENDERQUEUE</b>&#160;&#160;&#160;(&quot;MULTISENDER-QUEUE&quot;)</td></tr>
 <tr class="memdesc:a8b78b0cc0d204d1db3ff682c11637b29"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default name of a multi-sender-queue (multiple tasks write on the tx line), when no name is supplied. <br /></td></tr>
 <tr class="separator:a8b78b0cc0d204d1db3ff682c11637b29"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5d648be000727e8ecf36aa26a9d3d991"><td class="memItemLeft" align="right" valign="top"><a id="a5d648be000727e8ecf36aa26a9d3d991" name="a5d648be000727e8ecf36aa26a9d3d991"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>FRTTRANSCEIVER_ANALYTICS_ENABLE</b></td></tr>
-<tr class="memdesc:a5d648be000727e8ecf36aa26a9d3d991"><td class="mdescLeft">&#160;</td><td class="mdescRight">TURN ON (uncomment) if you want to use FRTTransceiver::printCommunicationsSummary() and let the library track packages received/sent. <br /></td></tr>
-<tr class="separator:a5d648be000727e8ecf36aa26a9d3d991"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa1236535b0c0fc9345b93af3cf11d065"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_f_r_t_transceiver_settings_8h.html#aa1236535b0c0fc9345b93af3cf11d065">FRTTRANSCEIVER_COMMTYPE1</a>&#160;&#160;&#160;(&quot;NORMAL COMMUNICATION (READ &amp; WRITE)&quot;)</td></tr>
-<tr class="memdesc:aa1236535b0c0fc9345b93af3cf11d065"><td class="mdescLeft">&#160;</td><td class="mdescRight">Describes a normal communication line with another task.  <a href="_f_r_t_transceiver_settings_8h.html#aa1236535b0c0fc9345b93af3cf11d065">More...</a><br /></td></tr>
+<tr class="memdesc:aa1236535b0c0fc9345b93af3cf11d065"><td class="mdescLeft">&#160;</td><td class="mdescRight">TURN ON (uncomment) if you want to use FRTTransceiver::printCommunicationsSummary() and let the library track packages received/sent etc. (SHOULD ONLY BE USED FOR DEBUGGING)  <a href="_f_r_t_transceiver_settings_8h.html#aa1236535b0c0fc9345b93af3cf11d065">More...</a><br /></td></tr>
 <tr class="separator:aa1236535b0c0fc9345b93af3cf11d065"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac1079e2988baa733ee1535c79af32b5f"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_f_r_t_transceiver_settings_8h.html#ac1079e2988baa733ee1535c79af32b5f">FRTTRANSCEIVER_COMMTYPE2</a>&#160;&#160;&#160;(&quot;MULTISENDER QUEUE (READONLY)&quot;)</td></tr>
 <tr class="memdesc:ac1079e2988baa733ee1535c79af32b5f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Describes a read-only communication line, where the tx queue is a multi-sender-queue (multiple tasks write on the tx line)  <a href="_f_r_t_transceiver_settings_8h.html#ac1079e2988baa733ee1535c79af32b5f">More...</a><br /></td></tr>
@@ -126,7 +123,7 @@ Enumerations</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Configuration file for the FreeRTOS-Transceiver library. </p>
 <dl class="section author"><dt>Author</dt><dd>Xhemail Ramabaja (<a href="#" onclick="location.href='mai'+'lto:'+'x.r'+'am'+'aba'+'ja'+'@ou'+'tl'+'ook'+'.d'+'e'; return false;">x.ram<span class="obfuscator">.nosp@m.</span>abaj<span class="obfuscator">.nosp@m.</span>a@out<span class="obfuscator">.nosp@m.</span>look<span class="obfuscator">.nosp@m.</span>.de</a>) </dd></dl>
-<dl class="section version"><dt>Version</dt><dd>v1.1.0 </dd></dl>
+<dl class="section version"><dt>Version</dt><dd>v1.2.0 </dd></dl>
 <dl class="section copyright"><dt>Copyright</dt><dd>Copyright 2022 Xhemail Ramabaja </dd></dl>
 </div><h2 class="groupheader">Macro Definition Documentation</h2>
 <a id="aa1236535b0c0fc9345b93af3cf11d065" name="aa1236535b0c0fc9345b93af3cf11d065"></a>
@@ -141,8 +138,8 @@ Enumerations</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Describes a normal communication line with another task. </p>
-<dl class="section note"><dt>Note</dt><dd>Used for FRTTransceiver::printCommunicationsSummary </dd></dl>
+<p>TURN ON (uncomment) if you want to use FRTTransceiver::printCommunicationsSummary() and let the library track packages received/sent etc. (SHOULD ONLY BE USED FOR DEBUGGING) </p>
+<p >Describes a normal communication line with another task </p><dl class="section note"><dt>Note</dt><dd>Used for FRTTransceiver::printCommunicationsSummary </dd></dl>
 
 </div>
 </div>

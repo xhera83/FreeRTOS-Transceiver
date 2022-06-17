@@ -5,7 +5,7 @@
  * \file        FRTTransceiverNotify.h
  * \brief       Extension for the FreeRTOS task notification api
  * \author      Xhemail Ramabaja (x.ramabaja@outlook.de)
- * \version     v1.1.0
+ * \version     v1.2.0
  * \copyright   Copyright 2022 Xhemail Ramabaja
  *
  */
@@ -13,9 +13,9 @@
 
 namespace FRTT {
     /*!
-    * \brief         ------
-    * \details       ------
-    * \note          ------
+    * \brief         Enumeration is used to specify what FreeRTOS should do with the notification value of a task (in different scenarios)
+    * \details       FRTT::eFRTTNotifyActions::e_CLEARCOUNTONEXIT and FRTT::eFRTTNotifyActions::e_DECREMENTCOUNTONEXIT are both used for the FRTT::FRTTransceiver::NotifyReceiveBasic() method. <br>
+    *                All remaining enumerators are used for the FRTT::FRTTransceiver::NotifyExtended() methods
     *                
     */
     enum class eFRTTNotifyActions : uint8_t

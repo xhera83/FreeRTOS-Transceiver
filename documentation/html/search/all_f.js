@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['tempcontainer_0',['tempContainer',['../struct_f_r_t_t_1_1_f_r_t_t_communication_partner.html#af2c4d9e7a31d27fae0b35535712213d6',1,'FRTT::FRTTCommunicationPartner']]],
-  ['txlinecontainer_1',['txLineContainer',['../struct_f_r_t_t_1_1_f_r_t_t_communication_partner.html#a8340bf48f29ab228447ab68cbe9d0b33',1,'FRTT::FRTTCommunicationPartner']]],
-  ['txqueue_2',['txQueue',['../struct_f_r_t_t_1_1_f_r_t_t_communication_partner.html#a9fbc7ae604646d79363fcbf54277ab66',1,'FRTT::FRTTCommunicationPartner']]]
+  ['semaphorerxqueue_0',['semaphoreRxQueue',['../struct_f_r_t_t_1_1_f_r_t_t_communication_partner.html#a0ab3827178a14081fa79f5d11f443961',1,'FRTT::FRTTCommunicationPartner']]],
+  ['semaphoretxqueue_1',['semaphoreTxQueue',['../struct_f_r_t_t_1_1_f_r_t_t_communication_partner.html#a341b1432fd0be7d5f9a68fbe3f6355d5',1,'FRTT::FRTTCommunicationPartner']]],
+  ['senderaddress_2',['senderAddress',['../struct_f_r_t_t_1_1_f_r_t_t_data_container_on_queue.html#aa78d3deb9370fdae6cb6c4b07b968f50',1,'FRTT::FRTTDataContainerOnQueue']]]
 ];

@@ -5,7 +5,7 @@
  * \file        FRTTransceiverSettings.h
  * \brief       Configuration file for the FreeRTOS-Transceiver library
  * \author      Xhemail Ramabaja (x.ramabaja@outlook.de)
- * \version     v1.1.0
+ * \version     v1.2.0
  * \copyright   Copyright 2022 Xhemail Ramabaja
  *
  */
@@ -25,30 +25,30 @@
 
 /*! \brief   Default name of a partner, when no name is supplied */
 #define FRTTRANSCEIVER_DEFAULTPARTNERNAME                   ("UNKNOWN NAME") 
-/*! \brief Default name of a multi-sender-queue (multiple tasks write on the tx line), when no name is supplied */
+/*! \brief Default name of a Multi-Sender-Queue (multiple tasks write on the tx line), when no name is supplied */
 #define FRTTRANSCEIVER_DEFAULTPARTNERNAMEMULTISENDERQUEUE   ("MULTISENDER-QUEUE")
-/*! \brief TURN ON (uncomment) if you want to use FRTTransceiver::printCommunicationsSummary() and let the library track packages received/sent etc. (SHOULD ONLY BE USED FOR DEBUGGING) */
+/*! \brief TURN ON (uncomment) if you want to use FRTT::FRTTransceiver.printCommunicationsSummary() and let the library track packages received/sent etc. (SHOULD ONLY BE USED FOR DEBUGGING) */
 //#define FRTTRANSCEIVER_ANALYTICS_ENABLE
 
 #if defined(FRTTRANSCEIVER_ANALYTICS_ENABLE)
 /*!
  * \brief   Describes a normal communication line with another task
- * \note    Used for FRTTransceiver#printCommunicationsSummary
+ * \note    Used for FRTT::FRTTransceiver.printCommunicationsSummary()
  */
 #define FRTTRANSCEIVER_COMMTYPE1                            ("NORMAL COMMUNICATION (READ & WRITE)")
 /*!
  * \brief   Describes a read-only communication line, where the tx queue is a multi-sender-queue (multiple tasks write on the tx line)
- * \note    Used for FRTTransceiver#printCommunicationsSummary
+ * \note    Used for FRTT::FRTTransceiver.printCommunicationsSummary()
  */
 #define FRTTRANSCEIVER_COMMTYPE2                            ("MULTISENDER QUEUE (READONLY)")
 /*!
  * \brief   Describes an echo communicatation line, where a task set him self as his communication partner
- * \note    Used for FRTTransceiver#printCommunicationsSummary
+ * \note    Used for FRTT::FRTTransceiver.printCommunicationsSummary()
  */
 #define FRTTRANSCEIVER_COMMTYPE3                            ("ECHO")
 /*!
  * \brief   When the address of the partner was not supplied
- * \note    Used by FRTTransceiver::printCommunicationsSummary
+ * \note    Used by FRTT::FRTTransceiver.printCommunicationsSummary()
  */
 #define FRTTRANSCEIVER_UNKNOWNADDRESS                       (0x00000000)
 #endif
@@ -56,8 +56,8 @@
 namespace FRTT {
     /*!
     * \brief         Enumeration is used to select a multi-sender-queue for different class methods
-    * \details       Normally one would need to select a communication line by supplying a ::FRTTTaskHandle.
-    *                A multi-sender-queue does not have a unique ::FRTTTaskHandle, so that another way of selecting a communication line
+    * \details       Normally one would need to select a communication line by supplying a FRTT::FRTTTaskHandle.
+    *                A multi-sender-queue does not have a unique FRTT::FRTTTaskHandle, so that another way of selecting a communication line
     *                had to be introduced.<br>
     * \note          There should be a maximum of #FRTTRANSCEIVER_MAXELEMENTSIZEONQUEUE enumerators. <br>
     *                Increasing #FRTTRANSCEIVER_MAXELEMENTSIZEONQUEUE also requires one to adjust the amount of eMultiSenderQueue enumerators to match #FRTTRANSCEIVER_MAXELEMENTSIZEONQUEUE
@@ -65,11 +65,11 @@ namespace FRTT {
     */
     enum class eMultiSenderQueue : int8_t 
     {
-        eNOMULTIQSELECTED   = -1,           /*!< It is just a filler enumerator if one wants to use a FRTTTaskHandle for selecting a communication line*/
-        eMULTISENDERQ0,                     /*!< Select the FIRST multi-sender-queue added with FRTTransceiver::addMultiSenderPartner()*/
-        eMULTISENDERQ1,                     /*!< Select the SECOND multi-sender-queue added with FRTTransceiver::addMultiSenderPartner()*/
-        eMULTISENDERQ2,                     /*!< Select the THIRD multi-sender-queue added with FRTTransceiver::addMultiSenderPartner()*/
-        eMULTISENDERQ3,                     /*!< Select the FOURTH multi-sender-queue added with FRTTransceiver::addMultiSenderPartner()*/
+        eNOMULTIQSELECTED   = -1,           /*!< It is just a filler enumerator if one wants to use a FRTT::FRTTTaskHandle for selecting a communication line       */
+        eMULTISENDERQ0,                     /*!< Select the FIRST Multi-Sender-Queue added with FRTT::FRTTransceiver::addMultiSenderPartner()                       */
+        eMULTISENDERQ1,                     /*!< Select the SECOND Multi-Sender-Queue added with FRTT::FRTTransceiver::addMultiSenderPartner()                      */
+        eMULTISENDERQ2,                     /*!< Select the THIRD Multi-Sender-Queue added with FRTT::FRTTransceiver::addMultiSenderPartner()                       */
+        eMULTISENDERQ3,                     /*!< Select the FOURTH Multi-Sender-Queue added with FRTT::FRTTransceiver::addMultiSenderPartner()                      */
     };
 }
 #endif

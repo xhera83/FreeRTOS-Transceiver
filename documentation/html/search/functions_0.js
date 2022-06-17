@@ -9,5 +9,7 @@ var searchData=
   ['_5fgetpartnersname_6',['_getPartnersName',['../class_f_r_t_t_1_1_f_r_t_transceiver.html#ae4678b60038ca09e513acaeb72488d2f',1,'FRTT::FRTTransceiver']]],
   ['_5fhasdatainterpreters_7',['_hasDataInterpreters',['../class_f_r_t_t_1_1_f_r_t_transceiver.html#acb831289a031c0d83829099937882f54',1,'FRTT::FRTTransceiver']]],
   ['_5fhassemaphore_8',['_hasSemaphore',['../class_f_r_t_t_1_1_f_r_t_transceiver.html#a6a6c12e3aca6711f3a8a92e1f07c4fb2',1,'FRTT::FRTTransceiver']]],
-  ['_5frearrangetempcontainerarray_9',['_rearrangeTempContainerArray',['../class_f_r_t_t_1_1_f_r_t_transceiver.html#a08459e4f85c44b4fc143a86dbe060d9c',1,'FRTT::FRTTransceiver']]]
+  ['_5fqueueexists_9',['_queueExists',['../class_f_r_t_t_1_1_f_r_t_transceiver.html#a22f0dc53483b4664bad83df2a36b60ce',1,'FRTT::FRTTransceiver']]],
+  ['_5frearrangetempcontainerarray_10',['_rearrangeTempContainerArray',['../class_f_r_t_t_1_1_f_r_t_transceiver.html#a08459e4f85c44b4fc143a86dbe060d9c',1,'FRTT::FRTTransceiver']]],
+  ['_5fsemaphoreexists_11',['_semaphoreExists',['../class_f_r_t_t_1_1_f_r_t_transceiver.html#a396cca324cfd1c2dc84bce430e467675',1,'FRTT::FRTTransceiver']]]
 ];

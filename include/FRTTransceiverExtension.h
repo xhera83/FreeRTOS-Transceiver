@@ -4,7 +4,7 @@
  * \file        FRTTransceiverExtension.h
  * \brief       Extends the library to important structures, defines and variable types
  * \author      Xhemail Ramabaja (x.ramabaja@outlook.de)
- * \version     v1.1.0
+ * \version     v1.2.0
  * \copyright   Copyright 2022 Xhemail Ramabaja
  *
  */
@@ -51,7 +51,7 @@ namespace FRTT {
     /*! \brief Structure holding all important data regarding a communication line*/
     struct FRTTCommunicationPartner
     {
-        FRTTTaskHandle commPartner = nullptr;                                                   /*!< Holds the address of the partner task or NULL in the case of a multi-sender-queue              */
+        FRTTTaskHandle commPartner = nullptr;                                                   /*!< Holds the address of the partner task or NULL in the case of a Multi-Sender-Queue              */
         string partnersName;                                                                    /*!< Holds the self set name of the partner task or FRTTRANSCEIVER_DEFAULTPARTNERNAMExxxxxxxx       */
 
         bool bReadOnlyCommunication = false;                                                    /*!< Is set to true if the communication line is meant for a readonly multi-sender-queue. RX        */
