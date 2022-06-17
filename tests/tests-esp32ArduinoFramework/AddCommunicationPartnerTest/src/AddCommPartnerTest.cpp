@@ -5,7 +5,7 @@
 
 using namespace aunit;
 
-/* No need to check the dynamic version since the library handles everything on its own */
+/* No need to check the dynamic version since the library handles everything on its own without us getting access from the outside */
 #if (DYNAMIC_STRUCTARRAY == 0)
 test(constructor)
 {

@@ -21,7 +21,7 @@ test(queueRead_TEST1)
     /*          Some queueRead operations + time measurement 
      *               - Not 100% accurate because delay() in use by the other task has a 1ms inaccuracy (havent checked the reason)
      *               - Also..If you give READ6-TEST a blockTimeRead of 1 in the last queueRead() (instead of 2) will let the test finish
-     *                 within 900-1000us (WILL FAIL TEST). Everything works as expected with a blockTimeRead of 2 (300-400us) (havent checked the reason yet)
+     *                 within 900-1000us (WILL FAIL TEST). Not concerning right now.. Everything works as expected with a blockTimeRead of 2 (300-400us) (havent checked the reason yet)
      *               - Just to get a first impression that queue-read runs >>almost<< as expected!
      */
     while(TASK_SENDER == nullptr) vTaskDelay(pdMS_TO_TICKS(1));
@@ -105,7 +105,7 @@ test(queueRead_TEST1)
     assertEqual(comm1.readFromQueue(TASK_SENDER,eMultiSenderQueue::eNOMULTIQSELECTED,true,1,1),true);          // waits a max of 1ms (waittime for data) and 1ms (waittime to get semaphore))
     assertEqual(comm1.readFromQueue(TASK_SENDER,eMultiSenderQueue::eNOMULTIQSELECTED,true,1,1),true);          // waits a max of 1ms (waittime for data) and 1ms (waittime to get semaphore))
     assertEqual(comm1.readFromQueue(TASK_SENDER,eMultiSenderQueue::eNOMULTIQSELECTED,true,2,1),true);          // waits a max of 2ms (waittime for data) and 1ms (waittime to get semaphore))
-    //assertEqual(comm1.readFromQueue(TASK_SENDER,eNOMULTIQSELECTED,true,1,1),true);        // >>>>>>>  WILL FAIL THE TEST ALTHOUGH IT SHOULDNT! <<<<<<<<<
+    //assertEqual(comm1.readFromQueue(TASK_SENDER,eNOMULTIQSELECTED,true,1,1),true);        // >>>>>>>  WILL FAIL THE TEST because of the 1ms blocktime to get permission to read, ALTHOUGH IT SHOULDNT! <<<<<<<<<
     auto e6 = std::chrono::high_resolution_clock::now() - s6;
     us = std::chrono::duration_cast<std::chrono::microseconds>(e6).count();                 // should be < 800us for all queue-read operations combined
     assertLessOrEqual((uint32_t)us,(uint32_t)800);

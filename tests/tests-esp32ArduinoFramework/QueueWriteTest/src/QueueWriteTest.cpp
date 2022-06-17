@@ -15,6 +15,8 @@ FRTTCommunicationPartner partners2[1];
 
 FRTTransceiver comm(TASK_TESTER1,&partners2[0],1);
 #endif 
+
+
 class QueueWriteTest : public TestOnce {
     
     

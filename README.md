@@ -21,17 +21,16 @@
 
 # About the project <a name="aboutTheProject"></a>
 ## Motivation <a name="motivation"></a>
-After some time using the FreeRTOS real-time operating system along with the esp32, I noticed that it's quite laborious to only use the bare FreeRTOS functionalities for inter-task communication.
+After some time using the FreeRTOS real-time operating system along with the ESP32, I've noticed that it's quite laborious to only use the bare FreeRTOS functionalities for inter-task communication.
 
 Following points particularly struck me:
 - X different queues had to be created to pass X different datatypes over to another task
     - Since you have to speficy the length of the queue + size of future messages during queue-creation
 - If you have multiple connections to other tasks, the number of different queues will be confusing after some time
-- No obvious cut between different connections (Queues defined all over the place, Who is the reading task at the end of the queue?)
+- No obvious cut between different connections (Queues defined all over the place, who is the reading task at the end of the queue?)
 
 
-&#8594; Therefore I've decided to build the FreeRTOS inter-task communication wrapper-libray **FreeRTOS-Transceiver** as a project for my college. The library is still in an early stage and will probably be, along with some other planned freertos inter-task libraries, my focus for a while (Better usage of C++, Code refactoring etc.)
-New ideas and suggestions for improvement are welcome. 
+&#8594; Therefore I've decided to build the FreeRTOS inter-task communication wrapper-libray **FreeRTOS-Transceiver** as a project for my college. The library is still in an early stage and will probably be, along with some other planned FreeRTOS inter-task libraries, my focus for a while (Better usage of C++, Code refactoring etc.). New ideas and suggestions for improvement are welcome. 
 
 ## FreeRTOS-Transceiver <a name="FreeRTOS-Transceiver"></a> [**Not usable inside an ISR yet**]
 The FreeRTOS-Transceiver C++ library simplifies the use of FreeRTOS inter-task communication and encapsulates related queues (tx/rx) to one communication line.<br>
@@ -49,10 +48,10 @@ Connection types possible with the library:
 - [ ] Multi-reader-queue (Can be set up, but not tested and certainly not as secure as other types)
 
 
-There is also a multi-sender-queue in the blockdiagram above, where 'Task_Data_1', 'Task_Data_2' and 'Task_Data_3' are the senders. 'Task_DataProcessor' is the receiver, although it is important to mention that he does not know who the senders on the multi-sender-queue are. So in case that 'Task_DataProcessor' wants to talk to the senders, it must open a seperate connection to each of them.  
+There is also a Multi-Sender-Queue in the block-diagram above, where 'Task_Data_1', 'Task_Data_2' and 'Task_Data_3' are the senders. 'Task_DataProcessor' is the receiver, although it is important to mention that he does not know who the senders on the Multi-Sender-Queue are. So in case that 'Task_DataProcessor' wants to talk to the senders, it must open a seperate connection to each of them.  
 
 ## A brief look under the hood of the library <a name="briefLookInto"></a>
-In the following blockdiagram you can see a very short **incomplete** description about the internal library structure. Each communication line has its seperate rx buffers of length ```FRTTRANSCEIVER_MAXELEMENTSIZEONQUEUE```, but only ```queue length``` positions in buffer will be in use (because we read max. ```queue length``` amount of data into rx buffers...new data will be inserted into the buffer if old one is released first)
+In the following blockdiagram you can see a very short **incomplete** description about the internal library structure. Each communication line has its seperate rx buffer of length ```FRTTRANSCEIVER_MAXELEMENTSIZEONQUEUE```, but only ```queue length``` positions of the buffer will be in use (because we read max. ```queue length``` amount of data into rx buffers...new data will be inserted into the buffer if old one is released first)
 
 ![FreeRTOS-TransceiverUnderTheHood](https://github.com/xhera83/FreeRTOS-Transceiver/blob/main/documentation/diagrams/FreeRTOS-TransceiverUnderTheHood.JPG?raw=true) 
 
@@ -61,7 +60,7 @@ In the following blockdiagram you can see a very short **incomplete** descriptio
 In order to pass different types of data to the queue, the ```FRTT::FRTTDataContainerOnQueue``` structure was introduced:
 ```
 /* Creating a queue with FRTT::FRTTCreateQueue(queueLength) will create a queue for queueLength 
-                                                        amount of FRTTDateContainerOnQueue structures */
+                                                        amount of FRTT::FRTTDateContainerOnQueue structures */
 struct FRTTDataContainerOnQueue{
     FRTTTaskHandle senderAddress;              
     void * data;                                          
@@ -75,34 +74,36 @@ struct FRTTDataContainerOnQueue{
 };
 ```
 With this method it is now possible to transmit a pointer to any data, and specify the type of data with ```u8DataType```, so that the receiving task can perform an explicit cast.
-The red blocks in the blockdiagram represent the data allocator/data de-allocator callbacks a user must provide to the library. Those are essentially used to copy original data (```FRTT::FRTTDataContainerOnQueue```), read from the queue, into the corresponding rx buffer position. <br>
+The red blocks in the blockdiagram represent the data allocator/data de-allocator callbacks, a user must provide to the library. Those are essentially used to copy original data (```FRTT::FRTTDataContainerOnQueue```), read from the queue, into the corresponding rx buffer position. <br>
 
 
 In the allocator callback a user can now do (Basically what ever your project requires):
-- Allocate memory with malloc (not recommended) and make a copy of the data the ```void * data``` points to (switch case over ```u8DataType```)
-    - You can provide the length of a buffer (e.g uint8_t * buff) through the u32AdditionalData/u64AdditionalData variable and use it inside the allocator/de-allocator       callbacks
+- Allocate memory with malloc/new (not recommended) and make a copy of the data the ```void * data``` points to (switch case over ```u8DataType```)
+    - You can provide the length of a buffer (e.g uint8_t * buff) through the u32AdditionalData/u64AdditionalData variable and use it inside the                allocator/de-allocator       callbacks
 - Just copy the ```void * data``` over and make sure that the pointer points to a valid address during access
 - Future implementations will introduce some sort of memory pool class which can be used inside the callbacks to dynamically allocate memory/free memory
 
 In the de-allocator callback a user must do:
-- Free the memory previously allocated with malloc
+- Free/deleete the memory previously allocated with malloc/new
 - Future implementations will introduce some sort of memory pool class which can be used inside the callbacks to dynamically allocate memory/free memory
 
-&#8594; Using dynamic memory allocation in the allocator callback lets you create a copy of the data received, right between ```queueRead``` and ```'moveIntoBuffer'```. Through this you can keep data as long as you want in your buffers without being dependent on the sender to keep the pointer valid. Another option is to just copy the pointer over and manually copy received data into a local variable (get buffered data with the various FRTTransceiver::getxXxBufferedDataFrom() methods). 
-An additional call to ```writeToQueue()``` could act as a signal (to the sender) that data has been copied (Tasknotification feature in v1.2.0).
+&#8594; Using dynamic memory allocation in the allocator callback lets you create a copy of the data you received, right between ```FRTT:FRTTransceiver::readFromQueue``` and ```'moveIntoBuffer'```. Through this you can keep data as long as you want in your buffer without being dependent on the sender to keep the pointer valid. ([example of dynamic memory allocation inside the callbacks](examples/examples-esp32ArduinoFramework/dynMemoryCallbacks/))
 
-To further understand how the library works, please take a look at the documented source code (/documentation/html/index.html) and also the examples that are provided in this repo (/examples).
+Another option is to just copy the pointer over and manually copy received data into a local variable (get buffered data with the various ```FRTT::FRTTransceiver::getxXxBufferedDataFrom()``` methods). 
+An additional call to ```FRTT::FRTTransceiver::writeToQueue()``` could act as a signal to the sender (or just use Task Notification as a better method for signaling something)
+
+To further understand how the library works, please take a look at the [documented source code](/documentation/html) (You might open the index.html inside your browser).  Also check out the various examples that are provided in this repo [click](/examples).
 
 ## Quickstart (ESP32 only but basically works the same for the ESP8266) <a name="quickStart"></a>
 
 ### Creating a FreeRTOS-Transceiver instance <a name="constructor"></a> 
 
-There are two different ways to create an instance of the FRTTransceiver class.
+There are two different ways to create an instance of the ```FRTT::FRTTransceiver``` class.
 
-- Statically allocated array of structures holding all partner-communication
+- Locally allocated array of structures holding all partner-communication (static memory)
 
     ``` 
-        FRTT::FRTTTaskHandle OWNER = (FRTT::FRTTTaskHandle)0x1;     // Use a self build TaskHandle, or acquire the real handle!
+        FRTT::FRTTTaskHandle OWNER = (FRTT::FRTTTaskHandle)0x1;     // Use a self build FRTT::FRTTTaskHandle, or better acquire the real handle!
         uint8_t u8Partners = 5;
         FRTT::FRTTCommunicationPartner partners[u8Partners]         // 5 possible connection to partner tasks
         FRTT::FRTTransceiver comm(OWNER,&partners[0],u8Partners);            
@@ -113,7 +114,7 @@ There are two different ways to create an instance of the FRTTransceiver class.
 - Dynamically allocated inside the library
 
     ``` 
-        FRTT::FRTTTaskHandle OWNER = (FRTT::FRTTTaskHandle)0x1;     // Use a self build TaskHandle, or acquire the real handle!
+        FRTT::FRTTTaskHandle OWNER = (FRTT::FRTTTaskHandle)0x1;     // Use a self build FRTT::FRTTTaskHandle, or acquire the real handle!
         uint8_t u8Partners = 5;
         FRTT::FRTTransceiver comm(OWNER,u8Partners); 
     
@@ -124,13 +125,14 @@ There are two different ways to create an instance of the FRTTransceiver class.
 ### Adding a communication partner <a name="addCommunicationPartner"></a> 
 
 Before we begin with examples it is important to understand how the library tells different communication partners apart. 
-The library distinguishes communication partners with the value of their ```FRTTTaskHandle``` ```(void *)```. Unless you plan to use the Task Notification functionality, you can build your own ```FRTTTaskHandles``` like this (not recommended, always acquire the real one during task-creation): 
+The library distinguishes communication partners with the value of their ```FRTT::FRTTTaskHandle``` (```void *```). Unless you plan to use the Task Notification functionality, you can build your own ```FRTT::FRTTTaskHandles``` like this (not recommended, always acquire the real one during task-creation): 
 
 ```
     FRTT::FRTTTaskHandle TASK1 = (FRTT::FRTTTaskHandle)0x1;
-    FRTTFRTTTaskHandle TASK2 = (FRTT::FRTTTaskHandle)0x2;
+    FRTT::FRTTTaskHandle TASK2 = (FRTT::FRTTTaskHandle)0x2;
 
 ```
+
 You can add a communication partner to the list like this (Read also [Important data for a Task Notification setup](#taskNotificationInUse) and [Important data for a Queue setup](#queueFeaturesInUse)):
 
     
@@ -168,20 +170,21 @@ You can add a communication partner to the list like this (Read also [Important 
         
         // Another comm.addCommPartner(...) will fail because we have no connections left
         
-You can acquire the ***real task handles*** while task-creation with ```FRTT::FRTTCreateTask```, by passing the address to your ```FRTTTaskHandle``` as a parameter. Those ***real task handles*** are important when you try to notify that task, because FreeRTOS uses the address ```void *``` to access the tasks control block of that task!
+        
+You can acquire the ***real task handles*** while task-creation with ```FRTT::FRTTCreateTask```, by passing the address to your ```FRTT::FRTTTaskHandle``` as a parameter. Those ***real task handles*** are important when you try to notify that task, because FreeRTOS uses the address (```void *```) to access the tasks control block of that task!
 
 What you cant do (reference to [Important data for a Task Notification setup](#taskNotificationInUse) and [Important data for a Queue setup](#queueFeaturesInUse)):
 
-- Use the same ```FRTTTaskHandle``` for two connections
-- Use the same ```FRTTQueueHandle``` that was previously linked to a partner (same queue for rx & tx in ```addCommPartner()``` works -> ECHO)
-- Use the same ```FRTTSemaphoreHandle``` that was previously linked to a partner (same semaphore for rx & tx in ```addCommPartner()``` works -> ECHO)
-- Use invalid ```FRTTTaskHandles/FRTTQueueHandles``` and plan to use them (queue read/write, task notification)
+- Use the same ```FRTT::FRTTTaskHandle``` for two connections
+- Use the same ```FRTT::FRTTQueueHandle``` that was previously linked to a partner (same queue for rx & tx in ```FRTT::FRTTransceiver::addCommPartner()``` works -> ```ECHO```)
+- Use the same ```FRTT::FRTTSemaphoreHandle``` that was previously linked to a partner (same semaphore for rx & tx in ```FRTT::FRTTransceiver::addCommPartner()``` works -> ```ECHO```)
+- Use invalid ```FRTT::FRTTTaskHandles/FRTT::FRTTQueueHandles``` and plan to use them for functionality (queue read/write, task notification) where FreeRTOS will access the memory address stored in those variables
 
 ### Adding a Multi-Sender-Queue <a name="multiSenderQueue"></a>
 
-Adding a Multi-Sender-Queue as a connection is similiar to a normal connection. In case of a multi-sender-queue you dont use a ```FRTTTaskHandle```. Instead you just provide the ```FRTTQueueHandle```. 
+Adding a Multi-Sender-Queue as a connection is similiar to a normal connection. In case of a Multi-Sender-Queue you wont use a standard ```FRTT::FRTTTaskHandle```. Instead you just provide the ```FRTT::FRTTQueueHandle```. 
 
-The Multi-Sender-Queue added to the list of connections is then accessible via ```eMultiSenderQueue::eMULTISENDERQ0``` enumerator, the second via ```eMultiSenderQueue::eMULTISENDERQ1``` enumerator and so on. Those connections are read-only.
+The Multi-Sender-Queue added to the list of connections is then accessible via ```FRTT::eMultiSenderQueue::eMULTISENDERQ0``` enumerator, the second via ```FRTT::eMultiSenderQueue::eMULTISENDERQ1``` enumerator, and so on. Those connections are read-only.
 
         using namespace FRTT;
         
@@ -213,7 +216,7 @@ The Multi-Sender-Queue added to the list of connections is then accessible via `
         ....
         
         
-Being one of the senders of a Multi-Sender-Queue is simply achievable by adding the queue and also the semaphore as a normal communication ``` comm.addCommPartner(...)```. 
+Being one of the senders of a Multi-Sender-Queue is simply achievable by adding queue and semaphore as a normal communication ``` comm.addCommPartner(...)```. 
 One sender does not know who any of the other sender tasks are, the reader on the other hand can check the ```senderAddress``` field of the ```FRTT::FRTTDataContainerOnQueue``` structure for the source of the data package (if the sender provided his real address). 
         
 #### Important data for a Task Notification setup <a name="taskNotificationInUse"></a> 
@@ -221,13 +224,13 @@ One sender does not know who any of the other sender tasks are, the reader on th
 - Task Notification (Receive functionality)
 
     - ***Owner Address***: Can be nullptr (FreeRTOS knows who the task asking for the notification state/value will be)
-    - ***Partner FRTTTaskHandle***: ```FRTTTaskHandle``` != nullptr (some val > 0x0, or valid handle) && the TaskHandle has not been added yet
-    - ***FRTTQueueHandle***: Can be nullptr
-    - ***Semaphore***: Can be nullptr    
+    - ***Partner FRTT::FRTTTaskHandle***: ```FRTTTaskHandle``` != nullptr (some val > 0x0, or valid handle) && the ```FRTT::FRTTTaskHandle``` has not been added yet
+    - ***FRTT::FRTTQueueHandle***: Can be nullptr
+    - ***FRTT::FRTTSemaphoreHandle***: Can be nullptr    
     
 - Task Notification (Notify functionality)
     - ***Owner Address***: Can be nullptr
-    - ***Partner FRTTTaskHandle***: MUST be a valid address != nullptr, acquired through ```FRTT::FRTTCreateTask``` && ```FRTTTaskHandle``` has not been                                     added yet
+    - ***Partner FRTTTaskHandle***: MUST be a valid address != nullptr, acquired through ```FRTT::FRTTCreateTask``` && ```FRTT::FRTTTaskHandle``` has not                                   been added yet
     - ***FRTTQueueHandle***: Can be nullptr
     - ***Semaphore***: Can be nullptr
 
@@ -237,14 +240,14 @@ One sender does not know who any of the other sender tasks are, the reader on th
 
 - Queue (Read functionality)
     - ***Owner Address***: Can be nullptr
-    - ***Partner FRTTTaskHandle***: ```FRTTTaskHandle``` != nullptr && ```FRTTTaskHandle``` has not been added yethas not been added yet. Tx-queue can be nullptr.
-    - ***Semaphore***: The rx-semaphore for the rx-queue must be a valid address != nullptr, acquired through ```FRTT::FRTTCreateSemaphore``` && rx-                            semahpore has not been added yet. Tx-semaphore can be nullptr.
+    - ***Partner FRTT::FRTTTaskHandle***: ```FRTT::FRTTTaskHandle``` != nullptr && ```FRTT::FRTTTaskHandle``` has not been added yet. ```Tx-queue``` can be nullptr.
+    - ***FRTT::FRTTSemaphoreHandle***: The ```rx-semaphore``` for the ```rx-queue``` must be a valid address != nullptr, acquired through ```FRTT::FRTTCreateSemaphore``` && ```rx-semahpore``` has not been added yet. ```Tx-semaphore``` can be nullptr.
     
 - Queue (Write functionality)
     - ***Owner Address***: Can be nullptr (But you might add it because the address of the owner will be put into data packages as the 'source')
-    - ***Partner FRTTTaskHandle***: ```FRTTTaskHandle``` != nullptr && ```FRTTTaskHandle``` has not been added yet
-    - ***FRTTQueueHandle***: The tx-queue must be a valid address != nullptr, acquired through ```FRTT::FRTTCreateQueue``` && tx-queue has not been added                           yet. Rx-queue can be nullptr.
-    - ***Semaphore***: Tx-semaphore for the tx-queue must be a valid address != nullptr, acquired through ```FRTT::FRTTCreateSemaphore``` && tx-                                semahpore has not been added yet. Rx-semaphore can be nullptr.
+    - ***Partner FRTT::FRTTTaskHandle***: ```FRTT::FRTTTaskHandle``` != nullptr && ```FRTT::FRTTTaskHandle``` has not been added yet
+    - ***FRTT::FRTTQueueHandle***: The ```tx-queue``` must be a valid address != nullptr, acquired through ```FRTT::FRTTCreateQueue``` && ```tx-queue```                                    has not been added yet. ```Rx-queue``` can be nullptr.
+    - ***FRTT::SemaphoreHandle***: ```Tx-semaphore``` for the ```tx-queue``` must be a valid address != nullptr, acquired through                                                   ```FRTT::FRTTCreateSemaphore``` && ```tx-semahpore``` has not been added yet. ```Rx-semaphore``` can be nullptr.
 
 
 ### First setup <a name="firstSetup"></a> 
@@ -255,7 +258,7 @@ void setup(){}
 
 void loop(){}
 ```
-The minimal useful setup is a unidirectional connection between two tasks (besides 'echo' queues). 
+The minimal useful setup is a ```unidirectional``` connection between two tasks (besides ```echo``` queues). 
 
 Lets setup the code to create two tasks and other important objects. 'Task 1' will be created with 5000 bytes stacksize and priority 8 on CORE-0. 'Task 2' will be created with 5000 bytes stacksize and priority 8 on CORE-1.
 
@@ -313,9 +316,9 @@ Lets ***zoom*** into both tasks and setup the communication lines:
 ```
 ......
 
-void TASK1 (void * pvParams)                                                                    // basic FreeRTOS style   
+void TASK1 (void * pvParams)                                                                 // basic FreeRTOS style   
 {
-    while(TASK1_HANDLE == nullptr || TASK2_HANDLE == nullptr) vTaskDelay(pdMS_TO_TICKS(2));     // wait until freertos created tasks
+    while(TASK1_HANDLE == nullptr || TASK2_HANDLE == nullptr) vTaskDelay(pdMS_TO_TICKS(2));  // wait until freertos created tasks, we dont want nullptr
     
     FRTTCommunicationPartner partners[1];
     FRTTransceiver comm(TASK1_HANDLE,&partners[0],1);                                           // Add owner address and amount of desired connections 
@@ -331,9 +334,9 @@ void TASK1 (void * pvParams)                                                    
     vTaskDelete(nullptr);
 }
 
-void TASK2(void * pvParams)                                                                     // basic FreeRTOS style 
+void TASK2(void * pvParams)                                                                  // basic FreeRTOS style 
 {
-    while(TASK1_HANDLE == nullptr || TASK2_HANDLE == nullptr) vTaskDelay(pdMS_TO_TICKS(2));     // wait until freertos created tasks
+    while(TASK1_HANDLE == nullptr || TASK2_HANDLE == nullptr) vTaskDelay(pdMS_TO_TICKS(2));  // wait until freertos created tasks, we dont want nullptr
     FRTTCommunicationPartner partners[1];
     FRTTransceiver comm(TASK1_HANDLE,&partners[0],1);                                           // Add owner address and amount of desired connections 
     
@@ -422,7 +425,7 @@ Now with this setup you can proceed to write to the receiver (TASK2) and read fr
 This library has been developed and tested on an **ESP32-WROOM-32** microcontroller inside a PlatformIO environment.
  - Example code plus an installation guide is located in [examples-esp32](/examples/examples-esp32ArduinoFramework)
 
-FRTTransceiver library also works for the **ESP8266**
+FRTTransceiver Library also works for the **ESP8266**
 - Besides developing and testing on the ES32, Ive also tried to adjust parts for the ESP8266. An example along with an installation guide can be found in [examples-esp8266](/examples/examples-esp8266-rtos-sdk)            
     
 ## Supported Devices <a name= "supportedDevices"></a>
@@ -441,4 +444,5 @@ Apache 2.0 License
 ## Useful Resources <a name="resources"></a>
 
 - https://www.freertos.org/fr-content-src/uploads/2018/07/161204_Mastering_the_FreeRTOS_Real_Time_Kernel-A_Hands-On_Tutorial_Guide.pdf
+
 

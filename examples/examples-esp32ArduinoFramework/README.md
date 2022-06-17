@@ -15,6 +15,7 @@
     1. Then on the left-hand side click on the platformio alien logo > QUICK ACCESS > PIO Home > Open > Open Project
         - Now you select one of the example folders containing a ```platform.ini``` file and let platformio install dependencies
         - You might want to adjust that .ini file (baudrate,board etc)
+        - Click 'build' and then 'flash' on the bottom bar.
         - All examples use the newest FreeRTOS-Transceiver version (```v1.2.0```)
         - Opening each folder as a project will make platformio download the dependencies multiple times. Workaround with option ii) 
     2. Follow 3) and just copy all example source files into the source folder of the project (you must use v1.2.0 of the library)

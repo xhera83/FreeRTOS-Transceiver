@@ -40,8 +40,6 @@ test(twoOutOfFourTxQueuesDB)
     assertEqual(comm1.databroadcast(0,&u8Data,500,500,0),true);             /* broadcast to two tx-queues (500ms waittime for the write operation, 500ms waittime for semaphore) */
     /* broadcast towards two tx-queues (2ms waittime for the write operation, 2ms waittime for semaphore). Will fail since we already posted data to those queues*/
     assertEqual(comm1.databroadcast(0,&u8Data,2,2,0),false); 
-
-    //comm1.printCommunicationsSummary();
 }
 
 test(noTxQueuesForDatabroadcast)
@@ -62,8 +60,6 @@ test(noTxQueuesForDatabroadcast)
 
     assertEqual(comm2.databroadcast(0,&u8Data,500,500,0),false);                                        /* Gonna fail, since we do not have a tx queue */
     assertEqual(comm2.databroadcast(0,&u8Data,2,2,0),false);                                            /* Gonna fail again, since we still do not have a tx queue */
-
-    //comm2.printCommunicationsSummary();
 }
 
 test(oneOfTwoTxQueuesDB)
