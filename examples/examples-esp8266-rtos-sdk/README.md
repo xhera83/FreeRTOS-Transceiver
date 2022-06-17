@@ -2,6 +2,7 @@
 - Simple unidirectional comm with multiple datatypes on the queue. Also task-synchronization via the task notification feature
 ### 2. Template
 - Follow 3) to use the template folder for your own projects
+- I've listed some resources under 4) if you might want to build your own esp8266 environment 
 
 ## 3. Flashing example code into the ESP8266 (guide only for linux at the moment)
 1. Install docker
@@ -10,9 +11,9 @@
 
 3. ```cd /PATH_TO_FOLDER/FreeRTOS-Transceiver/examples/examples-esp8266-rtos-sdk ```
 
-4. ```sudo docker build -f ./esp8266ImageBuild -t image8266Env```
+4. ```sudo docker build -f ./esp8266ImageBuild -t env . ```  (Takes a while)
 
-5. ```sudo docker run -d --device=/dev/ttyUSB0 -v /PATH_TO_FOLDER/FreeRTOS-Transceiver/examples/examples-esp8266-rtos-sdk/basic-example/::/projects --privileged --name container_esp8266 image8266Env tail -f /dev/null```
+5. ```sudo docker run -d --device=/dev/ttyUSB0 -v /PATH_TO_FOLDER/FreeRTOS-Transceiver/examples/examples-esp8266-rtos-sdk/basic-example/:/projects --privileged --name container_esp8266 env tail -f /dev/null```
     - This will, besides creating that container, mount ```.../basic-example``` on ```/projects```.
     - Of course you need to specify your own port ***/dev/tty...***
     
@@ -28,7 +29,7 @@
         - ```component.mk``` file
     - Two options
         - Inside the container do:  ```cd /projects/components/; git clone https://github.com/xhera83/FreeRTOS-Transceiver.git``` 
-        - Outside the container in ```.../basic-example/components/``` simply create the directory ```FreeRTOS-Transceiver```and copy ```/include```, ```/src```and ```component.mk``` from the root of the repo into it
+        - Outside the container in ```.../basic-example/components/``` simply create the directory ```FreeRTOS-Transceiver```and copy ```/include```, ```/src```and ```component.mk``` from the root of the repo into there
     - Must look like this inside the ```/projects/compontents``` OR ```.../basic-example``` folder:
         
                
@@ -41,16 +42,19 @@
                     component2/
                             - ....
                             
- 8. Now, if you're still inside the container (else revisit 6)) type ``` make help ``` for all commands:
-    - ```make menuconfig``` -  A GUI will open where you can set things up (I didnt need to)
-    - ``` make clean``` - Clean old build
-    - ``` make app ``` - Compiles app etc.
-    - ``` make flash monitor ``` - Flash + console output right away.
+ 8. Now, if you're still inside the container (else revisit 6)):
+    - Type ```cd /projects```
+        - In here ``` make ``` can be used
+    - Type ``` make help ``` for all possible commmands
+        - ```make menuconfig``` -  A GUI will open where you can set things up (I didnt need to)
+        - ``` make clean``` - Clean old build
+        - ``` make app ``` - Compiles app etc.
+        - ``` make flash monitor ``` - Flash + console output right away.
     
     
     
     
- ## 3. Additional informations
+ ## 4. Additional informations
     
 - Projects are  set up in ESP-IDF style: https://docs.espressif.com/projects/esp8266-rtos-sdk/en/latest/get-started/index.html
 - The project folder structure of an ESP8266 project : https://docs.espressif.com/projects/esp8266-rtos-sdk/en/latest/api-guides/build-system.html
