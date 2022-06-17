@@ -50,36 +50,38 @@
     
     
     
+ ## 3. Additional informations
     
-    
-    
-    - Projects can be set up in a ESP-IDF style: https://docs.espressif.com/projects/esp8266-rtos-sdk/en/latest/get-started/index.html
-    - A linux-installation guide (+docker file,+ESP8266 example) in "/examples" will be provided with (v1.2.0)
-    - FRTTransceiver library must be included as a "component". Infos regarding the folder structure of a project here: https://docs.espressif.com/projects/esp8266-rtos-sdk/en/latest/api-guides/build-system.html
-    - FRTTransceiver library uses C++, so all Files should be with an .cpp extension. 
-    - Main.cpp's app_main() (entry point for your projects software) function must be treated as a C function. Enclose as follows:
+- Projects are  set up in ESP-IDF style: https://docs.espressif.com/projects/esp8266-rtos-sdk/en/latest/get-started/index.html
+- The project folder structure of an ESP8266 project : https://docs.espressif.com/projects/esp8266-rtos-sdk/en/latest/api-guides/build-system.html
+- FRTTransceiver library uses C++, so all Files should be with an .cpp extension. 
+- Main.cpp's app_main() (like loop(), entry point for your projects software) function must be treated as a C function. Enclose as follows:
             
-```  
-#ifdef __cplusplus
-extern "C"{
-#endif
+        ......
+        using namespace FRTT;
+        
+        
+        #ifdef __cplusplus
+        extern "C"{
+        #endif
 
-void app_main()
-{   
+        void app_main()
+        {   
 
-    // Very first code of your project. Here you can use the library as you would do for the ESP32 but there is only 1 CORE
-    
-    QUEUE_TO_TASK2 = FRTTCreateQueue(2);                                                // Create queue with length 2
-    SMPH = FRTTCreateSemaphore();                                                       // Create semaphore
-    xTaskCreatePinnedToCore(TASK1,"task-1",STACKSIZE,NULL,8,&TASK1_HANDLE);             // Creates TASK1
-    xTaskCreatePinnedToCore(TASK2,"task-2",STACKSIZE,NULL,8,&TASK2_HANDLE);             // Creates TASK2
-}
+            // Very first code of your project. Here you can use the library as you would do for the ESP32 (but only 1 Core)
 
-#ifdef __cplusplus
-}
-#endif
+            QUEUE_TO_TASK2 = FRTTCreateQueue(2);                                                // Create queue with length 2
+            SMPH = FRTTCreateSemaphore();                                                       // Create semaphore
+            FRTTCreateTask(TASK1,"task-1",STACKSIZE,NULL,8,&TASK1_HANDLE);                      // Creates TASK1 (esp8266 only function)
+            FRTTCreateTask(TASK2,"task-2",STACKSIZE,NULL,8,&TASK2_HANDLE);                      // Creates TASK2 (esp8266 only function)
+        }
 
-```
+        #ifdef __cplusplus
+        }
+        #endif
+
+
                             
               
+
 
